@@ -23,7 +23,6 @@ import thanderIcon from "../public/image/myCreationIcon/thanderIcon.svg";
 import rightIcon from "../public/image/myCreationIcon/rightIcon.svg";
 
 import tracIcon from "../public/image/myCreationIcon/truckIcon.svg";
-import reloadIcon from "../public/image/myCreationIcon/reloadIcon.svg";
 import batchIcon from "../public/image/myCreationIcon/batchIcon.svg";
 
 // --- Custom Colors ---
