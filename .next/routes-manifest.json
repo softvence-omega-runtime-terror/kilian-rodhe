@@ -1,1 +1,167 @@
-{"version":3,"caseSensitive":false,"basePath":"","rewrites":{"beforeFiles":[],"afterFiles":[],"fallback":[]},"redirects":[{"source":"/:path+/","destination":"/:path+","permanent":true,"internal":true,"regex":"^(?:\\/((?:[^\\/]+?)(?:\\/(?:[^\\/]+?))*))\\/$"}],"headers":[]}
+{
+  "version": 3,
+  "pages404": true,
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    }
+  ],
+  "headers": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/admin",
+      "regex": "^/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin(?:/)?$"
+    },
+    {
+      "page": "/admin/signup",
+      "regex": "^/admin/signup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/signup(?:/)?$"
+    },
+    {
+      "page": "/favicon.ico",
+      "regex": "^/favicon\\.ico(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/favicon\\.ico(?:/)?$"
+    },
+    {
+      "page": "/pages/children-collections",
+      "regex": "^/pages/children\\-collections(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/children\\-collections(?:/)?$"
+    },
+    {
+      "page": "/pages/collections",
+      "regex": "^/pages/collections(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/collections(?:/)?$"
+    },
+    {
+      "page": "/pages/contact",
+      "regex": "^/pages/contact(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/contact(?:/)?$"
+    },
+    {
+      "page": "/pages/createaccount",
+      "regex": "^/pages/createaccount(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/createaccount(?:/)?$"
+    },
+    {
+      "page": "/pages/customise",
+      "regex": "^/pages/customise(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/customise(?:/)?$"
+    },
+    {
+      "page": "/pages/forgatepassword",
+      "regex": "^/pages/forgatepassword(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/forgatepassword(?:/)?$"
+    },
+    {
+      "page": "/pages/landing",
+      "regex": "^/pages/landing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/landing(?:/)?$"
+    },
+    {
+      "page": "/pages/login",
+      "regex": "^/pages/login(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/login(?:/)?$"
+    },
+    {
+      "page": "/pages/my-creation",
+      "regex": "^/pages/my\\-creation(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/my\\-creation(?:/)?$"
+    },
+    {
+      "page": "/pages/my-creation/create-your-design",
+      "regex": "^/pages/my\\-creation/create\\-your\\-design(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/my\\-creation/create\\-your\\-design(?:/)?$"
+    },
+    {
+      "page": "/pages/others-collections",
+      "regex": "^/pages/others\\-collections(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/others\\-collections(?:/)?$"
+    },
+    {
+      "page": "/pages/payment",
+      "regex": "^/pages/payment(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/payment(?:/)?$"
+    },
+    {
+      "page": "/pages/save-products",
+      "regex": "^/pages/save\\-products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/save\\-products(?:/)?$"
+    },
+    {
+      "page": "/pages/shipping",
+      "regex": "^/pages/shipping(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/shipping(?:/)?$"
+    },
+    {
+      "page": "/pages/shop",
+      "regex": "^/pages/shop(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/shop(?:/)?$"
+    },
+    {
+      "page": "/pages/woman-collections",
+      "regex": "^/pages/woman\\-collections(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/pages/woman\\-collections(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSuffix": ".prefetch.rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments"
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

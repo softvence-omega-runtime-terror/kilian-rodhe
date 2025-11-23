@@ -1,12 +1,17 @@
 "use client";
-
 import { useState } from "react";
-import Image from "next/image";
-import icon from "@/public/image/myCreationIcon/Icon.svg";
+import { Cormorant_Garamond } from "next/font/google";
+// Placeholder image for standalone environment
+const ICON_PLACEHOLDER_URL =
+  "https://placehold.co/112x112/E0E7FF/4338CA/png?text=%E2%9C%A8";
 
-// ----------------------------------------------------
-// 1. TYPES
-// ----------------------------------------------------
+
+const cormorantItalic = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["italic"],
+});
+
 
 type Product = {
   id: string;
@@ -33,19 +38,17 @@ type ProductCardProps = {
   onDelete?: (id: string, title: string) => void;
 };
 
-// --- NEW TYPE FOR EMPTY STATE PROPS ---
 type EmptyCreationsStateProps = {
   onFindProduct: () => void;
   isLoading: boolean;
 };
 
 // ----------------------------------------------------
-// 2. COMMON DATA
+// 2. DUMMY DATA
 // ----------------------------------------------------
 
 const COMMON_TITLE = "My Custom Design";
 
-// Ordered Products (Dummy data remains the same)
 const DUMMY_ORDERED_PRODUCTS: Product[] = [
   {
     id: "o1",
@@ -56,7 +59,7 @@ const DUMMY_ORDERED_PRODUCTS: Product[] = [
     orderDate: "Nov 15, 2025",
     price: 29.99,
     image:
-      "https://mms-images-prod.imgix.net/mms/images/catalog/6a62c76ef0978853a20391b6c32da4fe/colors/176100/views/alt/front_large_extended.png?dpr=1.2&auto=format&nrs=0&w=600",
+      "https://mms-images-prod.imgix.net/mms/images/catalog/6a62c76ef0978853a20391b6c32da4fe/colors/176100/views/alt/front_large_extended.png",
   },
   {
     id: "o2",
@@ -66,7 +69,7 @@ const DUMMY_ORDERED_PRODUCTS: Product[] = [
     design: "Abstract Art",
     orderDate: "Nov 10, 2025",
     price: 54.99,
-    image: "https://nobero.com/cdn/shop/files/Go_through_front.jpg?v=1732862026",
+    image: "https://nobero.com/cdn/shop/files/Go_through_front.jpg",
   },
   {
     id: "o3",
@@ -81,7 +84,6 @@ const DUMMY_ORDERED_PRODUCTS: Product[] = [
   },
 ];
 
-// Saved Designs (Dummy data remains the same)
 const DUMMY_SAVED_DESIGNS: Product[] = [
   {
     id: "s1",
@@ -91,7 +93,7 @@ const DUMMY_SAVED_DESIGNS: Product[] = [
     savedDate: "Nov 20, 2025",
     price: 79.99,
     image:
-      "https://mms-images-prod.imgix.net/mms/images/catalog/6a62c76ef0978853a20391b6c32da4fe/colors/176100/views/alt/front_large_extended.png?dpr=1.2&auto=format&nrs=0&w=600",
+      "https://mms-images-prod.imgix.net/mms/images/catalog/6a62c76ef0978853a20391b6c32da4fe/colors/176100/views/alt/front_large_extended.png",
   },
   {
     id: "s2",
@@ -100,11 +102,10 @@ const DUMMY_SAVED_DESIGNS: Product[] = [
     design: "Modern Logo",
     savedDate: "Nov 18, 2025",
     price: 49.99,
-    image: "https://nobero.com/cdn/shop/files/Go_through_front.jpg?v=1732862026",
+    image: "https://nobero.com/cdn/shop/files/Go_through_front.jpg",
   },
 ];
 
-// My Designs (Dummy data remains the same)
 const DUMMY_MY_DESIGNS: Product[] = [
   {
     id: "m1",
@@ -123,7 +124,7 @@ const DUMMY_MY_DESIGNS: Product[] = [
     design: "Taco Icon",
     savedDate: "Oct 20, 2025",
     price: 250.0,
-    image: "https://nobero.com/cdn/shop/files/Go_through_front.jpg?v=1732862026",
+    image: "https://nobero.com/cdn/shop/files/Go_through_front.jpg",
   },
   {
     id: "m3",
@@ -133,7 +134,7 @@ const DUMMY_MY_DESIGNS: Product[] = [
     savedDate: "Sep 15, 2025",
     price: 50.0,
     image:
-      "https://mms-images-prod.imgix.net/mms/images/catalog/6a62c76ef0978853a20391b6c32da4fe/colors/176100/views/alt/front_large_extended.png?dpr=1.2&auto=format&nrs=0&w=600",
+      "https://mms-images-prod.imgix.net/mms/images/catalog/6a62c76ef0978853a20391b6c32da4fe/colors/176100/views/alt/front_large_extended.png",
   },
   {
     id: "m4",
@@ -148,7 +149,7 @@ const DUMMY_MY_DESIGNS: Product[] = [
 ];
 
 // ----------------------------------------------------
-// 3. DELETE CONFIRMATION MODAL (No changes)
+// 3. DELETE MODAL
 // ----------------------------------------------------
 
 const DeleteConfirmationModal = ({
@@ -163,7 +164,7 @@ const DeleteConfirmationModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm">
         <div className="text-center">
-          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+          <div className="mx-auto h-12 w-12 bg-red-100 rounded-full flex items-center justify-center">
             <svg
               className="h-6 w-6 text-red-600"
               fill="none"
@@ -184,21 +185,20 @@ const DeleteConfirmationModal = ({
           </h3>
 
           <p className="mt-2 text-sm text-gray-500">
-            Are you sure you want to delete:{" "}
-            <strong>&quot;{title}&quot;</strong>?
+            Are you sure you want to delete <strong>&quot;{title}&quot;</strong>?
           </p>
         </div>
 
-        <div className="mt-5 flex justify-between gap-3">
+        <div className="mt-5 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-lg border-2 border-[#E8E3DC] px-4 py-2 bg-white hover:bg-gray-50"
+            className="flex-1 border-2 border-[#E8E3DC] rounded-lg py-2 hover:bg-gray-50"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 rounded-lg bg-red-600 text-white px-4 py-2 hover:bg-red-700"
+            className="flex-1 bg-red-600 text-white rounded-lg py-2 hover:bg-red-700"
           >
             Delete
           </button>
@@ -209,68 +209,62 @@ const DeleteConfirmationModal = ({
 };
 
 // ----------------------------------------------------
-// 4. PRODUCT CARD (No changes)
+// 4. PRODUCT CARD
 // ----------------------------------------------------
 
 const ProductCard = ({ product, tabType, onDelete }: ProductCardProps) => {
   const isOrdered = tabType === "ordered";
   const isSaved = tabType === "saved";
-  const isMyDesign = tabType === "my";
+  const isMy = tabType === "my";
 
   const statusColor =
     product.status === "Delivered" ? "bg-yellow-600" : "bg-orange-600";
-  const statusText =
-    product.status === "Delivered" ? "Delivered" : "In Transit";
 
   const dateLabel = isOrdered ? "Order Date:" : "Created Date:";
-  const dateValue = isOrdered ? product.orderDate : product.savedDate;
-
-  const showDeleteButton =
-    (isSaved || isMyDesign) && typeof onDelete === "function";
+  const dateValue = product.orderDate || product.savedDate;
 
   return (
     <div className="rounded-lg border-2 border-[#E8E3DC] bg-white hover:shadow-xl">
       {/* Image */}
       <div className="relative aspect-[3/2] overflow-hidden rounded-t-lg">
-        <img src={product.image} alt={product.title} className="w-full h-full" />
+        <img
+          src={product.image}
+          className="w-full h-full object-cover"
+          alt={product.title}
+        />
 
         {isOrdered && (
           <span
             className={`absolute top-3 right-3 text-xs px-3 py-1 rounded-full text-white ${statusColor}`}
           >
-            {statusText}
+            {product.status}
           </span>
         )}
       </div>
 
       {/* Details */}
       <div className="p-5">
-        <h3 className="text-xl font-semibold mb-1 truncate">
-          {product.title}
-        </h3>
+        <h3 className="text-xl font-semibold mb-1 truncate">{product.title}</h3>
 
         <p className="text-sm text-gray-500 mb-4">{product.productType}</p>
 
         <div className="grid grid-cols-2 text-sm gap-y-2">
-          <div className="text-gray-500">Design:</div>
-          <div className="font-medium text-right">{product.design}</div>
+          <span className="text-gray-500">Design:</span>
+          <span className="font-medium text-right">{product.design}</span>
 
-          <div className="text-gray-500">{dateLabel}</div>
-          <div className="font-medium text-right">{dateValue}</div>
+          <span className="text-gray-500">{dateLabel}</span>
+          <span className="font-medium text-right">{dateValue}</span>
         </div>
 
         <div className="mt-4 pt-3 border-t border-[#E8E3DC] flex justify-between items-center">
           <p className="text-lg font-bold text-gray-500">Price:</p>
-          <p className="text-2xl text-indigo-600">
-            €{product.price.toFixed(2)}
-          </p>
+          <p className="text-2xl text-indigo-600">€{product.price}</p>
         </div>
 
-        {/* Delete Button */}
-        {showDeleteButton && (
+        {onDelete && (isSaved || isMy) && (
           <button
-            onClick={() => onDelete!(product.id, product.title)}
-            className="mt-4 w-full text-red-600 py-2 border border-red-300 rounded-lg"
+            onClick={() => onDelete(product.id, product.title)}
+            className="mt-4 w-full text-red-600 py-2 border border-red-300 rounded-lg hover:bg-red-50 transition"
           >
             Delete
           </button>
@@ -281,7 +275,7 @@ const ProductCard = ({ product, tabType, onDelete }: ProductCardProps) => {
 };
 
 // ----------------------------------------------------
-// 5. EMPTY STATE (MODIFIED)
+// 5. EMPTY STATE
 // ----------------------------------------------------
 
 const EmptyCreationsState = ({
@@ -290,27 +284,30 @@ const EmptyCreationsState = ({
 }: EmptyCreationsStateProps) => (
   <div className="mt-16 text-center max-w-lg mx-auto p-10">
     <div className="mx-auto h-28 w-28 mb-6">
-      <Image
-        src={icon}
-        alt="No Creations Icon"
+      <img
+        src={ICON_PLACEHOLDER_URL}
         className="w-full h-full object-contain opacity-90"
+        alt="Empty"
       />
     </div>
+
     <h2 className="text-xl font-bold mb-2">No Creations Yet</h2>
+
     <p className="text-md text-gray-500 mb-8">
       You haven&apos;t created any designs or ordered any products yet.
     </p>
+
     <button
       onClick={onFindProduct}
       disabled={isLoading}
-      className={`px-8 py-3 bg-[#D4AF37] text-white font-bold rounded-lg transition-colors flex items-center justify-center mx-auto ${
+      className={`px-8 py-3 bg-[#D4AF37] text-white font-bold rounded-lg flex items-center justify-center mx-auto ${
         isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-[#c9a632]"
       }`}
     >
       {isLoading ? (
         <>
           <svg
-            className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+            className="animate-spin h-5 w-5 mr-2"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -326,7 +323,7 @@ const EmptyCreationsState = ({
             <path
               className="opacity-75"
               fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              d="M4 12a8 8 0 018-8"
             ></path>
           </svg>
           FINDING...
@@ -339,19 +336,20 @@ const EmptyCreationsState = ({
 );
 
 // ----------------------------------------------------
-// 6. MAIN PAGE (MODIFIED)
+// 6. MAIN PAGE
 // ----------------------------------------------------
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<"ordered" | "saved" | "my">(
-    "ordered"
-  );
-  const [isLoading, setIsLoading] = useState(false); // New state for loader
+  const [activeTab, setActiveTab] =
+    useState<"ordered" | "saved" | "my">("ordered");
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [savedProducts, setSavedProducts] =
     useState<Product[]>(DUMMY_SAVED_DESIGNS);
   const [orderedProducts] = useState<Product[]>(DUMMY_ORDERED_PRODUCTS);
-  const [myDesigns, setMyDesigns] = useState<Product[]>(DUMMY_MY_DESIGNS);
+  const [myDesigns, setMyDesigns] =
+    useState<Product[]>(DUMMY_MY_DESIGNS);
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -365,28 +363,26 @@ export default function App() {
     tab: null,
   });
 
-  // --- MODIFIED handleFindProduct to include loading state ---
   const handleFindProduct = () => {
     setIsLoading(true);
 
-    // Simulate an artificial delay before redirection to show the loader
-    // In a real application, this delay would be the time taken for an async action (e.g., API call)
     setTimeout(() => {
-      window.location.href = "/pages/shop";
-      // setIsLoading(false); // This line is not needed as the page redirects
-    }, 1000); // 1-second delay for demonstration
+      console.log("[Router] Navigating to /pages/shop");
+      setIsLoading(false);
+    }, 1000);
   };
 
   const openDeleteModal = (
     id: string,
     title: string,
-    tabId: "saved" | "my"
+    tab: "saved" | "my"
   ) => {
-    setModalState({ isOpen: true, id, title, tab: tabId });
+    setModalState({ isOpen: true, id, title, tab });
   };
 
-  const closeDeleteModal = () =>
+  const closeDeleteModal = () => {
     setModalState({ isOpen: false, id: null, title: "", tab: null });
+  };
 
   const confirmDeletion = () => {
     if (modalState.tab === "saved") {
@@ -402,27 +398,31 @@ export default function App() {
     closeDeleteModal();
   };
 
-  const renderContent = (products: Product[], tabId: "ordered" | "saved" | "my") => {
-    if (products.length === 0)
+  const renderContent = (
+    list: Product[],
+    tab: "ordered" | "saved" | "my"
+  ) => {
+    if (list.length === 0)
       return (
         <EmptyCreationsState
-          onFindProduct={handleFindProduct} // Pass handler
-          isLoading={isLoading} // Pass loading state
+          onFindProduct={handleFindProduct}
+          isLoading={isLoading}
         />
       );
 
     const deleteHandler =
-      tabId === "saved" || tabId === "my"
-        ? (id: string, title: string) => openDeleteModal(id, title, tabId)
+      tab === "saved" || tab === "my"
+        ? (id: string, title: string) =>
+            openDeleteModal(id, title, tab)
         : undefined;
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {products.map((product) => (
+        {list.map((item) => (
           <ProductCard
-            key={product.id}
-            product={product}
-            tabType={tabId}
+            key={item.id}
+            product={item}
+            tabType={tab}
             onDelete={deleteHandler}
           />
         ))}
@@ -431,72 +431,55 @@ export default function App() {
   };
 
   const tabs = [
-    {
-      id: "ordered",
-      label: "ORDERED PRODUCTS",
-      count: orderedProducts.length,
-    },
-    {
-      id: "saved",
-      label: "SAVED DESIGNS",
-      count: savedProducts.length,
-    },
-    {
-      id: "my",
-      label: "MY DESIGNS",
-      count: myDesigns.length,
-    },
+    { id: "ordered", label: "ORDERED PRODUCTS", count: orderedProducts.length },
+    { id: "saved", label: "SAVED DESIGNS", count: savedProducts.length },
+    { id: "my", label: "MY DESIGNS", count: myDesigns.length },
   ] as const;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="pt-16 pb-12 text-center">
-        <h1 className="text-4xl italic text-gray-800">My Creations</h1>
-        <p className="mt-2 text-md text-gray-500">
+        <h1 className={`${cormorantItalic.className} text-4xl  text-gray-800`}>My Creations</h1>
+        <p className="mt-2 px-2 text-md text-gray-500">
           Manage your orders and saved designs in one place.
         </p>
       </header>
 
       <div className="max-w-7xl mx-auto px-4">
         {/* Tabs */}
-        <div className="flex justify-center space-x-6 mb-10 bg-white p-2 rounded-xl border-2 border-[#E8E3DC]">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 py-3 px-4 rounded-lg transition-all ${
-                  isActive
-                    ? "text-white bg-indigo-600"
-                    : "text-gray-600 bg-white"
+        <div className="flex flex-col md:flex-row md:justify-center md:space-x-6 space-y-2 md:space-y-0 mb-10 bg-white p-3 rounded-xl border-2 border-[#E8E3DC]">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`w-full md:w-auto flex justify-center items-center space-x-2 py-3 px-4 rounded-lg transition-all ${
+                activeTab === t.id
+                  ? "text-white bg-indigo-600"
+                  : "text-gray-600 bg-white"
+              }`}
+            >
+              <span className="uppercase">{t.label}</span>
+              <span
+                className={`rounded-full px-2 text-xs font-bold ${
+                  activeTab === t.id
+                    ? "bg-white text-indigo-600"
+                    : "bg-gray-200"
                 }`}
               >
-                <span className="uppercase">{tab.label}</span>
-                <span
-                  className={`rounded-full px-2 text-xs font-bold ${
-                    isActive ? "bg-white text-indigo-600" : "bg-gray-200"
-                  }`}
-                >
-                  {tab.count}
-                </span>
-              </button>
-            );
-          })}
+                {t.count}
+              </span>
+            </button>
+          ))}
         </div>
 
         {/* Content */}
         <div className="pb-16">
-          {activeTab === "ordered" &&
-            renderContent(orderedProducts, "ordered")}
-          {activeTab === "saved" &&
-            renderContent(savedProducts, "saved")}
+          {activeTab === "ordered" && renderContent(orderedProducts, "ordered")}
+          {activeTab === "saved" && renderContent(savedProducts, "saved")}
           {activeTab === "my" && renderContent(myDesigns, "my")}
         </div>
       </div>
 
-      {/* Modal */}
       <DeleteConfirmationModal
         isOpen={modalState.isOpen}
         onClose={closeDeleteModal}
