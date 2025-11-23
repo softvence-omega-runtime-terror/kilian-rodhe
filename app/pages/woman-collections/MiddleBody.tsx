@@ -64,7 +64,7 @@ const baseWomensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     title: "T-SHIRTS",
     subtitle: "Organic Cotton Relaxed Tee",
     description: "Soft and breathable organic cotton, perfect for everyday wear.",
-    price: "$34.99",
+    price: "€34.99",
     colors: ["#FFFFFF", "#000000", "#FDE047", "#D1D5DB"],
     suitableAge: ["18-25", "26-35"],
   },
@@ -75,7 +75,7 @@ const baseWomensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     title: " HOODIES",
     subtitle: "Comfort Fleece Cropped Hoodie",
     description: "Stylish cropped fit with cozy fleece lining and drawstrings.",
-    price: "$59.99",
+    price: "€59.99",
     colors: ["#000000", "#FFFFFF", "#9CA3AF", "#EF4444"],
     suitableAge: ["18-25", "36-50"],
   },
@@ -85,7 +85,7 @@ const baseWomensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     title: "CAPS",
     subtitle: "Embroidered Logo Baseball Cap",
     description: "Adjustable strap for comfort, classic design with elegant embroidery.",
-    price: "$27.99",
+    price: "€27.99",
     colors: ["#F9A8D4", "#000000", "#FFFFFF", "#3B82F6"],
     suitableAge: ["18-25", "26-35", "50+"],
   },
@@ -97,7 +97,7 @@ const baseWomensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     title: "T-SHIRTS",
     subtitle: "Vintage Graphic Print Tee",
     description: "Soft cotton tee featuring a unique vintage-inspired graphic.",
-    price: "$39.99",
+    price: "€39.99",
     colors: ["#000000", "#D1D5DB", "#10B981", "#F97316"], 
     suitableAge: ["18-25", "26-35"],
   },
@@ -106,7 +106,7 @@ const baseWomensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     title: "HOODIES",
     subtitle: "Relaxed Fit Zip-Up Hoodie",
     description: "Versatile and comfortable, perfect for layering in any season.",
-    price: "$64.99",
+    price: "€64.99",
     colors: ["#000000", "#FFFFFF", "#9CA3AF", "#1D4ED8"],
     suitableAge: ["18-25", "36-50"],
   }
@@ -127,7 +127,7 @@ for (let i = 0; i < TOTAL_WOMENS_PRODUCTS; i++) {
     ...base,
     id: i + 1,
     priceValue: parseFloat(priceValue.toFixed(2)),
-    price: `$${priceValue.toFixed(2)}`,
+    price: `€${priceValue.toFixed(2)}`,
     subtitle: `${base.subtitle} - Style ${i + 1}`,
     isNew: i < 4 && base.isNew,
     isBestSeller: i % 7 === 0 && base.isBestSeller,
@@ -143,10 +143,10 @@ for (let i = 0; i < TOTAL_WOMENS_PRODUCTS; i++) {
 const ageGroups = ["ALL", "18-25", "26-35", "36-50", "50+"];
 const productTypes = ["T-SHIRTS", "HOODIES", "CAPS"];
 const priceRanges = [
-  { name: "Under $30", min: 0, max: 30 },
-  { name: "$30 - $60", min: 30, max: 60 },
-  { name: "$60 - $90", min: 60, max: 90 },
-  { name: "Over $90", min: 90, max: Infinity },
+  { name: "Under €30", min: 0, max: 30 },
+  { name: "€30 - €60", min: 30, max: 60 },
+  { name: "€60 - €90", min: 60, max: 90 },
+  { name: "Over €90", min: 90, max: Infinity },
 ];
 const filterColors = [
   { name: "Black", hex: "#000000" },
@@ -217,7 +217,7 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
     
     if (action === "Customize") {
         // Navigate to /pages/my-creation
-        router.push("/pages/my-creation");
+        router.push("/pages/customise");
     } else if (action === "Order Now") {
         // Navigate to /pages/shipping
         router.push("/pages/shipping");

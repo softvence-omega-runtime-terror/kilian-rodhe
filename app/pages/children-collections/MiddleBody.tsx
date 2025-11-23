@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 import Image, { StaticImageData } from "next/image";
-import { useRouter } from "next/navigation"; // ⬅️ NEW: Import useRouter for navigation
+import { useRouter } from "next/navigation";
 
 // ----------------------------------------------------------------------
 // Shared Assets (Unchanged)
@@ -32,11 +32,8 @@ const cormorantNormal = Cormorant_Garamond({
   style: ["normal"],
 });
 
-// ----------------------------------------------------------------------
-// Product Type & Data for CHILDREN'S Collection (UPDATED)
-// ----------------------------------------------------------------------
 
-// UPDATED: Age groups are adjusted for children
+// UPDATED: Age groups are adjusted for children (Product Data types)
 type AgeGroupKey = "2-5" | "6-10" | "11-16"; 
 
 type Product = {
@@ -56,26 +53,26 @@ type Product = {
 // Helper to extract numerical price
 const getPriceValue = (price: string) => parseFloat(price.replace(/[^0-9.]/g, ''));
 
-// UPDATED: Product data for Children's Collection
+// UPDATED: Product data for Children's Collection (Unchanged)
 const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
   {
     // CHILDREN'S T-SHIRT 1
     imageSrc: "https://www.yourprint.in/new-admin-ajax.php?action=resize_outer_image&cfcache=all&url=https%3A%2F%2Fyp-media.s3.amazonaws.com%2FDesigns_Inners_and_Outers%2FTshirts%2FKids%2Ftshirt_kid_HS_pat_d14_o.jpg&resizeTo=450&format=webp",
     isBestSeller: true,
-    title: "CHILDREN'S T-SHIRTS",
+    title: "T-SHIRTS",
     subtitle: "Cartoon Graphic Soft Tee",
     description: "Fun, comfortable t-shirt with a vibrant graphic print, great for play.",
-    price: "$14.50",
+    price: "€14.50",
     colors: ["#FFFFFF", "#FDE047", "#10B981", "#3B82F6"],
     suitableAge: ["2-5", "6-10"],
   },
     {
     imageSrc: "https://m.media-amazon.com/images/I/81fwhKpa7PL._AC_UY1100_.jpg",
     isNew: true,
-    title: "CHILDREN'S PANTS",
+    title: "PANTS",
     subtitle: "Cozy Cotton Zip Pan",
     description: "Warm and durable zip-up hoodie, perfect for school and outdoor adventures.",
-    price: "$10.99",
+    price: "€10.99",
     colors: ["#9CA3AF", "#FFFFFF", "#000000", "#F97316"],
     suitableAge: ["6-10", "11-16"],
   },
@@ -84,10 +81,10 @@ const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     // CHILDREN'S HOODIE 1
     imageSrc: "https://www.mypersonalisedclothing.com/wp-content/uploads/2021/04/JH01J_LS05_2021.png",
     isNew: true,
-    title: "CHILDREN'S HOODIES",
+    title: "HOODIES",
     subtitle: "Cozy Cotton Zip Hoodie",
     description: "Warm and durable zip-up hoodie, perfect for school and outdoor adventures.",
-    price: "$29.99",
+    price: "€29.99",
     colors: ["#9CA3AF", "#FFFFFF", "#000000", "#F97316"],
     suitableAge: ["6-10", "11-16"],
   },
@@ -96,20 +93,20 @@ const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
   {
     imageSrc: "https://www.xpres.co.uk/globalassets/brands/subli-tees/xp521.jpg?format=webp&quality=100&width=1200",
     isNew: true,
-    title: "CHILDREN'S T-SHIRTS",
+    title: "T-SHIRTS",
     subtitle: "Solid Color Long Sleeve Tee",
     description: "Everyday essential, soft cotton with reinforced stitching.",
-    price: "$17.99",
+    price: "€17.99",
     colors: ["#F97316", "#000000", "#FFFFFF", "#3B82F6"], 
     suitableAge: ["2-5", "11-16"],
   },
   {
     imageSrc: "https://www.woolerina.com.au/cdn/shop/products/C017-kids-merino-hoodie-navy-woolerina_8_820x1024.jpg?v=1678928657",
     isNew: false,
-    title: "CHILDREN'S HOODIES",
+    title: "HOODIES",
     subtitle: "Cozy Cotton Zip Hoodie",
     description: "Warm and durable zip-up hoodie, perfect for school and outdoor adventures.",
-    price: "$29.99",
+    price: "€29.99",
     colors: ["#9CA3AF", "#FFFFFF", "#000000", "#F97316"],
     suitableAge: ["6-10", "11-16"],
   },
@@ -117,10 +114,10 @@ const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
   {
     imageSrc: "https://assets.theplace.com/image/upload/v1/ecom/assets/products/gym/3054270/3054270_33K4.jpg",
     isNew: false,
-    title: "CHILDREN'S PANTS",
+    title: "PANTS",
     subtitle: "Cozy Cotton Zip Pan",
     description: "Warm and durable zip-up hoodie, perfect for school and outdoor adventures.",
-    price: "$10.99",
+    price: "€10.99",
     colors: ["#9CA3AF", "#FFFFFF", "#000000", "#F97316"],
     suitableAge: ["6-10", "11-16"],
   },
@@ -141,7 +138,7 @@ for (let i = 0; i < TOTAL_CHILDRENS_PRODUCTS; i++) {
     ...base,
     id: i + 1,
     priceValue: parseFloat(priceValue.toFixed(2)),
-    price: `$${priceValue.toFixed(2)}`,
+    price: `€${priceValue.toFixed(2)}`,
     subtitle: `${base.subtitle} - Style ${i + 1}`,
     isNew: i < 4 && base.isNew,
     isBestSeller: i % 7 === 0 && base.isBestSeller,
@@ -151,17 +148,17 @@ for (let i = 0; i < TOTAL_CHILDRENS_PRODUCTS; i++) {
   });
 }
 
-// UPDATED: Age groups
-const ageGroups = ["ALL", "2-5", "6-10", "11-16"]; 
+// ⬅️ MODIFIED: Reverting ageGroups to the requested display values
+const ageGroups = ["ALL", "3-6", "7-9", "10-13", "14-18"]; 
 
 // UPDATED: Product types (limited to 3 main categories + others from base data)
 const productTypes = ["T-SHIRTS", "HOODIES", "PANTS"]; 
 
 const priceRanges = [
-  { name: "Under $15", min: 0, max: 15 },
-  { name: "$15 - $30", min: 15, max: 30 },
-  { name: "$30 - $50", min: 30, max: 50 },
-  { name: "Over $50", min: 50, max: Infinity },
+  { name: "Under €10", min: 0, max: 10.99 },
+  { name: "€11 - €15", min: 11, max: 15.99 },
+  { name: "€16 - €20", min: 16, max: 20.99 },
+  { name: "Over €21", min: 21, max: Infinity },
 ];
 
 const filterColors = [
@@ -221,7 +218,7 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
   const imageUrl = typeof imageSrc === 'string' ? imageSrc : (imageSrc as StaticImageData).src;
 
   // UPDATED: Lighter background for items typically light/white
-  const isLighterBgNeeded = product.title === "CHILDREN'S T-SHIRTS"; 
+  const isLighterBgNeeded = product.title === "T-SHIRTS"; 
 
   const badgeColor = "bg-[#DFA637] text-black";
   const iconButtonColor = "bg-[#DFA637] text-black hover:bg-[#c99532]";
@@ -232,7 +229,7 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
     
     if (action === "Customize") {
         // Navigate to /pages/my-creation
-        router.push("/pages/my-creation");
+        router.push("/pages/customise");
     } else if (action === "Order Now") {
         // Navigate to /pages/shipping
         router.push("/pages/shipping");
@@ -390,12 +387,41 @@ const Pagination: React.FC<PaginationProps> = React.memo(
 Pagination.displayName = 'Pagination';
 
 // ----------------------------------------------------------------------
-// Main Component for Children's Collection (UPDATED NAME)
+// Age Group Mapping Function (NEW)
 // ----------------------------------------------------------------------
 
-export default function ChildrensCollectionPage() { // Component name changed
+/**
+ * Maps the user-selected display age group (e.g., "3-6") to the internal product data key (e.g., "2-5").
+ * @param displayGroup The group name from the UI filter.
+ * @returns The AgeGroupKey used in the product data, or "ALL".
+ */
+const mapDisplayAgeToKey = (displayGroup: string): AgeGroupKey | "ALL" => {
+    switch (displayGroup) {
+        case "ALL":
+            return "ALL";
+        case "3-6":
+        case "7-9":
+            // Both of these fall into the 2-5 and 6-10 ranges. We'll map "3-6" to "2-5"
+            // and "7-9" to "6-10" for the best fit, but the product data is coarser.
+            return "2-5"; 
+        case "10-13":
+            return "6-10"; // Fits best into the 6-10 range (or 11-16 if we stretch it)
+        case "14-18":
+            return "11-16"; 
+        default:
+            return "ALL";
+    }
+};
+
+
+// ----------------------------------------------------------------------
+// Main Component for Children's Collection (UPDATED)
+// ----------------------------------------------------------------------
+
+export default function ChildrensCollectionPage() { 
+  // ⬅️ MODIFIED: State now stores the string value from the UI array
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState(ageGroups[0]);
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState(ageGroups[0]); 
   const [selectedProductType, setSelectedProductType] = useState<string | null>(null);
   const [selectedPriceRange, setSelectedPriceRange] = useState<typeof priceRanges[number] | null>(null);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -408,21 +434,28 @@ export default function ChildrensCollectionPage() { // Component name changed
 
   // Filtering Logic (Using allChildrensProducts)
   const filteredProducts = useMemo(() => {
-    return allChildrensProducts // Data source changed
+    // Determine the product key based on the selected display group
+    const ageFilterKey = mapDisplayAgeToKey(selectedAgeGroup);
+
+    return allChildrensProducts 
       .filter(product => {
-        if (selectedAgeGroup !== "ALL") {
-            if (!product.suitableAge.includes(selectedAgeGroup as AgeGroupKey)) {
+        // AGE FILTER LOGIC - Uses the mapped key
+        if (ageFilterKey !== "ALL") {
+            if (!product.suitableAge.includes(ageFilterKey as AgeGroupKey)) {
                 return false;
             }
         }
+        // PRODUCT TYPE FILTER LOGIC
         if (selectedProductType && product.title !== selectedProductType) {
           return false;
         }
+        // PRICE RANGE FILTER LOGIC
         if (selectedPriceRange) {
-            if (product.priceValue < selectedPriceRange.min || product.priceValue >= selectedPriceRange.max) {
+            if (product.priceValue < selectedPriceRange.min || product.priceValue > selectedPriceRange.max) {
                 return false;
             }
         }
+        // COLOR FILTER LOGIC
         if (selectedColors.length > 0) {
             const hasSelectedColor = product.colors.some(productColor => selectedColors.includes(productColor));
             if (!hasSelectedColor) {
@@ -443,7 +476,7 @@ export default function ChildrensCollectionPage() { // Component name changed
             if (!a.isBestSeller && b.isBestSeller) return 1;
             if (a.isNew && !b.isNew) return -1;
             if (!a.isNew && b.isNew) return 1;
-            return a.id - b.id;
+            return a.id - b.id; // Fallback to ID for stable sort
         }
       });
   }, [selectedAgeGroup, selectedProductType, selectedPriceRange, selectedColors, sortOption]);
@@ -457,6 +490,7 @@ export default function ChildrensCollectionPage() { // Component name changed
     setCurrentPage(prevPage => prevPage + 1);
   }, []);
 
+  // ⬅️ MODIFIED: Handler uses the string from the UI
   const handleAgeGroupSelect = useCallback((group: string) => {
     setSelectedAgeGroup(group);
     handleFilterChange();

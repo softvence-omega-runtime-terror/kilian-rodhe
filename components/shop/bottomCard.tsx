@@ -1,8 +1,8 @@
 // pages/index.js
 "use client";
 import Image, { StaticImageData } from "next/image";
-import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useMemo, useCallback } from "react";
 
 import { Jost, Roboto_Flex } from "next/font/google";
 import { useRouter } from "next/navigation";
@@ -34,111 +34,148 @@ const roboto = Roboto_Flex({
 interface IconToggleButtonProps {
   src: StaticImageData;
   alt: string;
+  onClick?: () => void;
 }
 
-const IconToggleButton = ({ src, alt }: IconToggleButtonProps) => (
+const IconToggleButton = ({ src, alt, onClick }: IconToggleButtonProps) => (
   <motion.button
-    className="bg-[#D4AF37] p-2 shadow-md text-gray-700 hover:opacity-80 transition-opacity"
+    className="bg-[#D4AF37] p-2 shadow-md text-gray-700 hover:opacity-80 transition-opacity z-10"
     whileHover={{ scale: 1.1, rotate: 5 }}
     whileTap={{ scale: 0.9, rotate: -5 }}
+    onClick={onClick}
+    aria-label={alt}
   >
     <Image src={src} alt={alt} width={20} height={20} className="w-5 h-5" />
   </motion.button>
 );
 
-// Card Data Array
+// 👇 NEW/UPDATED COMPONENT: Toast Message for Bottom Slide-Up
+interface ToastMessageProps {
+    message: string;
+    onClose: () => void;
+}
+
+const ToastMessage = ({ message, onClose }: ToastMessageProps) => {
+    // Automatically close the toast after 3 seconds
+    useState(() => {
+        const timer = setTimeout(() => {
+            onClose();
+        }, 3000);
+        return () => clearTimeout(timer);
+    });
+
+    return (
+        <motion.div
+            // Positioned at the bottom
+            className={`${jostFont.className} fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-4 rounded-lg shadow-2xl z-50 text-center font-medium`}
+            // Animation for sliding up from the bottom (y: 100)
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ duration: 0.5, type: "spring", stiffness: 120 }}
+        >
+            <div className="flex items-center space-x-2">
+                 <span role="img" aria-label="heart icon" className="text-xl">❤️</span> 
+                 <span>{message}</span>
+            </div>
+        </motion.div>
+    );
+}
+// -----------------------
+
+// Card Data Array (Unchanged)
 const products = [
-  {
-    name: "Women's Fitted Tee",
-    price: "$32.99",
-    image: tshirtsImage,
-    alt: "Women's Fitted Tee",
-    delay: 0.2,
-  },
-  {
-    name: "Kids Fun T-Shirt",
-    price: "$19.99",
-    image: girlTshitImage,
-    alt: "Kids Fun T-Shirt",
-    delay: 0.4,
-  },
-  {
-    name: "Oversized Hoodie",
-    price: "$49.99",
-    image: hoodyImage,
-    alt: "Oversized Hoodie",
-    delay: 0.6,
-  },
-  {
-    name: "Classic Coffee Mug",
-    price: "$14.50",
-    image: mugImage,
-    alt: "Classic Coffee Mug",
-    delay: 0.1,
-  },
-  {
-    name: "Travel Tumbler (Steel)",
-    price: "$28.99",
-    image: cupImage,
-    alt: "Travel Tumbler",
-    delay: 0.2,
-  },
-  {
-    name: "Vintage Crewneck Tee",
-    price: "$35.00",
-    image: tshirtsImage,
-    alt: "Vintage Crewneck Tee",
-    delay: 0.3,
-  },
-  {
-    name: "Unisex Heavy Hoodie",
-    price: "$55.99",
-    image: hoodyImage,
-    alt: "Unisex Heavy Hoodie",
-    delay: 0.4,
-  },
-  {
-    name: "Toddler Graphic Tee",
-    price: "$15.99",
-    image: girlTshitImage,
-    alt: "Toddler Graphic Tee",
-    delay: 0.5,
-  },
-  {
-    name: "Large Custom Mug",
-    price: "$18.00",
-    image: mugImage,
-    alt: "Large Custom Mug",
-    delay: 0.6,
-  },
-  {
-    name: "Insulated Sports Cup",
-    price: "$25.00",
-    image: cupImage,
-    alt: "Insulated Sports Cup",
-    delay: 0.7,
-  },
-  {
-    name: "Premium V-Neck T-shirt",
-    price: "$39.99",
-    image: tshirtsImage,
-    alt: "Premium V-Neck T-shirt",
-    delay: 0.8,
-  },
-  {
-    name: "Zip-Up Fleece Hoodie",
-    price: "$62.00",
-    image: hoodyImage,
-    alt: "Zip-Up Fleece Hoodie",
-    delay: 0.9,
-  },
-  {
-    name: "Infant Onesie",
-    price: "$12.99",
-    image: girlTshitImage,
-    alt: "Infant Onesie",
-    delay: 1.0,
-  },
+    {
+        name: "Women's Fitted Tee",
+        price: "€32.99",
+        image: tshirtsImage,
+        alt: "Women's Fitted Tee",
+        delay: 0.2,
+    },
+    {
+        name: "Kids Fun T-Shirt",
+        price: "€19.99",
+        image: girlTshitImage,
+        alt: "Kids Fun T-Shirt",
+        delay: 0.4,
+    },
+    {
+        name: "Oversized Hoodie",
+        price: "€49.99",
+        image: hoodyImage,
+        alt: "Oversized Hoodie",
+        delay: 0.6,
+    },
+    {
+        name: "Classic Coffee Mug",
+        price: "€14.50",
+        image: mugImage,
+        alt: "Classic Coffee Mug",
+        delay: 0.1,
+    },
+    {
+        name: "Travel Tumbler (Steel)",
+        price: "€28.99",
+        image: cupImage,
+        alt: "Travel Tumbler",
+        delay: 0.2,
+    },
+    {
+        name: "Vintage Crewneck Tee",
+        price: "€35.00",
+        image: tshirtsImage,
+        alt: "Vintage Crewneck Tee",
+        delay: 0.3,
+    },
+    {
+        name: "Unisex Heavy Hoodie",
+        price: "€55.99",
+        image: hoodyImage,
+        alt: "Unisex Heavy Hoodie",
+        delay: 0.4,
+    },
+    {
+        name: "Toddler Graphic Tee",
+        price: "€15.99",
+        image: girlTshitImage,
+        alt: "Toddler Graphic Tee",
+        delay: 0.5,
+    },
+    {
+        name: "Large Custom Mug",
+        price: "€18.00",
+        image: mugImage,
+        alt: "Large Custom Mug",
+        delay: 0.6,
+    },
+    {
+        name: "Insulated Sports Cup",
+        price: "€25.00",
+        image: cupImage,
+        alt: "Insulated Sports Cup",
+        delay: 0.7,
+    },
+    {
+        name: "Premium V-Neck T-shirt",
+        price: "€39.99",
+        image: tshirtsImage,
+        alt: "Premium V-Neck T-shirt",
+        delay: 0.8,
+    },
+    {
+        name: "Zip-Up Fleece Hoodie",
+        price: "€62.00",
+        image: hoodyImage,
+        alt: "Zip-Up Fleece Hoodie",
+        delay: 0.9,
+    },
+    {
+        name: "Infant Onesie",
+        price: "€12.99",
+        image: girlTshitImage,
+        alt: "Infant Onesie",
+        delay: 1.0,
+    },
 ];
 
 const DUMMY_PRODUCT_COUNT = products.length;
@@ -149,10 +186,29 @@ const MAX_PAGES_TO_SHOW = 6;
 export default function Home() {
   const router = useRouter();
 
+  // State for Toast Message
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   const handleOrderNow = () => {
-    // 'ORDER NOW'
     router.push(`/pages/shipping`);
   };
+
+  const handleCustomize = () => {
+    router.push("/pages/customise");
+  };
+
+  // Handler for the Love Icon
+  const handleSaveToFavorites = useCallback((productName: string) => {
+    // Show the desired message with product name
+    const message = `${productName} saved to your favorites!`;
+    setToastMessage(message);
+  }, []);
+
+  // Handler to close the toast
+  const handleCloseToast = () => {
+    setToastMessage(null);
+  };
+  // ------------------------------------
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -189,7 +245,7 @@ export default function Home() {
     }
 
     return pages;
-  }, [currentPage]); // ✅ Removed totalPages from dependencies
+  }, [currentPage]); 
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -216,6 +272,13 @@ export default function Home() {
 
   return (
     <div className={`bg-[#FAFAFA] ${jostFont.className}`}>
+        {/* Toast Notification Area */}
+        <AnimatePresence>
+            {toastMessage && (
+                <ToastMessage message={toastMessage} onClose={handleCloseToast} />
+            )}
+        </AnimatePresence>
+
       <main className="max-w-8xl mx-auto px-4 py-8">
         <div className="flex flex-wrap justify-center md:justify-start gap-x-[30px] gap-y-10">
           {productsToDisplay.map((product, index) => (
@@ -248,11 +311,17 @@ export default function Home() {
                 </motion.div>
 
                 <div className="absolute top-4 right-4 flex space-x-2">
-                  <IconToggleButton src={loveIcon} alt="Love Icon" />
+                  {/* 👇 Love Icon with onClick Handler */}
+                  <IconToggleButton
+                    src={loveIcon}
+                    alt="Save to Favorites Icon"
+                    onClick={() => handleSaveToFavorites(product.name)}
+                  />
                   <IconToggleButton src={shopIcon} alt="Shop Icon" />
                 </div>
 
                 <motion.button
+                  onClick={handleCustomize}
                   className={`${jostFont.className} absolute bottom-[8%] w-[90%] left-1/2 -translate-x-1/2 h-12 border-2 border-[#ffffff] bg-white/10 text-[#fff] tracking-[2.1px] uppercase text-[14px] font-medium flex items-center justify-center`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}

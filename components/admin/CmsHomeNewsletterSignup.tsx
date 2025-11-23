@@ -34,7 +34,7 @@ const App = () => {
   );
 
   // HANDLER for saving settings
-  const handleSaveSettings = (e: { preventDefault: () => void; }) => {
+  const handleSaveSettings = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     console.log("Saving Newsletter Section settings...", {
       sectionTitle,
@@ -153,6 +153,38 @@ const App = () => {
                   />
                 </div>
               </div>
+
+              <section className="w-full px-6 py-10">
+                <h2 className="text-[14px] font-semibold mb-6">Statistics</h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Left Card */}
+                  <div className="bg-[#F7F5F2] border-2 border-[#E8E4DE] rounded-3xl p-6">
+                    <div className="space-y-4">
+                      <div className="bg-[#F1F1F4] rounded-xl p-2 border-2 border-[#E8E3DC] text-[#717182] text-[14px]">
+                        10K+
+                      </div>
+
+                      <div className="bg-[#F1F1F4] rounded-xl border-2 border-[#E8E3DC] p-2 text-[#717182] text-[14px]">
+                        SUBSCRIBERS
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Card */}
+                  <div className="bg-[#F7F5F2] border-2 border-[#E8E3DC] rounded-3xl p-6">
+                    <div className="space-y-4">
+                      <div className="bg-[#F1F1F4] rounded-xl p-2 border-2 border-[#E8E3DC] text-[#717182] text-[14px]">
+                        98%
+                      </div>
+
+                      <div className="bg-[#F1F1F4] rounded-xl p-2 border-2 border-[#E8E3DC] text-[#717182] text-[14px]">
+                        SATISFACTION
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
 

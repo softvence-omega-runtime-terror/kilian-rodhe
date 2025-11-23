@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import Image from "next/image"; // Import the Image component
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { FaEyeSlash } from "react-icons/fa";
 
 // Note: Ensure these paths are correct relative to your file structure
 import emailIcon from "../../../public/image/signinIcon/Icon (2).svg";
@@ -10,23 +12,35 @@ import lockIcon from "../../../public/image/signinIcon/Icon (4).svg";
 import eyeIcon from "../../../public/image/signinIcon/Icon (8).svg";
 import signinIcon from "../../../public/image/signinIcon/signinIcon.svg";
 
-import { FaEyeSlash } from "react-icons/fa";
-import { useRouter } from "next/navigation";
-
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter(); // Initialize the router
-  const ACCENT_COLOR = "#8B6F47"; // Defined accent color for styling
+  const [isLoading, setIsLoading] = useState(false); // 👈 নতুন স্টেট
+  const router = useRouter(); 
+  const ACCENT_COLOR = "#8B6F47"; 
 
   // Function to handle form submission
   const handleSubmit = (e: { preventDefault: () => void; }) => {
-    e.preventDefault(); // Prevent default form submission behavior (page reload)
-    // --- Authentication Logic goes here ---
+    e.preventDefault(); 
+    if (isLoading) return; // লোডিং হলে একাধিকবার সাবমিট প্রতিরোধ
+
+    setIsLoading(true); // 👈 লোডিং শুরু করো
     console.log("Attempting sign-in...");
 
-    // Navigate to the root route (/) after successful sign-in
-    // In a real app, this push would happen only after API success.
-    router.push("/");
+    // Simulate API call delay (2 seconds)
+    setTimeout(() => {
+      // --- Authentication Logic goes here ---
+      
+      // Assume sign-in was successful
+      setIsLoading(false); // 👈 লোডিং বন্ধ করো
+      router.push("/"); // সফলভাবে লগইন হলে রুটে নেভিগেট করো
+      
+      // In a real application, you'd handle failure here too:
+      // if (loginFailed) {
+      //   setIsLoading(false);
+      //   // Show error message
+      // }
+      
+    }, 2000); // 2 সেকেন্ডের সিমুলেটেড বিলম্ব
   };
 
   return (
@@ -86,7 +100,7 @@ export default function LoginPage() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
               >
                 {showPassword ? (
-                  <FaEyeSlash size={16} /> // Using FaEyeSlash for the 'hide' state
+                  <FaEyeSlash size={16} /> 
                 ) : (
                   <Image src={eyeIcon} alt="Eye Icon" width={16} height={16} />
                 )}
@@ -113,18 +127,53 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {/* Sign In Button */}
+          {/* Sign In Button (MODIFIED) */}
           <button
             type="submit"
-            className="w-full text-white py-3 rounded-xl mt-8 mb-4 font-semibold hover:bg-[#7a5e3e] transition-all duration-300 shadow-md shadow-[#8B6F47]/20"
+            disabled={isLoading} // 👈 লোডিং চলাকালীন বাটন ডিসেবল করো
+            className={`
+                w-full text-white py-3 rounded-xl mt-8 mb-4 font-semibold transition-all duration-300 shadow-md shadow-[#8B6F47]/20
+                ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#7a5e3e]'}
+            `}
             style={{
               background: `linear-gradient(to right, ${ACCENT_COLOR}, #7A5F3A)`,
               fontFamily: "'Jost', sans-serif",
             }}
           >
             <span className="inline-flex items-center justify-center gap-2">
-              <Image src={signinIcon} alt="User Icon" width={16} height={16} />
-              Sign In
+              {/* 👈 কন্ডিশনাল কন্টেন্ট */}
+              {isLoading ? (
+                // Loader SVG
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  Signing In...
+                </>
+              ) : (
+                // Default content
+                <>
+                  <Image src={signinIcon} alt="User Icon" width={16} height={16} />
+                  Sign In
+                </>
+              )}
             </span>
           </button>
         </form>
@@ -133,7 +182,7 @@ export default function LoginPage() {
         <div className="text-center text-sm mt-4 text-gray-600 font-['Jost']">
           Don&apos;t have an account?{" "}
           <Link
-            href="/pages/signup"
+            href="/pages/createaccount"
             className="font-semibold hover:text-[#7a5e3e] transition"
             style={{ color: ACCENT_COLOR }}
           >

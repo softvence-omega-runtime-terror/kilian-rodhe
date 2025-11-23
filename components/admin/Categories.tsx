@@ -80,14 +80,12 @@ const FilterItem: React.FC<FilterItemProps> = ({
 const genderCategories: string[] = [
   "Men's Collection",
   "Women's Collection",
-  "Kids' Collection",
-  "Unisex Collection",
+  "Kids' Collection"
 ];
 
 const ageGroups: string[] = [
-  "Kids (0-12)",
-  "Teens (13-19)",
-  "Young Adults (20-30)",
+  "Kids (0-18)",
+  "Young Adults (19-30)",
   "Adults (31-50)",
   "Seniors (51+)",
 ];

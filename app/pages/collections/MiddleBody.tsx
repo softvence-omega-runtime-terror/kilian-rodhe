@@ -159,7 +159,7 @@ for (let i = 0; i < TOTAL_PRODUCTS; i++) {
     ...base,
     id: i + 1,
     priceValue: parseFloat(priceValue.toFixed(2)),
-    price: `$${priceValue.toFixed(2)}`,
+    price: `€${priceValue.toFixed(2)}`,
     subtitle: `${base.subtitle} - Style ${i + 1}`,
     isNew: i < 4 && base.isNew,
     isBestSeller: i % 7 === 0 && base.isBestSeller,
@@ -174,10 +174,10 @@ for (let i = 0; i < TOTAL_PRODUCTS; i++) {
 const ageGroups = ["ALL", "18-25", "26-35", "36-50", "50+"];
 const productTypes = ["T-SHIRTS", "HOODIES", "CAPS", "MUGS"]; 
 const priceRanges = [
-  { name: "Under $25", min: 0, max: 25 },
-  { name: "$25 - $50", min: 25, max: 50 },
-  { name: "$50 - $75", min: 50, max: 75 },
-  { name: "Over $75", min: 75, max: Infinity },
+  { name: "Under €25", min: 0, max: 25 },
+  { name: "€25 - €50", min: 25, max: 50 },
+  { name: "€50 - €75", min: 50, max: 75 },
+  { name: "Over €75", min: 75, max: Infinity },
 ];
 const filterColors = [
   { name: "Black", hex: "#000000" },
@@ -422,7 +422,7 @@ export default function ShopPage() {
 
   // 2. ROUTE HANDLER: Customize (for /pages/my-creation)
   const handleCustomizeRoute = useCallback(() => {
-    router.push(`/pages/my-creation`);
+    router.push(`/pages/customise`);
   }, [router]);
 
   // Filtering Logic (Unchanged)

@@ -276,12 +276,12 @@ export default function ProductPage() {
             <p
               className={`${jostFont.className} tracking-[0.5px] text-2xl sm:text-3xl text-[#1a1a1a]`}
             >
-              ${product.price.toFixed(2)}
+              €{product.price.toFixed(2)}
             </p>
             <p
               className={`${jostFont.className} tracking-[0.5px] ml-3 text-[14px] sm:text-lg line-through text-[#6a6a6a]`}
             >
-              ${product.originalPrice.toFixed(2)}
+              €{product.originalPrice.toFixed(2)}
             </p>
             <div
               className={`${jostFont.className} tracking-[0.5px] bg-[#d4af37] ml-4 text-black text-[12px] font-medium px-2 py-0.5`}

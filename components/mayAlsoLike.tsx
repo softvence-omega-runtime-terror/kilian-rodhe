@@ -111,15 +111,16 @@ const featuredProducts: Product[] = [
 ];
 
 // 3. PRODUCT CARD COMPONENT
-
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   isVisible,
   index,
 }) => {
+  // ⬅️ UPDATED: Using "en-US" locale, which typically places the currency symbol
+  // on the left for many currencies (including EUR).
   const formattedPrice = new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: "EUR", // ISO 4217 code for Euro
   }).format(product.price);
 
   // Conditional classes for animation with staggered delay
@@ -154,6 +155,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <p
           className={`${jostFont.className} tracking-[0.5] text-[18px] text-[#1a1a1a] mt-1`}
         >
+          {/* Displays price with the € symbol on the left, e.g., "€34.99" */}
           {formattedPrice}
         </p>
       </div>

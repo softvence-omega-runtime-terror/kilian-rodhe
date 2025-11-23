@@ -187,6 +187,9 @@ const EmptyCart = (param)=>{
                 exit: {
                     opacity: 0
                 },
+                transition: {
+                    duration: 0.3
+                },
                 onClick: toggleCart
             }, void 0, false, {
                 fileName: "[project]/components/shoppingCard.tsx",
@@ -204,9 +207,9 @@ const EmptyCart = (param)=>{
                     x: "100%"
                 },
                 transition: {
-                    type: "spring",
-                    stiffness: 80,
-                    damping: 25
+                    type: "tween",
+                    duration: 0.5,
+                    ease: "easeOut"
                 },
                 className: "relative bg-white w-full sm:w-[420px] h-screen shadow-lg flex flex-col",
                 children: [
@@ -224,7 +227,7 @@ const EmptyCart = (param)=>{
                                                 size: 24
                                             }, void 0, false, {
                                                 fileName: "[project]/components/shoppingCard.tsx",
-                                                lineNumber: 55,
+                                                lineNumber: 60,
                                                 columnNumber: 15
                                             }, ("TURBOPACK compile-time value", void 0)),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -232,28 +235,28 @@ const EmptyCart = (param)=>{
                                                 children: "Shopping Cart"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/shoppingCard.tsx",
-                                                lineNumber: 56,
+                                                lineNumber: 61,
                                                 columnNumber: 15
                                             }, ("TURBOPACK compile-time value", void 0))
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/shoppingCard.tsx",
-                                        lineNumber: 54,
+                                        lineNumber: 59,
                                         columnNumber: 13
                                     }, ("TURBOPACK compile-time value", void 0)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-                                        className: "text-gray-500 hover:text-gray-700 text-2xl leading-none",
+                                        className: "text-gray-500 hover:text-gray-700 text-2xl leading-none transition-transform duration-150 hover:scale-110",
                                         onClick: toggleCart,
                                         children: "×"
                                     }, void 0, false, {
                                         fileName: "[project]/components/shoppingCard.tsx",
-                                        lineNumber: 62,
+                                        lineNumber: 67,
                                         columnNumber: 13
                                     }, ("TURBOPACK compile-time value", void 0))
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/shoppingCard.tsx",
-                                lineNumber: 53,
+                                lineNumber: 58,
                                 columnNumber: 11
                             }, ("TURBOPACK compile-time value", void 0)),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -261,13 +264,13 @@ const EmptyCart = (param)=>{
                                 children: "0 Items"
                             }, void 0, false, {
                                 fileName: "[project]/components/shoppingCard.tsx",
-                                lineNumber: 70,
+                                lineNumber: 75,
                                 columnNumber: 11
                             }, ("TURBOPACK compile-time value", void 0))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/shoppingCard.tsx",
-                        lineNumber: 51,
+                        lineNumber: 56,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -294,12 +297,12 @@ const EmptyCart = (param)=>{
                                         size: 50
                                     }, void 0, false, {
                                         fileName: "[project]/components/shoppingCard.tsx",
-                                        lineNumber: 86,
+                                        lineNumber: 91,
                                         columnNumber: 15
                                     }, ("TURBOPACK compile-time value", void 0))
                                 }, void 0, false, {
                                     fileName: "[project]/components/shoppingCard.tsx",
-                                    lineNumber: 85,
+                                    lineNumber: 90,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -307,7 +310,7 @@ const EmptyCart = (param)=>{
                                     children: "Your cart is empty"
                                 }, void 0, false, {
                                     fileName: "[project]/components/shoppingCard.tsx",
-                                    lineNumber: 88,
+                                    lineNumber: 93,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(MotionLink, {
@@ -323,24 +326,24 @@ const EmptyCart = (param)=>{
                                     children: "Start Shopping"
                                 }, void 0, false, {
                                     fileName: "[project]/components/shoppingCard.tsx",
-                                    lineNumber: 94,
+                                    lineNumber: 99,
                                     columnNumber: 13
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/shoppingCard.tsx",
-                            lineNumber: 79,
+                            lineNumber: 84,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/components/shoppingCard.tsx",
-                        lineNumber: 78,
+                        lineNumber: 83,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/shoppingCard.tsx",
-                lineNumber: 43,
+                lineNumber: 44,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0))
         ]
@@ -591,7 +594,7 @@ const Header = ()=>{
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2",
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                            className: "w-[90px] h-auto md:w-[150px] lg:w-[200px]",
+                            className: "w-[90px] md:w-[150px] lg:w-[172px]",
                             width: 200,
                             height: 59,
                             sizes: "(max-width: 768px) 90px, 200px",
@@ -925,31 +928,85 @@ __turbopack_context__.s([
     ()=>__TURBOPACK__default__export__
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)"); // 👈 Import useState
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/image.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-client] (ecmascript)"); // 👈 Import useRouter
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/navigation.js [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
-"use client"; // 👈 Important: Add this for client-side hooks like useRouter
+"use client";
+;
 ;
 ;
 const Button1 = (param)=>{
     let { text, image, title } = param;
     _s();
-    const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])(); // 👈 Initialize the router
+    const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
+    const [isLoading, setIsLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false); // 👈 New state for loading
     // Function to handle the click event and navigate
     const handleClick = ()=>{
-        if (title === "Men’s Collections") router.push("/pages/man-collections"); // 👈 Navigate to /collections rout
-        else if (title === "Women’s Collections") router.push("/pages/woman-collections"); // 👈 Navigate to /collections route
-        else if (title === "Children’s Collections") router.push("/pages/children-collections");
-        else if (title === "Other Products Collections") router.push("/pages/others-collections"); // 👈 Navigate to /collections route
-        else router.push("/pages/collections"); // 👈 Navigate to /collections route
+        setIsLoading(true); // 👈 Start loading state
+        let destination = "/pages/collections";
+        if (title === "Men’s Collections") {
+            destination = "/pages/man-collections";
+        } else if (title === "Women’s Collections") {
+            destination = "/pages/woman-collections";
+        } else if (title === "Kid’s Collections") {
+            destination = "/pages/children-collections";
+        } else if (title === "Other Products Collections") {
+            destination = "/pages/others-collections";
+        }
+        // Call router.push to navigate
+        router.push(destination);
+    // Note: Since router.push() is client-side, the loading state will automatically
+    // reset when the component on the destination page mounts.
+    // We don't need to manually set setIsLoading(false) here.
     };
-    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
-        className: "mt-6 border w-full border-white px-5 py-2.5 text-[14px] font-medium tracking-wider flex items-center justify-center gap-2 ",
-        style: {
-            fontFamily: "'Jost', sans-serif"
-        },
-        onClick: handleClick,
+    // Determine the content to show inside the button
+    const buttonContent = isLoading ? // Loader Icon (Using a simple SVG spinning animation)
+    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+        className: "flex items-center",
+        children: [
+            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                className: "animate-spin -ml-1 mr-3 h-5 w-5 text-white",
+                xmlns: "http://www.w3.org/2000/svg",
+                fill: "none",
+                viewBox: "0 0 24 24",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("circle", {
+                        className: "opacity-25",
+                        cx: "12",
+                        cy: "12",
+                        r: "10",
+                        stroke: "currentColor",
+                        strokeWidth: "4"
+                    }, void 0, false, {
+                        fileName: "[project]/components/button1.tsx",
+                        lineNumber: 51,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0)),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                        className: "opacity-75",
+                        fill: "currentColor",
+                        d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    }, void 0, false, {
+                        fileName: "[project]/components/button1.tsx",
+                        lineNumber: 59,
+                        columnNumber: 9
+                    }, ("TURBOPACK compile-time value", void 0))
+                ]
+            }, void 0, true, {
+                fileName: "[project]/components/button1.tsx",
+                lineNumber: 45,
+                columnNumber: 7
+            }, ("TURBOPACK compile-time value", void 0)),
+            "Loading..."
+        ]
+    }, void 0, true, {
+        fileName: "[project]/components/button1.tsx",
+        lineNumber: 44,
+        columnNumber: 5
+    }, ("TURBOPACK compile-time value", void 0)) : // Default content
+    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             text,
             image && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -959,17 +1016,26 @@ const Button1 = (param)=>{
                 height: 16
             }, void 0, false, {
                 fileName: "[project]/components/button1.tsx",
-                lineNumber: 39,
+                lineNumber: 71,
                 columnNumber: 17
             }, ("TURBOPACK compile-time value", void 0))
         ]
-    }, void 0, true, {
+    }, void 0, true);
+    return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+        className: "mt-6 border w-full border-white px-5 py-2.5 text-[14px] font-medium tracking-wider flex items-center justify-center gap-2 transition-all ".concat(isLoading ? "opacity-70 cursor-wait" : "hover:bg-white hover:text-black"),
+        style: {
+            fontFamily: "'Jost', sans-serif"
+        },
+        onClick: handleClick,
+        disabled: isLoading,
+        children: buttonContent
+    }, void 0, false, {
         fileName: "[project]/components/button1.tsx",
-        lineNumber: 31,
+        lineNumber: 76,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
-_s(Button1, "fN7XvhJ+p5oE6+Xlo0NJmXpxjC8=", false, function() {
+_s(Button1, "0X1krhOx79SeMQ1/PryH1Pxw4KA=", false, function() {
     return [
         __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"]
     ];
@@ -1048,10 +1114,10 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$styled$2d$jsx$2f$style$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/styled-jsx/style.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$users$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Users$3e$__ = __turbopack_context__.i("[project]/node_modules/lucide-react/dist/esm/icons/users.js [app-client] (ecmascript) <export default as Users>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/next/image.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$button1$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/button1.tsx [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2d$2$2e$svg$2e$mjs__$7b$__IMAGE__$3d3e$__$225b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2d$2$2e$svg__$28$static__in__ecmascript$2922$__$7d$__$5b$app$2d$client$5d$__$28$structured__image__object__with__data__url$2c$__ecmascript$29$__ = __turbopack_context__.i('[project]/public/image/cardIcon/Icon-2.svg.mjs { IMAGE => "[project]/public/image/cardIcon/Icon-2.svg (static in ecmascript)" } [app-client] (structured image object with data url, ecmascript)');
-var __TURBOPACK__imported__module__$5b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2e$svg$2e$mjs__$7b$__IMAGE__$3d3e$__$225b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2e$svg__$28$static__in__ecmascript$2922$__$7d$__$5b$app$2d$client$5d$__$28$structured__image__object__with__data__url$2c$__ecmascript$29$__ = __turbopack_context__.i('[project]/public/image/cardIcon/Icon.svg.mjs { IMAGE => "[project]/public/image/cardIcon/Icon.svg (static in ecmascript)" } [app-client] (structured image object with data url, ecmascript)'); // Path reverted to original
-var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$textstyle$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__ = __turbopack_context__.i("[project]/components/textstyle.module.css [app-client] (css module)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$button1$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/components/button1.tsx [app-client] (ecmascript)"); // Assuming button1 is the path to your ExploreButton component
+var __TURBOPACK__imported__module__$5b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2d$2$2e$svg$2e$mjs__$7b$__IMAGE__$3d3e$__$225b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2d$2$2e$svg__$28$static__in__ecmascript$2922$__$7d$__$5b$app$2d$client$5d$__$28$structured__image__object__with__data__url$2c$__ecmascript$29$__ = __turbopack_context__.i('[project]/public/image/cardIcon/Icon-2.svg.mjs { IMAGE => "[project]/public/image/cardIcon/Icon-2.svg (static in ecmascript)" } [app-client] (structured image object with data url, ecmascript)'); // Adjust path as needed
+var __TURBOPACK__imported__module__$5b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2e$svg$2e$mjs__$7b$__IMAGE__$3d3e$__$225b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2e$svg__$28$static__in__ecmascript$2922$__$7d$__$5b$app$2d$client$5d$__$28$structured__image__object__with__data__url$2c$__ecmascript$29$__ = __turbopack_context__.i('[project]/public/image/cardIcon/Icon.svg.mjs { IMAGE => "[project]/public/image/cardIcon/Icon.svg (static in ecmascript)" } [app-client] (structured image object with data url, ecmascript)'); // Adjust path as needed
+var __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$textstyle$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__ = __turbopack_context__.i("[project]/components/textstyle.module.css [app-client] (css module)"); // Adjust path as needed
 "use client";
 ;
 ;
@@ -1069,6 +1135,21 @@ const cardAnimationStyles = /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b
 function MensCollectionCard(param) {
     let { image, tranding, title, productNumber, dis, ageGroup, ageValue } = param;
     const imageContainerHeight = ageValue ? "h-[500px]" : "h-full";
+    // --- Dynamic Age Group Logic ---
+    const isKidsCollection = title === "Kid’s Collections";
+    const ageRanges = isKidsCollection ? [
+        "3-7",
+        "7-9",
+        "10-13",
+        "14-18"
+    ] // Kid's Collections age groups
+     : [
+        "18-25",
+        "26-35",
+        "36-50",
+        "50+"
+    ]; // Default/Men's Collections age groups
+    // --- End Dynamic Age Group Logic ---
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
         className: "bg-white overflow-hidden overflow-x-hidden lg:mb-30 font-['Cormorant_Garamond'] h-[660px]",
         children: [
@@ -1079,20 +1160,20 @@ function MensCollectionCard(param) {
                 children: [
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$image$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
                         src: image,
-                        alt: "Men's Collection",
+                        alt: title || "Collection Image",
                         fill: true,
                         className: "object-cover w-full h-full",
                         priority: true
                     }, void 0, false, {
                         fileName: "[project]/components/Card.tsx",
-                        lineNumber: 78,
+                        lineNumber: 87,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "absolute inset-0 bg-black/60"
                     }, void 0, false, {
                         fileName: "[project]/components/Card.tsx",
-                        lineNumber: 87,
+                        lineNumber: 96,
                         columnNumber: 9
                     }, this),
                     tranding === 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1106,7 +1187,7 @@ function MensCollectionCard(param) {
                                 className: "opacity-90"
                             }, void 0, false, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 92,
+                                lineNumber: 101,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1114,13 +1195,13 @@ function MensCollectionCard(param) {
                                 children: "Trending"
                             }, void 0, false, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 99,
+                                lineNumber: 108,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/Card.tsx",
-                        lineNumber: 91,
+                        lineNumber: 100,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1135,12 +1216,12 @@ function MensCollectionCard(param) {
                                             className: "w-4 h-4 text-black"
                                         }, void 0, false, {
                                             fileName: "[project]/components/Card.tsx",
-                                            lineNumber: 109,
+                                            lineNumber: 117,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/Card.tsx",
-                                        lineNumber: 108,
+                                        lineNumber: 116,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1149,7 +1230,7 @@ function MensCollectionCard(param) {
                                             "Products ",
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("br", {}, void 0, false, {
                                                 fileName: "[project]/components/Card.tsx",
-                                                lineNumber: 112,
+                                                lineNumber: 120,
                                                 columnNumber: 24
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1157,13 +1238,13 @@ function MensCollectionCard(param) {
                                                 children: productNumber
                                             }, void 0, false, {
                                                 fileName: "[project]/components/Card.tsx",
-                                                lineNumber: 113,
+                                                lineNumber: 121,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/Card.tsx",
-                                        lineNumber: 111,
+                                        lineNumber: 119,
                                         columnNumber: 13
                                     }, this),
                                     ageGroup !== -1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1172,7 +1253,7 @@ function MensCollectionCard(param) {
                                                 className: __TURBOPACK__imported__module__$5b$project$5d2f$components$2f$textstyle$2e$module$2e$css__$5b$app$2d$client$5d$__$28$css__module$29$__["default"].container
                                             }, void 0, false, {
                                                 fileName: "[project]/components/Card.tsx",
-                                                lineNumber: 118,
+                                                lineNumber: 126,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1183,7 +1264,7 @@ function MensCollectionCard(param) {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/Card.tsx",
-                                                lineNumber: 119,
+                                                lineNumber: 127,
                                                 columnNumber: 17
                                             }, this)
                                         ]
@@ -1191,7 +1272,7 @@ function MensCollectionCard(param) {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 107,
+                                lineNumber: 115,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -1199,7 +1280,7 @@ function MensCollectionCard(param) {
                                 children: title
                             }, void 0, false, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 125,
+                                lineNumber: 133,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1207,7 +1288,7 @@ function MensCollectionCard(param) {
                                 children: dis
                             }, void 0, false, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 128,
+                                lineNumber: 136,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$button1$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -1216,19 +1297,19 @@ function MensCollectionCard(param) {
                                 image: __TURBOPACK__imported__module__$5b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2e$svg$2e$mjs__$7b$__IMAGE__$3d3e$__$225b$project$5d2f$public$2f$image$2f$cardIcon$2f$Icon$2e$svg__$28$static__in__ecmascript$2922$__$7d$__$5b$app$2d$client$5d$__$28$structured__image__object__with__data__url$2c$__ecmascript$29$__["default"]
                             }, void 0, false, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 131,
+                                lineNumber: 139,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/Card.tsx",
-                        lineNumber: 105,
+                        lineNumber: 113,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/Card.tsx",
-                lineNumber: 75,
+                lineNumber: 84,
                 columnNumber: 7
             }, this),
             ageValue && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1245,7 +1326,7 @@ function MensCollectionCard(param) {
                                 children: "Age Group Selection"
                             }, void 0, false, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 138,
+                                lineNumber: 151,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1256,23 +1337,18 @@ function MensCollectionCard(param) {
                                 children: "GDPR Compliant"
                             }, void 0, false, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 146,
+                                lineNumber: 159,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/Card.tsx",
-                        lineNumber: 137,
+                        lineNumber: 150,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "grid grid-cols-2 gap-2 w-full",
-                        children: [
-                            "18-25",
-                            "26-35",
-                            "36-50",
-                            "50+"
-                        ].map((age, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                        children: ageRanges.map((age, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
                                 className: "border border-gray-300 py-2 text-[14px] text-[#1a1a1a] w-full sm:w-auto min-w-[120px] px-4 age-button-slide-up age-button-delay-".concat(index + 1),
                                 style: {
                                     fontFamily: "'Jost', sans-serif"
@@ -1280,24 +1356,24 @@ function MensCollectionCard(param) {
                                 children: age
                             }, age, false, {
                                 fileName: "[project]/components/Card.tsx",
-                                lineNumber: 158,
+                                lineNumber: 171,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/components/Card.tsx",
-                        lineNumber: 155,
+                        lineNumber: 168,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/components/Card.tsx",
-                lineNumber: 136,
+                lineNumber: 149,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/components/Card.tsx",
-        lineNumber: 72,
+        lineNumber: 80,
         columnNumber: 5
     }, this);
 }
@@ -1859,7 +1935,7 @@ const WhyChooseTundra = ()=>{
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                        className: "bg-white rounded-lg shadow-xl overflow-hidden border border-gray-200 ".concat(tableClasses),
+                        className: "bg-white rounded-lg overflow-hidden border border-gray-200 ".concat(tableClasses),
                         children: [
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "grid grid-cols-3 text-center border-b border-gray-200 bg-white text-gray-800 font-semibold text-sm sm:text-base",

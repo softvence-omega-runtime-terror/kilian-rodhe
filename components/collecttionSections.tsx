@@ -51,7 +51,7 @@ const CollectionSections = () => {
             <Card
               image={productImage3.src}
               tranding={1}
-              title="Children’s Collections"
+              title="Kid’s Collections"
               dis="Stylish designs for children"
               productNumber={88}
               ageGroup={4}

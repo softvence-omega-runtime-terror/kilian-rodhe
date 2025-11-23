@@ -8,6 +8,7 @@
   "/pages/collections/page": "/pages/collections",
   "/pages/contact/page": "/pages/contact",
   "/pages/createaccount/page": "/pages/createaccount",
+  "/pages/customise/page": "/pages/customise",
   "/pages/forgatepassword/page": "/pages/forgatepassword",
   "/pages/landing/page": "/pages/landing",
   "/pages/login/page": "/pages/login",

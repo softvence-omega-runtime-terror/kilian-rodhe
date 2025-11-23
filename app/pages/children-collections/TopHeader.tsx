@@ -64,7 +64,7 @@ const CollectionHero = () => {
           <h1
             className={`text-6xl md:text-7xl lg:text-8xl mb-4 ${cormorantItalic.className}`}
           >
-            Children&apos;s Collection
+            Kid&apos;s Collection
           </h1>
 
           {/* Subtitle / Description */}

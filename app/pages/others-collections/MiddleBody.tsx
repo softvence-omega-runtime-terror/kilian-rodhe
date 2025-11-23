@@ -108,7 +108,7 @@ for (let i = 0; i < TOTAL_PRODUCTS; i++) {
     ...base,
     id: i + 1,
     priceValue: parseFloat(priceValue.toFixed(2)),
-    price: `$${priceValue.toFixed(2)}`,
+    price: `€${priceValue.toFixed(2)}`,
     subtitle: `${base.subtitle} - Style ${i + 1}`,
     isNew: i < 4 && base.isNew,
     isBestSeller: i % 7 === 0 && base.isBestSeller,
@@ -120,10 +120,10 @@ const productFocus = ["ALL", "Apparel (Hoodies)", "Home Goods (Mugs)"];
 const productTypes = ["HOODIES", "MUGS"];
 
 const priceRanges = [
-  { name: "Under $15", min: 0, max: 15 },
-  { name: "$15 - $30", min: 15, max: 30 },
-  { name: "$30 - $50", min: 30, max: 50 },
-  { name: "Over $50", min: 50, max: Infinity },
+  { name: "Under €15", min: 0, max: 15 },
+  { name: "€15 - €30", min: 15, max: 30 },
+  { name: "€30 - €50", min: 30, max: 50 },
+  { name: "Over €50", min: 50, max: Infinity },
 ];
 
 const filterColors = [
@@ -352,7 +352,7 @@ export default function AllProductsCollectionPage() {
   // --- Routing Handlers ---
 
   const handleCustomizeRoute = useCallback(() => {
-    router.push(`/pages/my-creation`);
+    router.push(`/pages/customise`);
   }, [router]);
   
   const handleOrderNow = useCallback(() => {

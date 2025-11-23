@@ -231,7 +231,7 @@ const WhyChooseTundra = () => {
 
         {/* Comparison Table Container with Animation Classes */}
         <div
-          className={`bg-white rounded-lg shadow-xl overflow-hidden border border-gray-200 ${tableClasses}`}
+          className={`bg-white rounded-lg overflow-hidden border border-gray-200 ${tableClasses}`}
         >
           {/* Table Header (Keeping the staggered effect here for smooth transition) */}
           <div className="grid grid-cols-3 text-center border-b border-gray-200 bg-white text-gray-800 font-semibold text-sm sm:text-base">

@@ -60,7 +60,7 @@ interface InputFieldProps {
   Icon?: StaticImageData;
 }
 
-// ---------------- Shipping Method Component ----------------
+// ---------------- Shipping Method Component ---------------- (No changes)
 
 const ShippingMethod: React.FC<ShippingMethodProps> = ({
   title,
@@ -85,7 +85,7 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({
   </div>
 );
 
-// ---------------- Step Component ----------------
+// ---------------- Step Component ---------------- (No changes)
 
 const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 1 }) => {
   const isCompleted = index < currentStepIndex;
@@ -141,7 +141,7 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 1 }) => {
   );
 };
 
-// ---------------- Input Field Component ----------------
+// ---------------- Input Field Component ---------------- (No changes)
 
 const InputField: React.FC<InputFieldProps> = ({
   label,
@@ -173,23 +173,31 @@ const InputField: React.FC<InputFieldProps> = ({
   </div>
 );
 
-// ---------------- Main Component ----------------
+// ---------------- Main Component (MODIFIED) ----------------
 
 const ShippingPage: React.FC = () => {
   const [selectedShipping, setSelectedShipping] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(false); // 👈 NEW STATE FOR LOADER
   const router = useRouter();
 
   const shippingOptions = [
-    { title: "Standard Shipping", desc: "5–7 business days", price: "$5.99" },
-    { title: "Express Shipping", desc: "2–3 business days", price: "$15.99" },
-    { title: "Overnight Delivery", desc: "Next business day", price: "$29.99" },
+    { title: "Standard Shipping", desc: "5–7 business days", price: "€5.99" },
+    { title: "Express Shipping", desc: "2–3 business days", price: "€15.99" },
+    { title: "Overnight Delivery", desc: "Next business day", price: "€29.99" },
   ];
 
   const ACTIVE_STEP_INDEX = 1;
 
   const handleContinueToPayment = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push("/pages/payment");
+    setIsLoading(true); // 👈 START LOADER
+
+    // In a real scenario, you might send data to an API here.
+    // We use setTimeout to simulate the delay before navigation.
+    setTimeout(() => {
+        router.push("/pages/payment");
+        // We don't need to set isLoading(false) because the page redirects.
+    }, 500); // Simulate a short processing delay
   };
 
   return (
@@ -206,7 +214,7 @@ const ShippingPage: React.FC = () => {
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full border-b pb-3 border-t pt-3 bg-[#ffffff]  border-[#E8E3DC] flex flex-col sm:flex-row items-center justify-center mb-12 sm:px-0">
+      <div className="w-full border-b pb-3 border-t pt-3 bg-[#ffffff] border-[#E8E3DC] flex flex-col sm:flex-row items-center justify-center mb-12 sm:px-0">
         {["Product Details", "Shipping Info", "Payment"].map((label, index) => (
           <Step
             key={index}
@@ -301,16 +309,47 @@ const ShippingPage: React.FC = () => {
 
               <button
                 type="submit"
+                disabled={isLoading} // 👈 DISABLE BUTTON WHILE LOADING
                 style={{ backgroundColor: ACCENT_COLOR }}
-                className="px-8 py-2 text-white rounded-lg hover:bg-[#8a6a3f] transition duration-150 text-sm font-medium shadow-md shadow-[#a07d48]/20"
+                className={`
+                    px-8 py-2 text-white rounded-lg transition duration-150 text-sm font-medium shadow-md shadow-[#a07d48]/20 flex items-center justify-center
+                    ${isLoading ? 'opacity-70 cursor-wait' : 'hover:bg-[#8a6a3f]'}
+                `}
               >
-                Continue to Payment
+                {isLoading ? (
+                  <>
+                    {/* Spinning Loader SVG */}
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  "Continue to Payment"
+                )}
               </button>
             </div>
           </form>
         </div>
 
-        {/* Right: Order Summary */}
+        {/* Right: Order Summary (No changes) */}
         <div
           className={`${jostFont.className} w-full lg:w-[350px] bg-[#ffffff] rounded-xl p-6 border-2 border-[#E8E3DC] self-start`}
         >
@@ -351,17 +390,17 @@ const ShippingPage: React.FC = () => {
           <div className="space-y-2 text-sm text-gray-600">
             <div className="flex justify-between">
               <span>Subtotal (1 item)</span>
-              <span>$24.99</span>
+              <span>€24.99</span>
             </div>
 
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>$5.99</span>
+              <span>€5.99</span>
             </div>
 
             <div className="flex justify-between">
               <span>Tax (19% VAT)</span>
-              <span>$4.75</span>
+              <span>€4.75</span>
             </div>
           </div>
 
@@ -369,7 +408,7 @@ const ShippingPage: React.FC = () => {
 
           <div className="flex justify-between font-bold text-lg text-gray-800">
             <span>Total</span>
-            <span style={{ color: ACCENT_COLOR }}>$35.73</span>
+            <span style={{ color: ACCENT_COLOR }}>€35.73</span>
           </div>
 
           <ul

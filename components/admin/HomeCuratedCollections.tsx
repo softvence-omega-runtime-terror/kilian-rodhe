@@ -170,6 +170,7 @@ const CollectionItem: React.FC<CollectionItemProps> = ({
             type="number"
             defaultValue={collection.itemCount}
             className={countInputClass}
+            disabled
           />
           <button
             onClick={() => fileInputRef.current?.click()}

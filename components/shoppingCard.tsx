@@ -36,6 +36,7 @@ const EmptyCart: React.FC<EmptyCartProps> = ({ toggleCart }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }} // Fast fade out
         onClick={toggleCart} // Allows clicking the overlay to close the cart
       />
 
@@ -43,8 +44,12 @@ const EmptyCart: React.FC<EmptyCartProps> = ({ toggleCart }) => {
       <motion.div
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", stiffness: 80, damping: 25 }}
+        exit={{ x: "100%" }} // ডানদিকে স্লাইড করে বেরিয়ে যাবে
+        transition={{
+          type: "tween", // সিম্পল ট্রানজিশন টাইপ
+          duration: 0.5, // 0.5 সেকেন্ডে অ্যানিমেশন সম্পন্ন হবে (স্লো)
+          ease: "easeOut",
+        }}
         className="relative bg-white w-full sm:w-[420px] h-screen shadow-lg flex flex-col"
       >
         {/* Header */}
@@ -60,7 +65,7 @@ const EmptyCart: React.FC<EmptyCartProps> = ({ toggleCart }) => {
               </h2>
             </div>
             <button
-              className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+              className="text-gray-500 hover:text-gray-700 text-2xl leading-none transition-transform duration-150 hover:scale-110" // added slight hover effect
               onClick={toggleCart} // Call toggleCart to close the cart
             >
               ×

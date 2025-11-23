@@ -3,12 +3,16 @@
 "use client"; // Required for Next.js client components
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import React, { useState } from "react";
+import React, { useState } from "react"; // 👈 Import useState
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Jost, Cormorant_Garamond } from "next/font/google";
+
 import {
   CheckCircle,
+  X,
+  ShoppingBag,
+  Download, // Download Icon
 } from "lucide-react";
 
 // Imported Assets
@@ -32,9 +36,10 @@ const cormorantItalic = Cormorant_Garamond({
   style: ["italic"],
 });
 
+// Helper Components and Types (Step, PaymentOption) are defined here...
 const ACCENT_COLOR = "#8b6f47";
+const TOTAL_AMOUNT = "€35.73"; // Use a constant for the total amount
 
-// Types
 interface PaymentOptionProps {
   label: string;
   value: string;
@@ -48,7 +53,7 @@ interface StepProps {
   currentStepIndex?: number;
 }
 
-// Payment Option Component
+// Payment Option Component (No changes)
 const PaymentOption: React.FC<
   PaymentOptionProps & { children?: React.ReactNode }
 > = ({ label, value, selected, setSelected, children }) => {
@@ -80,7 +85,7 @@ const PaymentOption: React.FC<
   );
 };
 
-// Step Component
+// Step Component (No changes)
 const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 2 }) => {
   const isCompleted = index < currentStepIndex;
   const isCurrent = index === currentStepIndex;
@@ -124,6 +129,7 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 2 }) => {
               width={16}
               height={16}
               alt="Completed"
+              className="invert"
             />
           ) : (
             index + 1
@@ -135,17 +141,153 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 2 }) => {
   );
 };
 
-// Main Component
+
+// ----------------------------------------------------------------------
+// Success Modal Component (No changes)
+// ----------------------------------------------------------------------
+
+const SuccessModal: React.FC<{
+    router: ReturnType<typeof useRouter>;
+    onClose: () => void; // Function to close the modal
+}> = ({ router, onClose }) => {
+
+    const orderId = "ORD-20251123-1001";
+    const subtotal = "€24.99";
+    const shipping = "€5.99";
+    const tax = "€4.75";
+    const totalAmount = TOTAL_AMOUNT; // Use the constant
+
+    // ⬅️ UPDATED HANDLER: Simulates the receipt download by creating a file blob
+    const handleDownloadReceipt = () => {
+
+        // 1. Create the content of the dummy receipt file
+        const receiptContent = `
+        --- PAYMENT RECEIPT ---
+        Order ID: ${orderId}
+        Date: ${new Date().toLocaleDateString()}
+        
+        Item: Premium Coffee Mug
+        
+        Subtotal (1 item): ${subtotal}
+        Shipping: ${shipping}
+        Tax (19% VAT): ${tax}
+        --------------------------
+        TOTAL CHARGED: ${totalAmount}
+        --------------------------
+        
+        Thank you for your custom order!
+        `;
+
+        // 2. Create a Blob (Binary Large Object)
+        const blob = new Blob([receiptContent], { type: 'text/plain' });
+
+        // 3. Create a temporary anchor element
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        // 4. Set attributes for download
+        a.href = url;
+        a.download = `${orderId}-Receipt.txt`; // Recommended file name
+
+        // 5. Trigger download and clean up
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Optional: Close the modal immediately after triggering the download
+        // onClose();
+    };
+
+    return (
+        <div className={`${jostFont.className} fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-60 backdrop-blur-sm`}>
+            <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform transition-all duration-300 scale-100 relative">
+
+                {/* Cross Icon now CLOSES the modal */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 transition"
+                    aria-label="Close"
+                    title="Close"
+                >
+                    <X className="w-5 h-5" />
+                </button>
+
+                <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-[#a07d48]/10 mb-4">
+                    <ShoppingBag className="w-8 h-8 text-[#a07d48]"/>
+                </div>
+
+                <h3 className={`${cormorantItalic.className} text-3xl font-bold mb-2 text-[#1A1410]`}>
+                    Congratulations!
+                </h3>
+
+                <p className="text-gray-700 mb-6 text-sm">
+                    Your custom order has been placed successfully! Download your receipt below.
+                </p>
+
+                <div className="bg-[#f9f7f5] p-3 rounded-lg mb-6 text-sm">
+                    <p className="font-medium text-gray-800">Order ID: <span className="text-[#a07d48]">{orderId}</span></p>
+                    <p className="text-gray-600">Total Charged: <span className="font-bold">{totalAmount}</span></p>
+                </div>
+
+                {/* Main Action Button for Download */}
+                <button
+                    onClick={handleDownloadReceipt}
+                    style={{ backgroundColor: ACCENT_COLOR }}
+                    className="w-full py-3 text-white rounded-lg shadow-lg hover:bg-[#8a6a3f] transition duration-150 font-medium text-sm flex items-center justify-center mb-3"
+                >
+                    <Download className="w-4 h-4 mr-2" />
+                    <span className="tracking-wider">DOWNLOAD RECEIPT</span>
+                </button>
+
+                {/* Secondary Button to return to shopping */}
+                <button
+                    onClick={() => { onClose(); router.push("/pages/shop"); }}
+                    className="w-full py-2 text-gray-700 bg-transparent border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-150 font-medium text-xs tracking-wider"
+                >
+                    CONTINUE SHOPPING
+                </button>
+
+            </div>
+        </div>
+    );
+};
+
+// ----------------------------------------------------------------------
+// Main Component (MODIFIED)
+// ----------------------------------------------------------------------
 const PaymentPage: React.FC = () => {
   const router = useRouter();
   const [selectedPayment, setSelectedPayment] = useState<string>("card");
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // 👈 NEW STATE FOR LOADER
 
   const ACTIVE_STEP_INDEX = 2;
+
+  const handlePlaceOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isLoading) return; // Prevent multiple submissions
+
+    setIsLoading(true); // 👈 START LOADER
+    console.log("Placing order with method:", selectedPayment);
+
+    // Simulate API call delay
+    setTimeout(() => {
+      setIsLoading(false); // 👈 STOP LOADER
+      setOrderPlaced(true); // Show success modal
+    }, 1500); // 1.5 second simulated delay
+  };
+
+  const handleCloseModal = () => {
+    setOrderPlaced(false);
+  };
+
 
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-[#f9f7f5] font-sans flex flex-col items-center py-10">
+
         {/* Back Link */}
         <div className="w-full md:container px-3 lg:container mb-5 lg:px-0">
           <button
@@ -178,7 +320,8 @@ const PaymentPage: React.FC = () => {
         </div>
 
         {/* Main Container */}
-        <div className="w-full max-w-5xl flex flex-col  lg:flex-row gap-10 p-4 md:p-0">
+        <form onSubmit={handlePlaceOrder} className="w-full max-w-5xl flex flex-col lg:flex-row gap-10 p-4 md:p-0">
+
           {/* Left: Payment Method */}
           <div className="flex-1 rounded-xl p-4 bg-white border-2 border-[#E8E3DC]">
             <h2
@@ -201,6 +344,7 @@ const PaymentPage: React.FC = () => {
                     defaultValue="1234 5678 9012 3456"
                     className="w-full p-3 bg-gray-100 border-none rounded-md text-gray-600 focus:ring-1 focus:ring-gray-300"
                     placeholder="Card Number"
+                    required
                   />
 
                   <div className="flex space-x-4">
@@ -209,12 +353,14 @@ const PaymentPage: React.FC = () => {
                       defaultValue="MM/YY"
                       className="w-1/2 p-3 bg-white border border-gray-200 rounded-md text-gray-600 placeholder-gray-400 focus:ring-1 focus:ring-gray-300"
                       placeholder="MM/YY"
+                      required
                     />
                     <input
                       type="text"
                       defaultValue="123"
                       className="w-1/2 p-3 bg-gray-100 border-none rounded-md text-gray-600 focus:ring-1 focus:ring-gray-300"
                       placeholder="CVV"
+                      required
                     />
                   </div>
                 </div>
@@ -246,7 +392,7 @@ const PaymentPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Buttons */}
+            {/* Buttons (MODIFIED) */}
             <div className="flex justify-between pt-8 space-x-4">
               <button
                 type="button"
@@ -258,14 +404,46 @@ const PaymentPage: React.FC = () => {
               <button
                 type="submit"
                 style={{ backgroundColor: ACCENT_COLOR }}
-                className="px-8 py-3 text-white rounded-lg shadow-lg hover:bg-[#8a6a3f] transition duration-150 font-medium text-sm"
+                disabled={isLoading || orderPlaced} // 👈 DISABLE WHEN LOADING OR ALREADY PLACED
+                className={`
+                    px-8 py-3 text-white rounded-lg shadow-lg transition duration-150 font-medium text-sm flex items-center justify-center
+                    ${isLoading ? 'opacity-70 cursor-wait' : 'hover:bg-[#8a6a3f]'}
+                `}
               >
-                Place Order - $35.73
+                {/* 👈 CONDITIONAL CONTENT */}
+                {isLoading ? (
+                  <>
+                    {/* Spinning Loader SVG - Use ACCENT_COLOR/white */}
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  `Place Order - ${TOTAL_AMOUNT}` // Use the constant
+                )}
               </button>
             </div>
           </div>
 
-          {/* Right: Order Summary */}
+          {/* Right: Order Summary (No changes) */}
           <div
             className={`${jostFont.className} w-full lg:w-[350px] bg-white rounded-xl p-6 border-2 border-[#E8E3DC] self-start`}
           >
@@ -307,15 +485,15 @@ const PaymentPage: React.FC = () => {
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex justify-between">
                 <span>Subtotal (1 item)</span>
-                <span>$24.99</span>
+                <span>€24.99</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>$5.99</span>
+                <span>€5.99</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax (19% VAT)</span>
-                <span>$4.75</span>
+                <span>€4.75</span>
               </div>
             </div>
 
@@ -323,7 +501,7 @@ const PaymentPage: React.FC = () => {
 
             <div className="flex justify-between font-bold text-lg text-gray-800">
               <span>Total</span>
-              <span style={{ color: ACCENT_COLOR }}>$35.73</span>
+              <span style={{ color: ACCENT_COLOR }}>{TOTAL_AMOUNT}</span>
             </div>
 
             {/* Extra List */}
@@ -332,7 +510,7 @@ const PaymentPage: React.FC = () => {
             >
               <li className="flex items-center">
                 <Image src={track} width={16} height={16} alt="track" />
-                <span className="ml-2">Free shipping over $150</span>
+                <span className="ml-2">Free shipping over €150</span>
               </li>
 
               <li className="flex items-center">
@@ -351,8 +529,11 @@ const PaymentPage: React.FC = () => {
               </li>
             </ul>
           </div>
-        </div>
+        </form>
       </div>
+
+      {/* Success Modal renders here */}
+      {orderPlaced && <SuccessModal router={router} onClose={handleCloseModal} />}
 
       <Footer />
     </>
