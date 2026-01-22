@@ -2,18 +2,27 @@
 "[project]/app/store/slices/authSlice.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
-// store/slices/authSlice.ts
 __turbopack_context__.s([
     "default",
     ()=>__TURBOPACK__default__export__,
     "logout",
     ()=>logout,
-    "selectAccessToken",
-    ()=>selectAccessToken,
+    "selectAccess",
+    ()=>selectAccess,
     "selectAuth",
     ()=>selectAuth,
+    "selectIsAuthenticated",
+    ()=>selectIsAuthenticated,
+    "selectIsLoading",
+    ()=>selectIsLoading,
+    "selectRefresh",
+    ()=>selectRefresh,
+    "selectUser",
+    ()=>selectUser,
     "setCredentials",
-    ()=>setCredentials
+    ()=>setCredentials,
+    "setLoading",
+    ()=>setLoading
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$redux$2d$toolkit$2e$modern$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@reduxjs/toolkit/dist/redux-toolkit.modern.mjs [app-client] (ecmascript) <locals>");
 ;
@@ -24,28 +33,58 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f
     isAuthenticated: false,
     isLoading: false
 };
+/* ================= HELPERS ================= */ /** Clean string values (remove surrounding quotes if backend returns them) */ function cleanString(str) {
+    if (!str) return null;
+    if (str.startsWith('"') && str.endsWith('"')) return str.slice(1, -1);
+    return str;
+}
+/** Safely parse user from string or object and merge profile */ function parseUser(user, profile) {
+    if (!user) return null;
+    let parsed;
+    if (typeof user === "string") {
+        try {
+            parsed = JSON.parse(user);
+        } catch (e) {
+            parsed = {
+                id: 0,
+                email: ""
+            }; // fallback
+        }
+    } else {
+        parsed = user;
+    }
+    if (profile) parsed.profile = profile;
+    return parsed;
+}
 /* ================= SLICE ================= */ const authSlice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$redux$2d$toolkit$2e$modern$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createSlice"])({
     name: "auth",
     initialState,
     reducers: {
-        setCredentials: (state, action)=>{
-            state.user = action.payload.user;
-            state.access = action.payload.access;
-            state.refresh = action.payload.refresh;
+        /** ✅ Login / Set credentials */ setCredentials: (state, action)=>{
+            state.user = parseUser(action.payload.user, action.payload.profile);
+            state.access = cleanString(action.payload.access);
+            state.refresh = cleanString(action.payload.refresh);
             state.isAuthenticated = true;
         },
-        logout: (state)=>{
+        /** Logout user */ logout: (state)=>{
             state.user = null;
             state.access = null;
             state.refresh = null;
             state.isAuthenticated = false;
+        },
+        /** Optional: set loading state */ setLoading: (state, action)=>{
+            state.isLoading = action.payload;
         }
     }
 });
-const { setCredentials, logout } = authSlice.actions;
+const { setCredentials, logout, setLoading } = authSlice.actions;
 const __TURBOPACK__default__export__ = authSlice.reducer;
 const selectAuth = (state)=>state.auth;
-const selectAccessToken = (state)=>state.auth.access;
+const selectAccess = (state)=>state.auth.access;
+const selectRefresh = (state)=>state.auth.refresh;
+const selectUser = (state)=>state.auth.user;
+const selectIsAuthenticated = (state)=>state.auth.isAuthenticated;
+const selectIsLoading = (state)=>state.auth.isLoading;
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }

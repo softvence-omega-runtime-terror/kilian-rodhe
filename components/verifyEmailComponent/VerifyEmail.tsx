@@ -2,6 +2,7 @@
 
 import { setCredentials } from "@/app/store/slices/authSlice";
 import { useVerifyOtpMutation } from "@/app/store/slices/services/auth/authApi";
+import { cleanString } from "@/app/utils/cleanString";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -15,14 +16,11 @@ interface VerifyOtpResponse {
   success: boolean;
   message: string;
   data: {
-    user: {
-      id: number;
-      email: string;
-    };
+    user: { id: number; email: string } | string;
     profile?: {
       first_name?: string;
       last_name?: string;
-      phone?: string;
+      phone_number?: string;
       image?: string;
     };
     tokens: {
@@ -64,17 +62,25 @@ export default function VerifyEmail({ email }: VerifyEmailProps) {
     try {
       const payload: VerifyOtpResponse = await verifyOtp({ email, otp: otpValue }).unwrap();
 
-      // ✅ Save user & tokens safely
+      // Merge user and profile before dispatching
+      const user =
+        typeof payload.data.user === "string"
+          ? JSON.parse(payload.data.user)
+          : payload.data.user;
+
+      const fullUser = { ...user, profile: payload.data.profile || {} };
+
+      // Dispatch to Redux
       dispatch(
         setCredentials({
-          user: payload.data.user,
+          user: fullUser,
           access: payload.data.tokens.access || "",
           refresh: payload.data.tokens.refresh || "",
         })
       );
 
       toast.success(payload.message);
-      console.log("OTP verify payload:", payload);
+      console.log("Full user with profile dispatched:", fullUser);
 
       router.push("/"); // navigate home
     } catch (err: any) {

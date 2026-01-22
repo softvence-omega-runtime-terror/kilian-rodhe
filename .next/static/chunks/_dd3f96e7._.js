@@ -117,9 +117,14 @@ if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelper
 "[project]/app/store/slices/services/auth/authApi.ts [app-client] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
+// authApi.ts
 __turbopack_context__.s([
     "authApi",
     ()=>authApi,
+    "useLoginMutation",
+    ()=>useLoginMutation,
+    "useLogoutMutation",
+    ()=>useLogoutMutation,
     "useRegisterMutation",
     ()=>useRegisterMutation,
     "useVerifyOtpMutation",
@@ -129,6 +134,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$slices$2f$se
 ;
 const authApi = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$slices$2f$services$2f$baseBackendApi$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["baseBackendApi"].injectEndpoints({
     endpoints: (builder)=>({
+            // ✅ Register
             register: builder.mutation({
                 query: (formData)=>({
                         url: "/auth/register",
@@ -139,6 +145,7 @@ const authApi = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$
                     "Users"
                 ]
             }),
+            // ✅ OTP verification
             verifyOtp: builder.mutation({
                 query: (param)=>{
                     let { email, otp } = param;
@@ -151,11 +158,44 @@ const authApi = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$
                         }
                     };
                 }
+            }),
+            // ✅ Login endpoint
+            login: builder.mutation({
+                query: (param)=>{
+                    let { email, password } = param;
+                    return {
+                        url: "/auth/login",
+                        method: "POST",
+                        body: {
+                            email,
+                            password
+                        }
+                    };
+                },
+                invalidatesTags: [
+                    "Users"
+                ]
+            }),
+            // ✅ Logout endpoint
+            logout: builder.mutation({
+                query: (param)=>{
+                    let { refresh } = param;
+                    return {
+                        url: "/auth/logout/",
+                        method: "POST",
+                        body: {
+                            refresh
+                        }
+                    };
+                },
+                invalidatesTags: [
+                    "Users"
+                ]
             })
         }),
     overrideExisting: true
 });
-const { useRegisterMutation, useVerifyOtpMutation } = authApi;
+const { useRegisterMutation, useVerifyOtpMutation, useLoginMutation, useLogoutMutation } = authApi;
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_context__.k.registerExports(__turbopack_context__.m, globalThis.$RefreshHelpers$);
 }
@@ -214,14 +254,20 @@ function VerifyEmail(param) {
                 email,
                 otp: otpValue
             }).unwrap();
-            // ✅ Save user & tokens safely
+            // Merge user and profile before dispatching
+            const user = typeof payload.data.user === "string" ? JSON.parse(payload.data.user) : payload.data.user;
+            const fullUser = {
+                ...user,
+                profile: payload.data.profile || {}
+            };
+            // Dispatch to Redux
             dispatch((0, __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$slices$2f$authSlice$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["setCredentials"])({
-                user: payload.data.user,
+                user: fullUser,
                 access: payload.data.tokens.access || "",
                 refresh: payload.data.tokens.refresh || ""
             }));
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success(payload.message);
-            console.log("OTP verify payload:", payload);
+            console.log("Full user with profile dispatched:", fullUser);
             router.push("/"); // navigate home
         } catch (err) {
             var _err_data;
@@ -238,7 +284,7 @@ function VerifyEmail(param) {
                     children: "Verify Your Email"
                 }, void 0, false, {
                     fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-                    lineNumber: 88,
+                    lineNumber: 94,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -250,13 +296,13 @@ function VerifyEmail(param) {
                             children: email
                         }, void 0, false, {
                             fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-                            lineNumber: 93,
+                            lineNumber: 99,
                             columnNumber: 37
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-                    lineNumber: 92,
+                    lineNumber: 98,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("form", {
@@ -274,12 +320,12 @@ function VerifyEmail(param) {
                                     className: "w-12 h-12 text-center border border-gray-300 rounded-lg text-lg focus:ring-1 focus:ring-gray-400 focus:outline-none"
                                 }, index, false, {
                                     fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-                                    lineNumber: 99,
+                                    lineNumber: 105,
                                     columnNumber: 15
                                 }, this))
                         }, void 0, false, {
                             fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-                            lineNumber: 97,
+                            lineNumber: 103,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -289,24 +335,24 @@ function VerifyEmail(param) {
                             children: isLoading ? "Verifying..." : "Verify Email"
                         }, void 0, false, {
                             fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-                            lineNumber: 111,
+                            lineNumber: 117,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-                    lineNumber: 96,
+                    lineNumber: 102,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-            lineNumber: 87,
+            lineNumber: 93,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/verifyEmailComponent/VerifyEmail.tsx",
-        lineNumber: 86,
+        lineNumber: 92,
         columnNumber: 5
     }, this);
 }
