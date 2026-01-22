@@ -134,7 +134,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$slices$2f$se
 ;
 const authApi = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$slices$2f$services$2f$baseBackendApi$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["baseBackendApi"].injectEndpoints({
     endpoints: (builder)=>({
-            // ✅ Register
+            // ✅ Register (UNCHANGED)
             register: builder.mutation({
                 query: (formData)=>({
                         url: "/auth/register",
@@ -145,7 +145,7 @@ const authApi = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$
                     "Users"
                 ]
             }),
-            // ✅ OTP verification
+            // ✅ OTP verification (UNCHANGED)
             verifyOtp: builder.mutation({
                 query: (param)=>{
                     let { email, otp } = param;
@@ -159,7 +159,7 @@ const authApi = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$
                     };
                 }
             }),
-            // ✅ Login endpoint
+            // ✅ LOGIN (FIXED — DIFFERENT RESPONSE SHAPE)
             login: builder.mutation({
                 query: (param)=>{
                     let { email, password } = param;
@@ -171,12 +171,9 @@ const authApi = __TURBOPACK__imported__module__$5b$project$5d2f$app$2f$store$2f$
                             password
                         }
                     };
-                },
-                invalidatesTags: [
-                    "Users"
-                ]
+                }
             }),
-            // ✅ Logout endpoint
+            // ✅ Logout (UNCHANGED)
             logout: builder.mutation({
                 query: (param)=>{
                     let { refresh } = param;

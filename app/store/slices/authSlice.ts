@@ -45,7 +45,7 @@ function cleanString(str?: string): string | null {
   return str;
 }
 
-/** Safely parse user from string or object and merge profile */
+/** Safely parse user from string or object and merge profile immutably */
 function parseUser(user: User | string | undefined, profile?: Profile): User | null {
   if (!user) return null;
 
@@ -60,8 +60,11 @@ function parseUser(user: User | string | undefined, profile?: Profile): User | n
     parsed = user;
   }
 
-  if (profile) parsed.profile = profile;
-  return parsed;
+  // 🔑 Return a NEW object, never mutate original
+  return {
+    ...parsed,
+    profile: profile ? { ...profile } : parsed.profile,
+  };
 }
 
 /* ================= SLICE ================= */
@@ -70,7 +73,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    /** ✅ Login / Set credentials */
+    /** Login / Set credentials */
     setCredentials: (
       state,
       action: PayloadAction<{

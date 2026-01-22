@@ -6,5 +6,6 @@
   "/pages/collections/page": "app/pages/collections/page.js",
   "/pages/createaccount/page": "app/pages/createaccount/page.js",
   "/pages/login/page": "app/pages/login/page.js",
+  "/pages/my-creation/page": "app/pages/my-creation/page.js",
   "/pages/shop/page": "app/pages/shop/page.js"
 }
