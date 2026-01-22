@@ -3,19 +3,20 @@
     "/pages/children-collections/page": [
       "static/chunks/ff1a16fafef87110.js",
       "static/chunks/31763fdc5472b875.js",
-      "static/chunks/65974f2358d556c5.css",
-      "static/chunks/5d4f9701ee45afa4.css",
+      "static/chunks/ac596ac71a47027d.js",
+      "static/chunks/f461631ee2f28f80.css",
+      "static/chunks/0d5c3a80437fe772.css",
       "static/chunks/5404ae84876e5e69.js",
-      "static/chunks/498fac70631977a3.js",
+      "static/chunks/9ccac15889f58b4c.js",
       "static/chunks/1b9bad3d8f1c0320.js",
       "static/chunks/ed316168bf3396a3.css",
       "static/chunks/0d250b68046216ff.css",
-      "static/chunks/eb154b7a7a3d5878.js",
-      "static/chunks/5a50ee1d1bd5f6b0.js",
+      "static/chunks/0119f23ddb289397.js",
+      "static/chunks/91adb7bdb9870c6a.js",
       "static/chunks/8082ab48faca5ea1.js",
       "static/chunks/a655730ccc1c0fff.js",
       "static/chunks/2008ffcf9e5b170c.js",
-      "static/chunks/turbopack-109e8d79639f1c55.js"
+      "static/chunks/turbopack-562e587ba716a1f7.js"
     ]
   }
 }
