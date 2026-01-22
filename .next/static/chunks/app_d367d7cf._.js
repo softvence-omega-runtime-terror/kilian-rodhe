@@ -38,7 +38,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f
     if (str.startsWith('"') && str.endsWith('"')) return str.slice(1, -1);
     return str;
 }
-/** Safely parse user from string or object and merge profile */ function parseUser(user, profile) {
+/** Safely parse user from string or object and merge profile immutably */ function parseUser(user, profile) {
     if (!user) return null;
     let parsed;
     if (typeof user === "string") {
@@ -53,14 +53,19 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f
     } else {
         parsed = user;
     }
-    if (profile) parsed.profile = profile;
-    return parsed;
+    // 🔑 Return a NEW object, never mutate original
+    return {
+        ...parsed,
+        profile: profile ? {
+            ...profile
+        } : parsed.profile
+    };
 }
 /* ================= SLICE ================= */ const authSlice = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$reduxjs$2f$toolkit$2f$dist$2f$redux$2d$toolkit$2e$modern$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$locals$3e$__["createSlice"])({
     name: "auth",
     initialState,
     reducers: {
-        /** ✅ Login / Set credentials */ setCredentials: (state, action)=>{
+        /** Login / Set credentials */ setCredentials: (state, action)=>{
             state.user = parseUser(action.payload.user, action.payload.profile);
             state.access = cleanString(action.payload.access);
             state.refresh = cleanString(action.payload.refresh);
