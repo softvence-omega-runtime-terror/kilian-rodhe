@@ -1,11 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/admin/page": "app/admin/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/page": "app/page.js",
-  "/pages/collections/page": "app/pages/collections/page.js",
-  "/pages/createaccount/page": "app/pages/createaccount/page.js",
-  "/pages/login/page": "app/pages/login/page.js",
-  "/pages/my-creation/page": "app/pages/my-creation/page.js",
-  "/pages/shop/page": "app/pages/shop/page.js"
+  "/page": "app/page.js"
 }
