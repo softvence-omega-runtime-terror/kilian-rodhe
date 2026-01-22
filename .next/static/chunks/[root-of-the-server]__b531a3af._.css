@@ -4372,10 +4372,6 @@
     font-family: Cormorant Garamond;
   }
 
-  .font-\[\'Jost\'\] {
-    font-family: Jost;
-  }
-
   .font-mono {
     font-family: var(--font-mono);
   }
@@ -5237,16 +5233,6 @@
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
 
-  .shadow-\[\#8B6F47\]\/20 {
-    --tw-shadow-color: rgba(139, 111, 71, .2);
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .shadow-\[\#8B6F47\]\/20 {
-      --tw-shadow-color: color-mix(in oklab, lab(48.9112% 7.44998 26.6116 / .2) var(--tw-shadow-alpha), transparent);
-    }
-  }
-
   .shadow-\[\#a07d48\]\/20 {
     --tw-shadow-color: rgba(160, 125, 72, .2);
   }
@@ -5966,12 +5952,6 @@
   @media (hover: hover) {
     .hover\:text-\[\#1a1a1a\]:hover {
       color: #1a1a1a;
-    }
-  }
-
-  @media (hover: hover) {
-    .hover\:text-\[\#7a5e3e\]:hover {
-      color: #7a5e3e;
     }
   }
 
