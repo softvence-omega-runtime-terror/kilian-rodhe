@@ -3,45 +3,62 @@
 import Link from "next/link";
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { FaEyeSlash } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useDispatch } from "react-redux";
 
-// Note: Ensure these paths are correct relative to your file structure
 import emailIcon from "../../../public/image/signinIcon/Icon (2).svg";
 import lockIcon from "../../../public/image/signinIcon/Icon (4).svg";
 import eyeIcon from "../../../public/image/signinIcon/Icon (8).svg";
 import signinIcon from "../../../public/image/signinIcon/signinIcon.svg";
 
+import { setCredentials } from "@/app/store/slices/authSlice";
+import { useLoginMutation } from "@/app/store/slices/services/auth/authApi";
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // 👈 নতুন স্টেট
-  const router = useRouter(); 
-  const ACCENT_COLOR = "#8B6F47"; 
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const ACCENT_COLOR = "#8B6F47";
 
-  // Function to handle form submission
-  const handleSubmit = (e: { preventDefault: () => void; }) => {
-    e.preventDefault(); 
-    if (isLoading) return; // লোডিং হলে একাধিকবার সাবমিট প্রতিরোধ
+  const dispatch = useDispatch();
+  const router = useRouter();
 
-    setIsLoading(true); // 👈 লোডিং শুরু করো
-    console.log("Attempting sign-in...");
+  const [loginApi, { isLoading }] = useLoginMutation();
 
-    // Simulate API call delay (2 seconds)
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (isLoading) return;
+
+  try {
+    const result: any = await loginApi({ email, password }).unwrap();
+
+    //  SUPPORT BOTH RESPONSE SHAPES
+    const user = result.data?.user ?? result.user;
+    const profile = result.data?.profile ?? result.profile;
+    const tokens = result.data?.tokens ?? result.tokens;
+
+    dispatch(
+      setCredentials({
+        user,
+        profile,
+        access: tokens?.access,
+        refresh: tokens?.refresh,
+      })
+    );
+
+    toast.success("Logged in successfully!");
+
     setTimeout(() => {
-      // --- Authentication Logic goes here ---
-      
-      // Assume sign-in was successful
-      setIsLoading(false); // 👈 লোডিং বন্ধ করো
-      router.push("/"); // সফলভাবে লগইন হলে রুটে নেভিগেট করো
-      
-      // In a real application, you'd handle failure here too:
-      // if (loginFailed) {
-      //   setIsLoading(false);
-      //   // Show error message
-      // }
-      
-    }, 2000); // 2 সেকেন্ডের সিমুলেটেড বিলম্ব
-  };
+      router.push("/");
+    }, 300);
+  } catch (err: any) {
+    console.error("Login error:", err);
+    toast.error(err?.data?.message || "Login failed");
+  }
+};
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#f9f7f5] p-4">
@@ -70,6 +87,8 @@ export default function LoginPage() {
                 type="email"
                 placeholder="your@email.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-400 focus:outline-none transition duration-150"
               />
             </div>
@@ -92,6 +111,8 @@ export default function LoginPage() {
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-400 focus:outline-none transition duration-150"
               />
               <button
@@ -100,7 +121,7 @@ export default function LoginPage() {
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition"
               >
                 {showPassword ? (
-                  <FaEyeSlash size={16} /> 
+                  <FaEyeSlash size={16} />
                 ) : (
                   <Image src={eyeIcon} alt="Eye Icon" width={16} height={16} />
                 )}
@@ -127,13 +148,13 @@ export default function LoginPage() {
             </Link>
           </div>
 
-          {/* Sign In Button (MODIFIED) */}
+          {/* Sign In Button */}
           <button
             type="submit"
-            disabled={isLoading} // 👈 লোডিং চলাকালীন বাটন ডিসেবল করো
+            disabled={isLoading}
             className={`
                 w-full text-white py-3 rounded-xl mt-8 mb-4 font-semibold transition-all duration-300 shadow-md shadow-[#8B6F47]/20
-                ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#7a5e3e]'}
+                ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#7a5e3e]"}
             `}
             style={{
               background: `linear-gradient(to right, ${ACCENT_COLOR}, #7A5F3A)`,
@@ -141,9 +162,7 @@ export default function LoginPage() {
             }}
           >
             <span className="inline-flex items-center justify-center gap-2">
-              {/* 👈 কন্ডিশনাল কন্টেন্ট */}
               {isLoading ? (
-                // Loader SVG
                 <>
                   <svg
                     className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -168,10 +187,9 @@ export default function LoginPage() {
                   Signing In...
                 </>
               ) : (
-                // Default content
                 <>
                   <Image src={signinIcon} alt="User Icon" width={16} height={16} />
-                  Sign In
+                  Login
                 </>
               )}
             </span>

@@ -1,13 +1,21 @@
-// store/slices/authSlice.ts
-
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import type { PersistPartial } from "redux-persist/es/persistReducer";
 
 /* ================= TYPES ================= */
 
+export interface Profile {
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+  image?: string;
+  [key: string]: any;
+}
+
 export interface User {
   id: number;
   email: string;
+  profile?: Profile;
+  [key: string]: any;
 }
 
 export interface AuthState {
@@ -28,44 +36,81 @@ const initialState: AuthState = {
   isLoading: false,
 };
 
+/* ================= HELPERS ================= */
+
+/** Clean string values (remove surrounding quotes if backend returns them) */
+function cleanString(str?: string): string | null {
+  if (!str) return null;
+  if (str.startsWith('"') && str.endsWith('"')) return str.slice(1, -1);
+  return str;
+}
+
+/** Safely parse user from string or object and merge profile */
+function parseUser(user: User | string | undefined, profile?: Profile): User | null {
+  if (!user) return null;
+
+  let parsed: User;
+  if (typeof user === "string") {
+    try {
+      parsed = JSON.parse(user) as User;
+    } catch {
+      parsed = { id: 0, email: "" }; // fallback
+    }
+  } else {
+    parsed = user;
+  }
+
+  if (profile) parsed.profile = profile;
+  return parsed;
+}
+
 /* ================= SLICE ================= */
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    /** ✅ Login / Set credentials */
     setCredentials: (
       state,
       action: PayloadAction<{
-        user: User;
+        user: User | string;
+        profile?: Profile;
         access: string;
         refresh: string;
       }>
     ) => {
-      state.user = action.payload.user;
-      state.access = action.payload.access;
-      state.refresh = action.payload.refresh;
+      state.user = parseUser(action.payload.user, action.payload.profile);
+      state.access = cleanString(action.payload.access);
+      state.refresh = cleanString(action.payload.refresh);
       state.isAuthenticated = true;
     },
 
+    /** Logout user */
     logout: (state) => {
       state.user = null;
       state.access = null;
       state.refresh = null;
       state.isAuthenticated = false;
     },
+
+    /** Optional: set loading state */
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
   },
 });
 
+/* ================= EXPORTS ================= */
 
-export const { setCredentials, logout } = authSlice.actions;
+export const { setCredentials, logout, setLoading } = authSlice.actions;
 export default authSlice.reducer;
 
 /* ================= SELECTORS ================= */
 
-export const selectAuth = (state: { auth: AuthState & PersistPartial }) =>
-  state.auth;
-
-export const selectAccessToken = (state: { auth: AuthState & PersistPartial }) =>
-  state.auth.access;
-
+export const selectAuth = (state: { auth: AuthState & PersistPartial }) => state.auth;
+export const selectAccess = (state: { auth: AuthState & PersistPartial }) => state.auth.access;
+export const selectRefresh = (state: { auth: AuthState & PersistPartial }) => state.auth.refresh;
+export const selectUser = (state: { auth: AuthState & PersistPartial }) => state.auth.user;
+export const selectIsAuthenticated = (state: { auth: AuthState & PersistPartial }) => state.auth.isAuthenticated;
+export const selectIsLoading = (state: { auth: AuthState & PersistPartial }) => state.auth.isLoading;
