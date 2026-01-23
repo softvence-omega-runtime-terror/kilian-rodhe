@@ -91,7 +91,7 @@ const TAB_DATA = [
         </p>
         <ul className="list-none p-0 space-y-2 ">
           <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
               <Image
                 src={rightIcon}
                 alt="Checkmark Icon"
@@ -107,7 +107,7 @@ const TAB_DATA = [
             </span>
           </li>
           <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
               <Image
                 src={rightIcon}
                 alt="Checkmark Icon"
@@ -123,7 +123,7 @@ const TAB_DATA = [
             </span>
           </li>
           <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
               <Image
                 src={rightIcon}
                 alt="Checkmark Icon"
@@ -139,7 +139,7 @@ const TAB_DATA = [
             </span>
           </li>
           <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
               <Image
                 src={rightIcon}
                 alt="Checkmark Icon"
@@ -155,7 +155,7 @@ const TAB_DATA = [
             </span>
           </li>
           <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
               <Image
                 src={rightIcon}
                 alt="Checkmark Icon"
@@ -256,7 +256,7 @@ const TAB_DATA = [
           </h3>
           <ul className="list-none p-0 space-y-2">
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -272,7 +272,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -288,7 +288,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -304,7 +304,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -320,7 +320,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -370,7 +370,7 @@ const TAB_DATA = [
           </p>
           <ul className="list-none p-0 space-y-2 text-sm">
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -385,7 +385,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -400,7 +400,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -415,7 +415,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -457,7 +457,7 @@ const TAB_DATA = [
           </p>
           <ul className="list-none p-0 space-y-2 text-sm">
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -472,7 +472,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -483,7 +483,7 @@ const TAB_DATA = [
               <span>Custom colors and effects</span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -499,7 +499,7 @@ const TAB_DATA = [
               </span>
             </li>
             <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 flex-shrink-0">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
                 <Image
                   src={rightIcon}
                   alt="Checkmark Icon"
@@ -584,23 +584,22 @@ const TAB_DATA = [
                   >
                     {starCount} Star
                   </span>
-                  <div className="flex-grow bg-[#F5F5F5] h-2.5 relative overflow-hidden">
+                  <div className="grow bg-[#F5F5F5] h-2.5 relative overflow-hidden">
                     <div
                       className="bg-[#F4C430] h-full "
                       style={{
-                        width: `${
-                          starCount === 5
+                        width: `${starCount === 5
                             ? (101 / 127) * 100
                             : starCount === 4
-                            ? (19 / 127) * 100
-                            : starCount === 3
-                            ? (7 / 127) * 100
-                            : starCount === 2
-                            ? (7 / 127) * 100
-                            : starCount === 1
-                            ? (7 / 127) * 100
-                            : 0
-                        }%`,
+                              ? (19 / 127) * 100
+                              : starCount === 3
+                                ? (7 / 127) * 100
+                                : starCount === 2
+                                  ? (7 / 127) * 100
+                                  : starCount === 1
+                                    ? (7 / 127) * 100
+                                    : 0
+                          }%`,
                       }}
                     ></div>
                   </div>
@@ -610,14 +609,14 @@ const TAB_DATA = [
                     {starCount === 5
                       ? 101
                       : starCount === 4
-                      ? 19
-                      : starCount === 3
-                      ? 7
-                      : starCount === 2
-                      ? 7
-                      : starCount === 1
-                      ? 7
-                      : 0}
+                        ? 19
+                        : starCount === 3
+                          ? 7
+                          : starCount === 2
+                            ? 7
+                            : starCount === 1
+                              ? 7
+                              : 0}
                   </span>
                 </div>
               ))}
@@ -708,7 +707,7 @@ const TAB_DATA = [
 ];
 
 // --- COMPONENT ---
-export default function ProductTabs() {
+export default function ProductTabs({ productId }: { productId?: number }) {
   const [activeTab, setActiveTab] = useState(TAB_DATA[0].value);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
@@ -729,7 +728,7 @@ export default function ProductTabs() {
         setShowLeftArrow(scrollContainer.scrollLeft > 0);
         setShowRightArrow(
           scrollContainer.scrollLeft <
-            scrollContainer.scrollWidth - scrollContainer.clientWidth
+          scrollContainer.scrollWidth - scrollContainer.clientWidth
         );
       }
     } else {
@@ -822,21 +821,19 @@ export default function ProductTabs() {
               }}
               onClick={() => setActiveTab(tab.value)}
               className={`
-      py-3 md:py-4 md:px-21.5 ${
-        jostFont.className
-      } tracking-[2.1] text-[14px] text-[#1a1a1a]
+      py-3 md:py-4 md:px-21.5 ${jostFont.className
+                } tracking-[2.1] text-[14px] text-[#1a1a1a]
       text-sm font-medium uppercase 
       relative z-10 transition-colors duration-200 flex-shrink-0 
       w-full md:w-auto  border 
       
       // Active/Inactive States
-      ${
-        activeTab === tab.value
-          ? // --- Active State: Full Border + Background Color ---
-            "text-[#1a1a1a] bg-gray-50 border-[#795548] md:bg-white"
-          : // --- Inactive State: Transparent Border ---
-            "text-[#1a1a1a] hover:text-[#1a1a1a] hover:bg-gray-50 md:hover:bg-white border-transparent"
-      }
+      ${activeTab === tab.value
+                  ? // --- Active State: Full Border + Background Color ---
+                  "text-[#1a1a1a] bg-gray-50 border-[#795548] md:bg-white"
+                  : // --- Inactive State: Transparent Border ---
+                  "text-[#1a1a1a] hover:text-[#1a1a1a] hover:bg-gray-50 md:hover:bg-white border-transparent"
+                }
     `}
             >
               <div className="px-4 md:px-0 text-left">{tab.label}</div>

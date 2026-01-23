@@ -1,24 +1,15 @@
-// pages/index.js
 "use client";
-import Head from "next/head";
 import Image, { StaticImageData } from "next/image";
-import { motion, AnimatePresence } from "framer-motion"; // Import AnimatePresence
-import { useState } from "react"; // ⬅️ NEW: Import useState hook
-
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
-
-// --- Imported Assets ---
-import mugImage from "@/public/image/shopIcon/mugImage.jpg";
-import cupImage from "@/public/image/shopIcon/cup.jpg";
 import loveIcon from "@/public/image/shopIcon/loveIcon.svg";
 import shopIcon from "@/public/image/shopIcon/shopIcon.svg";
 import arrowIcon from "@/public/image/shopIcon/arrowIcon.svg";
 import colorStarIcon from "@/public/image/shopIcon/colorStar.svg";
-// -----------------------
 
 import { useRouter } from "next/navigation";
-
-import BottomCard from "@/components/shop/bottomCard";
+import { IProductQueryParams } from "@/app/store/slices/services/product/productApi";
 
 const jostFont = Jost({
   subsets: ["latin"],
@@ -33,71 +24,55 @@ const cormorantItalic = Cormorant_Garamond({
 
 // Define the correct type for the props
 interface IconToggleButtonProps {
-  src: StaticImageData;
+  src: string | StaticImageData;
   alt: string;
-  // ⬅️ UPDATED: Added an optional onClick handler
-  onClick?: () => void; 
+  onClick?: () => void;
 }
 
-// ⬅️ UPDATED: IconToggleButton now accepts an onClick handler
 const IconToggleButton = ({ src, alt, onClick }: IconToggleButtonProps) => (
   <motion.button
     className="bg-[#D4AF37] p-2 shadow-md text-gray-700 hover:opacity-80 transition-opacity"
     whileHover={{ scale: 1.1 }}
     whileTap={{ scale: 0.9 }}
-    onClick={onClick} // ⬅️ Apply the onClick handler
+    onClick={onClick}
   >
     <Image src={src} alt={alt} width={20} height={20} className="w-5 h-5" />
   </motion.button>
 );
 
-// Card Data Array
-const products = [
-  {
-    name: "Premium Coffee Mug",
-    price: "€14.99",
-    image: mugImage,
-    alt: "Premium Coffee Mug",
-    delay: 0.2,
-    id: 1, // ⬅️ Added a unique ID for tracking
-  },
-  {
-    name: "Snapback Cap",
-    price: "€24.99",
-    image: cupImage,
-    alt: "Snapback Cap",
-    delay: 0.4,
-    id: 2, // ⬅️ Added a unique ID for tracking
-  },
-];
+const Loader = () => (
+  <div className="flex flex-col items-center justify-center h-64 w-full">
+    <div className="relative w-16 h-16">
+      <div className="absolute top-0 left-0 w-full h-full border-4 border-[#D4AF37]/20 rounded-full"></div>
+      <div className="absolute top-0 left-0 w-full h-full border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+    <p className={`${jostFont.className} mt-4 text-[#D4AF37] font-medium tracking-widest uppercase text-sm`}>
+      Loading Collections
+    </p>
+  </div>
+);
 
-export default function Home() {
+import { IProduct } from "@/app/store/slices/services/product/productApi";
+
+export default function PopularWeek({ products, isLoading }: { products: IProduct[], isLoading: boolean }) {
   const router = useRouter();
-  // ⬅️ NEW STATE: Stores the ID of the last liked product for success message
   const [likedProductId, setLikedProductId] = useState<number | null>(null);
 
   const handleOrderNow = () => {
     router.push(`/pages/shipping`);
   };
 
-  const handleCustomize = () => {
-    router.push("/pages/customise");
+  const handleCustomize = (id: number) => {
+    router.push(`/pages/customise?id=${id}`);
   };
 
-  // ⬅️ NEW HANDLER: For the Love Icon click
   const handleLikeProduct = (productId: number) => {
-    // 1. Set the state to show the success message for this product
     setLikedProductId(productId);
-    
-    // 2. Hide the success message after 2 seconds
     setTimeout(() => {
       setLikedProductId(null);
     }, 2000);
-
-    // *In a real app, you would also save the product ID to global state or local storage here.*
   };
 
-  // ⬅️ NEW COMPONENT: Floating Success Message
   const LikeSuccessMessage = ({ productName }: { productName: string }) => (
     <motion.div
       className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white p-3 rounded-lg shadow-xl z-50 flex items-center space-x-2"
@@ -113,13 +88,16 @@ export default function Home() {
     </motion.div>
   );
 
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (products.length === 0) {
+    return null;
+  }
+
   return (
     <div className={` bg-[#FAFAFA] ${jostFont.className}`}>
-      <Head>
-        <title>Popular This Week</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <main className=" max-w-8xl">
         {/* ... Title Section (unchanged) ... */}
         <motion.h1
@@ -131,41 +109,38 @@ export default function Home() {
           Popular this week
         </motion.h1>
         {/* ---------------------------------- */}
-        
+
         {/* Product Grid */}
         <div className="flex flex-wrap justify-center md:justify-between">
-          {products.map((product) => ( // Removed index for cleaner key usage
+          {products.map((product, index) => (
             <motion.div
-              key={product.id} // ⬅️ Using product.id as key
+              key={product.id}
               className="group flex flex-col items-center w-full sm:w-[calc(50%-20px)]  md:max-w-none md:w-[calc(50%-20px)]"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: product.delay }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
             >
               {/* Image Container (Main Product Image) */}
-              <div className="relative w-full h-80 overflow-hidden mb-6">
-                <Image
-                  src={product.image}
-                  alt={product.alt}
-                  layout="fill"
-                  objectFit="cover"
-                  className="brightness-[0.9] transition-transform duration-500"
-                />
-
-                {/* Customize Bar (Subtle bottom line) */}
-                <motion.div
-                  className="absolute bottom-0 left-0 right-0 "
-                  initial={{ height: 1 }}
-                  animate={{ height: "4px" }}
-                  transition={{ duration: 0.8, delay: product.delay + 0.5 }}
-                />
+              <div className="relative w-full h-80 overflow-hidden mb-6 bg-gray-100">
+                {product.images?.[0]?.image ? (
+                  <Image
+                    src={product.images[0].image}
+                    alt={product.name}
+                    layout="fill"
+                    objectFit="cover"
+                    className="brightness-[0.9] transition-transform duration-500 group-hover:scale-110"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    No Image
+                  </div>
+                )}
 
                 {/* Icons Overlay */}
                 <div className="absolute top-4 right-4 flex space-x-2">
-                  {/* ⬅️ UPDATED: Added onClick handler to the love icon */}
-                  <IconToggleButton 
-                    src={loveIcon} 
-                    alt="Love Icon" 
+                  <IconToggleButton
+                    src={loveIcon}
+                    alt="Love Icon"
                     onClick={() => handleLikeProduct(product.id)}
                   />
                   <IconToggleButton src={shopIcon} alt="Shop Icon" />
@@ -173,8 +148,8 @@ export default function Home() {
 
                 {/* CUSTOMIZE Button */}
                 <motion.button
-                  onClick={handleCustomize}
-                  className={`${jostFont.className} absolute bottom-[8%] w-9/10 right-[5%] h-12 border-2 border-[#ffffff] bg-white/10 text-[#fff] tracking-[2.1px] uppercase text-[14px] font-medium transition-colors duration-300 flex items-center justify-center`}
+                  onClick={() => handleCustomize(product.id)}
+                  className={`${jostFont.className} absolute bottom-[8%] w-9/10 right-[5%] h-12 border-2 border-[#ffffff] bg-white/10 text-white tracking-[2.1px] uppercase text-[14px] font-medium transition-colors duration-300 flex items-center justify-center`}
                 >
                   CUSTOMIZE
                   <Image
@@ -187,17 +162,18 @@ export default function Home() {
                 </motion.button>
               </div>
 
-              {/* ... Product Info and Buttons (unchanged) ... */}
+              {/* Product Info */}
               <div className="w-full max-w-md text-center">
-                <h3
-                  className={`${jostFont.className} text-[16px] text-[#2c2c2c] mb-1`}
-                >
+                <h3 className={`${jostFont.className} text-[16px] text-[#2c2c2c] mb-1`}>
                   {product.name}
                 </h3>
-                <p
-                  className={`${jostFont.className} text-[16px] font-medium mb-2`}
-                >
-                  {product.price}
+                <p className={`${jostFont.className} text-[16px] font-medium mb-2`}>
+                  €{product.discounted_price}
+                  {product.discount_percentage > 0 && (
+                    <span className="ml-2 text-sm text-gray-500 line-through">
+                      €{product.price}
+                    </span>
+                  )}
                 </p>
 
                 {/* Star Ratings */}
@@ -228,17 +204,13 @@ export default function Home() {
         </div>
       </main>
 
-      {/* ⬅️ NEW: Conditionally render the success message using AnimatePresence */}
       <AnimatePresence>
         {likedProductId !== null && (
-          <LikeSuccessMessage 
-            productName={products.find(p => p.id === likedProductId)?.name || "Product"} 
+          <LikeSuccessMessage
+            productName={products.find(p => p.id === likedProductId)?.name || "Product"}
           />
         )}
       </AnimatePresence>
-      {/* --------------------------------------------------------------------- */}
-      
-      <BottomCard />
     </div>
   );
 }
