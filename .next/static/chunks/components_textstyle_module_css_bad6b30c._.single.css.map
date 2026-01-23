@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 1, "column": 0}, "map": {"version":3,"sources":["turbopack:///[project]/components/textstyle.module.css"],"sourcesContent":["@import url('https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400&display=swap');\n\nbody {\n  \tmargin: 0; line-height: normal;\n}\n\n.textStyle {\n    font-family: 'Jost', sans-serif;\n    text-transform: uppercase;\n    font-size: 12px;\n\tcolor: rgba(255, 255, 255, 0.6);\n\tletter-spacing: 1.8px;\n\t\n}\n\n.ageGroups {\nwidth: 106px;\nheight: 16px;\nposition: relative;\nfont-size: 12px;\nletter-spacing: 1.8px;\nline-height: 16px;\nfont-family: 'Jost', sans-serif;\ncolor: #ffd448;\ntext-align: right;\ndisplay: inline-block;\n}\n\n.container {\nheight: 1px;\nflex: 1;\nwidth: 100%;\nposition: relative;\nbackground-color:#FFFFFF33;\n}\n\n.sophisticatedDesignsFor {\n  \twidth: 310px;\n  \theight: 23px;\n  \tposition: relative;\n  \tfont-size: 12px;\n  \tletter-spacing: 0.5px;\n  \tline-height: 22.75px;\n  \tfont-family: 'Jost', sans-serif;\n  \tcolor: rgba(255, 255, 255, 0.9);\n  \ttext-align: left;\n  \tdisplay: inline-block;\n}\n\n\n"],"names":[],"mappings":"AAEA;;;;;AAIA;;;;;;;;AASA;;;;;;;;;;;;;AAaA;;;;;;;;AAQA"}}]
-}

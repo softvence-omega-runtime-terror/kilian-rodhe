@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { StaticImageData } from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { Jost, Cormorant_Garamond } from "next/font/google";
 
@@ -45,9 +45,11 @@ const cormorantNormal = Cormorant_Garamond({
   style: ["normal"],
 });
 
+import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
+
 // --- Interface Definitions ---
 interface Thumbnail {
-  src: StaticImageData;
+  src: string | StaticImageData;
   alt: string;
 }
 
@@ -65,79 +67,110 @@ interface ProductData {
   description: string;
   sizes: string[];
   colors: ColorData[];
-  mainImageSrc: StaticImageData;
+  mainImageSrc: string | StaticImageData;
   thumbnails: Thumbnail[];
 }
 
 interface CustomIconProps {
-  src: StaticImageData;
+  src: any;
   alt: string;
   className?: string;
   style?: React.CSSProperties;
 }
 
-// --- Product Data ---
-const product: ProductData = {
-  title: "Premium Cotton T-Shirt",
-  price: 29.99,
-  originalPrice: 38.99,
-  reviews: 127,
-  description: "Luxurious 100% premium cotton with superior comfort",
-  sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-  colors: [
-    { name: "White", hex: "#FFFFFF", selected: true },
-    { name: "Black", hex: "#000000" },
-    { name: "Dark Blue", hex: "#1F4E79" },
-    { name: "Grey", hex: "#A9A9A9" },
-  ],
-
-  mainImageSrc: mainTshirt,
-
-  thumbnails: [
-    { src: tshirt1, alt: "White T-Shirt Front" },
-    { src: tshirt2, alt: "Black T-Shirt View" },
-    { src: tshirt3, alt: "Red T-Shirt Style" },
-    { src: tshirt4, alt: "Outdoor T-Shirt Shot" },
-  ],
-};
-// --- Custom Components ---
-const CustomIcon: React.FC<CustomIconProps> = ({
-  src,
-  alt,
-  className = "",
-  style = {},
-}) => (
-  <div className={`relative ${className}`} style={style}>
-    <Image src={src} alt={alt} layout="fill" objectFit="contain" />
+// --- Professional Loader ---
+const Loader = () => (
+  <div className="flex flex-col items-center justify-center h-screen w-full bg-white">
+    <div className="relative w-20 h-20">
+      <div className="absolute top-0 left-0 w-full h-full border-4 border-[#D4AF37]/20 rounded-full"></div>
+      <div className="absolute top-0 left-0 w-full h-full border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+    <p className={`${jostFont.className} mt-6 text-[#D4AF37] font-medium tracking-[4px] uppercase text-sm`}>
+      Loading Details
+    </p>
   </div>
 );
-// --- Constants for Logic/Animation ---
-const MAX_STOCK = 10;
-
-const CUBIC_EASE_OUT: [number, number, number, number] = [0, 0, 0.2, 1];
-
-const fadeSlideIn = {
-  initial: { opacity: 0, x: -50 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.5, ease: CUBIC_EASE_OUT },
-};
-
-const rightSlideIn = {
-  initial: { opacity: 0, x: 50 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.5, ease: CUBIC_EASE_OUT },
-};
 
 // --- Main Component ---
-export default function ProductPage() {
-  const initialMainImage: Thumbnail = product.thumbnails[0];
+export default function ProductPage({ productId }: { productId?: number }) {
+  const { data: detailsData, isLoading } = useGetProductDetailsQuery(productId ?? 0, {
+    skip: !productId,
+  });
+
+  const apiProduct = detailsData?.data;
+
+  // Fallback / Static product for when no ID is provided or API fails
+  const staticProduct: ProductData = {
+    title: "Premium Cotton T-Shirt",
+    price: 29.99,
+    originalPrice: 38.99,
+    reviews: 127,
+    description: "Luxurious 100% premium cotton with superior comfort",
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+    colors: [
+      { name: "White", hex: "#FFFFFF", selected: true },
+      { name: "Black", hex: "#000000" },
+      { name: "Dark Blue", hex: "#1F4E79" },
+      { name: "Grey", hex: "#A9A9A9" },
+    ],
+    mainImageSrc: mainTshirt,
+    thumbnails: [
+      { src: tshirt1, alt: "White T-Shirt Front" },
+      { src: tshirt2, alt: "Black T-Shirt View" },
+      { src: tshirt3, alt: "Red T-Shirt Style" },
+      { src: tshirt4, alt: "Outdoor T-Shirt Shot" },
+    ],
+  };
+
+  // Map API data if available
+  const displayProduct: ProductData = apiProduct ? {
+    title: apiProduct.name,
+    price: apiProduct.discounted_price,
+    originalPrice: parseFloat(apiProduct.price),
+    reviews: 127, // Mocked as API doesn't provide
+    description: apiProduct.description,
+    sizes: apiProduct.cloth_size.length > 0 ? apiProduct.cloth_size : ["S", "M", "L"],
+    colors: [
+      { name: apiProduct.color_code, hex: apiProduct.color_code.toLowerCase(), selected: true },
+      { name: "Black", hex: "#000000" },
+      { name: "Grey", hex: "#A9A9A9" },
+    ],
+    mainImageSrc: apiProduct.images?.[0]?.image || mainTshirt,
+    thumbnails: apiProduct.images?.map(img => ({ src: img.image, alt: apiProduct.name })) || staticProduct.thumbnails,
+  } : staticProduct;
+
+  const CustomIcon: React.FC<CustomIconProps> = ({
+    src,
+    alt,
+    className = "",
+    style = {},
+  }) => (
+    <div className={`relative ${className}`} style={style}>
+      <Image src={src} alt={alt} layout="fill" objectFit="contain" />
+    </div>
+  );
+
+  const MAX_STOCK = 10;
+  const CUBIC_EASE_OUT: [number, number, number, number] = [0, 0, 0.2, 1];
+  const fadeSlideIn = {
+    initial: { opacity: 0, x: -50 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.5, ease: CUBIC_EASE_OUT },
+  };
+  const rightSlideIn = {
+    initial: { opacity: 0, x: 50 },
+    animate: { opacity: 1, x: 0 },
+    transition: { duration: 0.5, ease: CUBIC_EASE_OUT },
+  };
+
+  const initialMainImage: Thumbnail = displayProduct.thumbnails[0] || { src: displayProduct.mainImageSrc, alt: displayProduct.title };
 
   // --- State Hooks ---
   const [mainImage, setMainImage] = useState<Thumbnail>(initialMainImage);
   const [mainImageIndex, setMainImageIndex] = useState<number>(0);
   const [selectedSize, setSelectedSize] = useState<string>("XS");
   const initialSelectedColor =
-    product.colors.find((c) => c.selected) || product.colors[0];
+    displayProduct.colors.find((c) => c.selected) || displayProduct.colors[0];
   const [selectedColor, setSelectedColor] =
     useState<ColorData>(initialSelectedColor);
   const [quantity, setQuantity] = useState<number>(1);
@@ -169,9 +202,23 @@ export default function ProductPage() {
   };
 
   const savePercentage = (
-    (1 - product.price / product.originalPrice) *
+    (1 - displayProduct.price / displayProduct.originalPrice) *
     100
   ).toFixed(0);
+
+  if (isLoading) return <Loader />;
+
+  // Sync state if displayProduct changes (e.g. after fetch)
+  // Note: For simplicity in this demo, we'll just use the first render or key the component
+  // Better approach would be useEffect to sync when apiProduct changes.
+  useEffect(() => {
+    if (apiProduct) {
+      setMainImage({ src: apiProduct.images?.[0]?.image || mainTshirt, alt: apiProduct.name });
+      setSelectedSize(apiProduct.cloth_size[0] || "S");
+      const col = { name: apiProduct.color_code, hex: apiProduct.color_code.toLowerCase(), selected: true };
+      setSelectedColor(col);
+    }
+  }, [apiProduct]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-white">
@@ -181,7 +228,7 @@ export default function ProductPage() {
           <div className="relative aspect-square overflow-hidden bg-gray-100 ">
             {/* BEST SELLER Tag */}
             <div
-              className={`${jostFont.className} absolute tracking-[2.4px] top-4 left-4 z-10 h-[40px] bg-[#D4AF37] flex justify-center items-center text-black text-[12px] px-3 py-1 uppercase`}
+              className={`${jostFont.className} absolute tracking-[2.4px] top-4 left-4 z-10 h-10 bg-[#D4AF37] flex justify-center items-center text-black text-[12px] px-3 py-1 uppercase`}
             >
               BEST SELLER
             </div>
@@ -198,18 +245,18 @@ export default function ProductPage() {
               className={`${jostFont.className} w-[38px] text-[12px] absolute bottom-2 right-2 text-white bg-[rgba(0,0,0,0.8)] px-5 py-1 text-center flex items-center justify-center `}
             >
               <span className="text-center">
-                {mainImageIndex + 1}/{product.thumbnails.length}
+                {mainImageIndex + 1}/{displayProduct.thumbnails.length}
               </span>
             </div>
           </div>
 
           {/* Thumbnail Selector */}
           <div className="mt-6 flex space-x-4 overflow-x-auto pb-2">
-            {product.thumbnails.map((img, index) => (
+            {displayProduct.thumbnails.map((img, index) => (
               <div
                 key={index}
                 onClick={() => handleThumbnailClick(img, index)}
-                className={`flex-shrink-0 w-16 h-16 sm:w-25 sm:h-25 relative overflow-hidden  cursor-pointer 
+                className={`shrink-0 w-16 h-16 sm:w-25 sm:h-25 relative overflow-hidden  cursor-pointer 
 								transition duration-300 ease-in-out hover:shadow
 								border ${mainImageIndex === index ? `border` : "border-gray-200"}`}
                 style={{
@@ -248,7 +295,7 @@ export default function ProductPage() {
           <h1
             className={`${cormorantItalic.className} text-3xl sm:text-4xl tracking-tight text-[#1a1a1a] mt-2`}
           >
-            {product.title}
+            {displayProduct.title}
           </h1>
 
           {/* Reviews */}
@@ -266,7 +313,7 @@ export default function ProductPage() {
             <p
               className={`${jostFont.className} tracking-[0.5px] ml-2 text-sm text-[#6d6d6d] `}
             >
-              ({product.reviews} reviews)
+              ({displayProduct.reviews} reviews)
             </p>
           </div>
 
@@ -275,12 +322,12 @@ export default function ProductPage() {
             <p
               className={`${jostFont.className} tracking-[0.5px] text-2xl sm:text-3xl text-[#1a1a1a]`}
             >
-              €{product.price.toFixed(2)}
+              €{displayProduct.price.toFixed(2)}
             </p>
             <p
               className={`${jostFont.className} tracking-[0.5px] ml-3 text-[14px] sm:text-lg line-through text-[#6a6a6a]`}
             >
-              €{product.originalPrice.toFixed(2)}
+              €{displayProduct.originalPrice.toFixed(2)}
             </p>
             <div
               className={`${jostFont.className} tracking-[0.5px] bg-[#d4af37] ml-4 text-black text-[12px] font-medium px-2 py-0.5`}
@@ -293,7 +340,7 @@ export default function ProductPage() {
           <p
             className={`${jostFont.className} tracking-[0.5px] mt-4 text-[#6b6b6b]`}
           >
-            {product.description}
+            {displayProduct.description}
           </p>
 
           <hr className="h-px border-t border-[#e5e5e5] w-full my-6" />
@@ -308,7 +355,7 @@ export default function ProductPage() {
             }}
           >
             <div className="flex items-center">
-              <div className="h-10 w-10 mr-3 bg-[#D4AF37] text-[#1a1a1a] flex items-center justify-center flex-shrink-0">
+              <div className="h-10 w-10 mr-3 bg-[#D4AF37] text-[#1a1a1a] flex items-center justify-center shrink-0">
                 <Image
                   src={specialStarBlackIcon}
                   alt="Zap Icon"
@@ -385,27 +432,25 @@ export default function ProductPage() {
             </div>
 
             <div className="mt-3 grid grid-cols-6 gap-2">
-              {product.sizes.map((size) => (
+              {displayProduct.sizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => handleSizeClick(size)}
-                  className={`${
-                    jostFont.className
-                  } tracking-[1.4px] relative flex items-center justify-center 
+                  className={`${jostFont.className
+                    } tracking-[1.4px] relative flex items-center justify-center 
 											w-full aspect-square  border 
 											text-sm uppercase  
 											focus:outline-none transition duration-150 ease-in-out
-											${
-                        selectedSize === size
-                          ? `border-2 shadow-sm text-white`
-                          : `bg-white text-[#1a1a1a] border-[#E5E5E5] hover:border-gray-300`
-                      }`}
+											${selectedSize === size
+                      ? `border-2 shadow-sm text-white`
+                      : `bg-white text-[#1a1a1a] border-[#E5E5E5] hover:border-gray-300`
+                    }`}
                   style={
                     selectedSize === size
                       ? {
-                          backgroundColor: CUSTOM_BROWN,
-                          borderColor: CUSTOM_GOLD,
-                        }
+                        backgroundColor: CUSTOM_BROWN,
+                        borderColor: CUSTOM_GOLD,
+                      }
                       : {}
                   }
                 >
@@ -427,15 +472,14 @@ export default function ProductPage() {
               </span>
             </h3>
             <div className="mt-3 flex items-center space-x-3">
-              {product.colors.map((color) => (
+              {displayProduct.colors.map((color) => (
                 <button
                   key={color.name}
                   onClick={() => handleColorClick(color)}
                   className={`w-12 h-12 border focus:outline-none flex items-center justify-center transition duration-150 ease-in-out
-										${
-                      color.name === selectedColor.name
-                        ? `border-[1.2px] ring-2`
-                        : `border-gray-200 hover:ring-2 hover:ring-offset-1 hover:ring-gray-300`
+										${color.name === selectedColor.name
+                      ? `border-[1.2px] ring-2`
+                      : `border-gray-200 hover:ring-2 hover:ring-offset-1 hover:ring-gray-300`
                     }`}
                   style={{
                     backgroundColor: color.hex,
@@ -481,11 +525,10 @@ export default function ProductPage() {
                 <button
                   onClick={handleDecrease}
                   disabled={quantity <= 1}
-                  className={`h-9 w-9 flex items-center justify-center text-lg transition duration-150 rounded-l-md ${
-                    quantity <= 1
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                  className={`h-9 w-9 flex items-center justify-center text-lg transition duration-150 rounded-l-md ${quantity <= 1
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-700 hover:bg-gray-100"
+                    }`}
                 >
                   -
                 </button>
@@ -499,11 +542,10 @@ export default function ProductPage() {
                 <button
                   onClick={handleIncrease}
                   disabled={quantity >= MAX_STOCK}
-                  className={`h-9 w-9 flex items-center justify-center text-lg transition duration-150  ${
-                    quantity >= MAX_STOCK
-                      ? "text-gray-400 cursor-not-allowed"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                  className={`h-9 w-9 flex items-center justify-center text-lg transition duration-150  ${quantity >= MAX_STOCK
+                    ? "text-gray-400 cursor-not-allowed"
+                    : "text-gray-700 hover:bg-gray-100"
+                    }`}
                 >
                   +
                 </button>
@@ -518,7 +560,7 @@ export default function ProductPage() {
                 className={`${jostFont.className} tracking-[0.5px] text-[18px] text-lg ml-1 font-normal text-gray-900`}
               >
                 {" "}
-                ${(product.price * quantity).toFixed(2)}
+                ${(displayProduct.price * quantity).toFixed(2)}
               </span>
             </div>
 
@@ -533,7 +575,7 @@ export default function ProductPage() {
               <CustomIcon
                 src={specialStar}
                 alt="AI Icon"
-                className="h-[16px] w-5"
+                className="h-4 w-5"
                 style={{ filter: "invert(1)" }}
               />
               <span
@@ -557,7 +599,7 @@ export default function ProductPage() {
           <div className="mt-8 border-gray-200 pt-8 grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8 lg:gap-x-16 text-sm">
             {/* 1. Free Shipping */}
             <div className="flex items-start">
-              <div className="w-10 h-10 border border-[#E5E5E5] flex items-center justify-center mr-3 flex-shrink-0 transition duration-300 hover:border-gray-500">
+              <div className="w-10 h-10 border border-[#E5E5E5] flex items-center justify-center mr-3 shrink-0 transition duration-300 hover:border-gray-500">
                 <CustomIcon
                   src={tracIcon}
                   alt="Shipping Icon"
@@ -577,7 +619,7 @@ export default function ProductPage() {
 
             {/* 2. Quality Guarantee */}
             <div className="flex items-start">
-              <div className="w-10 h-10 border border-[#E5E5E5] flex items-center justify-center mr-3 flex-shrink-0 transition duration-300 hover:border-gray-500">
+              <div className="w-10 h-10 border border-[#E5E5E5] flex items-center justify-center mr-3 shrink-0 transition duration-300 hover:border-gray-500">
                 <CustomIcon
                   src={batchIcon}
                   alt="Shipping Icon"
@@ -596,7 +638,7 @@ export default function ProductPage() {
             </div>
 
             {/* 3. Easy Returns */}
-           
+
 
             {/* 4. 300 DPI Print */}
             <div className="flex items-start">
