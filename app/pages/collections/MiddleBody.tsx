@@ -3,7 +3,8 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 import Image, { StaticImageData } from "next/image";
-import { useRouter } from "next/navigation"; // 👈 IMPORTED
+import { useRouter, useSearchParams } from "next/navigation";
+import { useGetProductsQuery, useGetProductCategoriesQuery, ICategory } from "@/app/store/slices/services/product/productApi";
 
 // Images (Ensure you have a checkmark icon or use an SVG/Unicode character)
 import hoodi from "@/public/image/collections/imag1.jpg";
@@ -40,14 +41,14 @@ const cormorantNormal = Cormorant_Garamond({
 });
 
 // ----------------------------------------------------------------------
-// Product Type & Data Definitions (Unchanged)
+// Product Type & Data Definitions (UPDATED)
 // ----------------------------------------------------------------------
 
 type AgeGroupKey = "18-25" | "26-35" | "36-50" | "50+";
 
-type Product = {
+export type Product = {
   id: number;
-  imageSrc: StaticImageData;
+  imageSrc: string | StaticImageData;
   isBestSeller?: boolean;
   isNew?: boolean;
   title: string;
@@ -56,123 +57,20 @@ type Product = {
   price: string;
   priceValue: number;
   colors: string[];
-  suitableAge: AgeGroupKey[]; 
+  suitableAge: AgeGroupKey[] | string[];
 };
 
 // Helper to extract numerical price
 const getPriceValue = (price: string) => parseFloat(price.replace(/[^0-9.]/g, ''));
 
-const baseProducts: Omit<Product, 'id' | 'priceValue'>[] = [
-  // ... (Your baseProducts array remains the same)
-  {
-    imageSrc: tshirt,
-    isBestSeller: true,
-    title: "T-SHIRTS",
-    subtitle: "Premium Cotton T-Shirt",
-    description: "Luxurious 100% premium cotton with superior comfort",
-    price: "$29.99",
-    colors: ["#FFFFFF", "#000000", "#2563EB", "#7C7C7C"],
-    suitableAge: ["18-25", "26-35"], 
-  },
-  {
-    imageSrc: hoodi,
-    isNew: true,
-    title: "HOODIES",
-    subtitle: "Designer Hoodie",
-    description: "Premium fleece blend with kangaroo pocket",
-    price: "$54.99",
-    colors: ["#000000", "#FFFFFF", "#9B0000", "#2563EB"],
-    suitableAge: ["18-25", "36-50"], 
-  },
-  {
-    imageSrc: cap,
-    title: "CAPS",
-    subtitle: "Classic Baseball Cap",
-    description: "Adjustable fit with premium embroidery quality",
-    price: "$24.99",
-    colors: ["#000000", "#FFFFFF", "#2563EB", "#7C7C7C"],
-    suitableAge: ["18-25", "26-35", "50+"], 
-  },
-  {
-    imageSrc: hoodi2,
-    isBestSeller: true,
-    title: "HOODIES",
-    subtitle: "Designer Hoodie",
-    description: "Premium fleece blend with kangaroo pocket",
-    price: "$54.99",
-    colors: ["#FFFFFF", "#000000", "#7C7C7C", "#9B0000"],
-    suitableAge: ["26-35", "36-50", "50+"], 
-  },
-
-  {
-    imageSrc: tshirt2,
-    isBestSeller: true,
-    title: "T-SHIRTS",
-    subtitle: "Premium Cotton T-Shirt",
-    description: "Luxurious 100% premium cotton with superior comfort",
-    price: "$29.99",
-    colors: ["#FFFFFF", "#000000", "#2563EB", "#7C7C7C"],
-    suitableAge: ["18-25", "26-35"], 
-  },
-  {
-    imageSrc: hoodi2,
-    isNew: true,
-    title: "HOODIES",
-    subtitle: "Designer Hoodie",
-    description: "Premium fleece blend with kangaroo pocket",
-    price: "$54.99",
-    colors: ["#000000", "#FFFFFF", "#9B0000", "#2563EB"],
-    suitableAge: ["18-25", "36-50"], 
-  },
-  {
-    imageSrc: cap2,
-    title: "CAPS",
-    subtitle: "Classic Baseball Cap",
-    description: "Adjustable fit with premium embroidery quality",
-    price: "$24.99",
-    colors: ["#000000", "#FFFFFF", "#2563EB", "#7C7C7C"],
-    suitableAge: ["18-25", "26-35", "50+"], 
-  },
-  {
-    imageSrc: hoodi3,
-    isBestSeller: true,
-    title: "HOODIES",
-    subtitle: "Designer Hoodie",
-    description: "Premium fleece blend with kangaroo pocket",
-    price: "$54.99",
-    colors: ["#FFFFFF", "#000000", "#7C7C7C", "#9B0000"],
-    suitableAge: ["26-35", "36-50", "50+"], 
-  },
-];
-
-// ... (Product generation loop remains the same)
-const TOTAL_PRODUCTS = 48;
+// Static data removed in favor of API
 const PRODUCTS_PER_PAGE = 8;
-const allProducts: Product[] = [];
-
-for (let i = 0; i < TOTAL_PRODUCTS; i++) {
-  const baseIndex = i % baseProducts.length;
-  const base = baseProducts[baseIndex];
-  const priceValue = getPriceValue(base.price) + (i % 5) * 0.5;
-
-  allProducts.push({
-    ...base,
-    id: i + 1,
-    priceValue: parseFloat(priceValue.toFixed(2)),
-    price: `€${priceValue.toFixed(2)}`,
-    subtitle: `${base.subtitle} - Style ${i + 1}`,
-    isNew: i < 4 && base.isNew,
-    isBestSeller: i % 7 === 0 && base.isBestSeller,
-    imageSrc: base.imageSrc,
-    suitableAge: base.suitableAge.includes("50+") && i % 3 === 0 ? ["50+"] : base.suitableAge,
-  });
-}
 
 // ----------------------------------------------------------------------
 // Filters (Unchanged)
 // ----------------------------------------------------------------------
 const ageGroups = ["ALL", "18-25", "26-35", "36-50", "50+"];
-const productTypes = ["T-SHIRTS", "HOODIES", "CAPS", "MUGS"]; 
+const productTypes = ["T-SHIRTS", "HOODIES", "CAPS", "MUGS"];
 const priceRanges = [
   { name: "Under €25", min: 0, max: 25 },
   { name: "€25 - €50", min: 25, max: 50 },
@@ -182,7 +80,7 @@ const priceRanges = [
 const filterColors = [
   { name: "Black", hex: "#000000" },
   { name: "White", hex: "#FFFFFF", border: true },
-  { name: "Gray", hex: "#6B7280" }, 
+  { name: "Gray", hex: "#6B7280" },
   { name: "Red", hex: "#DC2626" },
   { name: "Blue", hex: "#2563EB" },
   { name: "Yellow", hex: "#DFA637" },
@@ -200,9 +98,8 @@ type ColorSwatchProps = {
 
 const ColorSwatch: React.FC<ColorSwatchProps> = React.memo(({ hex, isWhite }) => (
   <div
-    className={`w-4 h-4 mr-2 ${
-      isWhite ? "border border-gray-300" : "border-none"
-    }`}
+    className={`w-4 h-4 mr-2 ${isWhite ? "border border-gray-300" : "border-none"
+      }`}
     style={{
       backgroundColor: hex,
       outline: isWhite ? "1px solid #00000010" : "none",
@@ -217,9 +114,9 @@ ColorSwatch.displayName = 'ColorSwatch';
 // ----------------------------------------------------------------------
 
 type ProductCardProps = {
-    product: Product;
-    handleOrderNow: () => void;
-    handleCustomizeRoute: () => void;
+  product: Product;
+  handleOrderNow: () => void;
+  handleCustomizeRoute: () => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrderNow, handleCustomizeRoute }) => {
@@ -234,14 +131,15 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
     imageSrc,
   } = product;
 
-  const isDarkImage = product.id % baseProducts.length === 2 || product.id % baseProducts.length === 0;
-  
+  const imageUrl = typeof imageSrc === "string" ? imageSrc : imageSrc.src;
+  const isDarkImage = false; // logic removed
+
   const badgeColor = "bg-[#DFA637] text-black";
   const iconButtonColor = "bg-[#DFA637] text-black hover:bg-[#c99532]";
 
   const handleAction = (action: string) => {
     console.log(`${action} for Product ID: ${product.id}`);
-    
+
     if (action === "Order Now") {
       handleOrderNow(); // 👈 Call handler for /pages/shipping
     } else if (action === "Customize") {
@@ -255,9 +153,9 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
     <div className="flex flex-col border-none">
       <div className="relative overflow-hidden">
         <div
-          className="w-full h-[400px] bg-cover bg-center" 
+          className="w-full h-[400px] bg-cover bg-center"
           style={{
-            backgroundImage: `url(${imageSrc.src})`,
+            backgroundImage: `url(${imageUrl})`,
             backgroundColor: isDarkImage ? "#000" : "#FFF",
           }}
         >
@@ -270,15 +168,15 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
           )}
 
           <div className="absolute top-3 right-3 flex space-x-2">
-            <button 
-                className={`${iconButtonColor} p-2 shadow-sm transition`}
-                onClick={() => handleAction("Wishlist")}
+            <button
+              className={`${iconButtonColor} p-2 shadow-sm transition`}
+              onClick={() => handleAction("Wishlist")}
             >
               <Image src={heart} alt="Add to Wishlist" className="h-4 w-4" />
             </button>
-            <button 
-                className={`${iconButtonColor} p-2 shadow-sm transition`}
-                onClick={() => handleAction("Quick Shop")}
+            <button
+              className={`${iconButtonColor} p-2 shadow-sm transition`}
+              onClick={() => handleAction("Quick Shop")}
             >
               <Image src={shop} alt="Quick Shop" className="h-4 w-4" />
             </button>
@@ -353,10 +251,10 @@ GdpComplianceBanner.displayName = 'GdpComplianceBanner';
 
 
 type PaginationProps = {
-    totalProducts: number;
-    displayedCount: number;
-    onLoadMore: () => void;
-    canLoadMore: boolean;
+  totalProducts: number;
+  displayedCount: number;
+  onLoadMore: () => void;
+  canLoadMore: boolean;
 }
 
 const Pagination: React.FC<PaginationProps> = React.memo(
@@ -400,87 +298,112 @@ Pagination.displayName = 'Pagination';
 // Main Component (UPDATED with route handlers)
 // ----------------------------------------------------------------------
 
-export default function ShopPage() {
-  const router = useRouter(); // 👈 INITIALIZED ROUTER
+
+
+// ... constants
+
+interface MiddleBodyProps {
+  currentCategory?: ICategory;
+}
+
+export default function ShopPage({ currentCategory }: MiddleBodyProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+  const subCategoryParam = searchParams.get("subcategory");
+  const ageRangeParam = searchParams.get("age_range");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState(ageGroups[0]);
+  const [selectedAgeGroupId, setSelectedAgeGroupId] = useState<number | "ALL">("ALL"); // Store ID
   const [selectedProductType, setSelectedProductType] = useState<string | null>(null);
   const [selectedPriceRange, setSelectedPriceRange] = useState<typeof priceRanges[number] | null>(null);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<SortOption>('Featured');
-  
-  // Handlers to reset pagination
+
+  // Dynamic Age Groups
+  const ageGroups = useMemo(() => {
+    if (!currentCategory?.age_range) return [];
+    return currentCategory.age_range.map(age => ({
+      id: age.id,
+      label: `${age.start}-${age.end}`
+    }));
+  }, [currentCategory]);
+
+  // Sync selected age group with URL param only on mount/change? 
+  // User says "when click specific age group fetch with that agegroup id".
+  // Note: searchParams for age_range might be present from URL.
+  // Ideally, valid selectedAgeGroupId should be from params if present.
+
+  // Update state from params if needed, or simply use params in query and use state for UI selection.
+  // Actually, keeping them in sync is best.
+  // For now, let's prioritize local interaction updating the query.
+
+  // API Query
+  const { data: productsData, isLoading, isFetching } = useGetProductsQuery({
+    page: currentPage,
+    category: categoryParam ? parseInt(categoryParam) : undefined,
+    subcategory: subCategoryParam ? parseInt(subCategoryParam) : undefined,
+    age_range: selectedAgeGroupId !== "ALL" ? selectedAgeGroupId : (ageRangeParam ? parseInt(ageRangeParam) : undefined),
+    min_price: selectedPriceRange?.min,
+    max_price: selectedPriceRange?.max === Infinity ? undefined : selectedPriceRange?.max,
+    color: selectedColors.length > 0 ? selectedColors[0] : undefined,
+  });
+
+  const productsToDisplay: Product[] = useMemo(() => {
+    if (!productsData?.data) return [];
+
+    // Map API data to UI Product type
+    const mapped = productsData.data.map((p) => ({
+      id: p.id,
+      imageSrc: p.images[0]?.image || "",
+      isBestSeller: false,
+      isNew: false,
+      title: p.category?.title || "Product",
+      subtitle: p.name,
+      description: p.description,
+      price: `$${p.discounted_price || p.price}`,
+      priceValue: p.discounted_price || parseFloat(p.price),
+      colors: [p.color_code],
+      suitableAge: p.age_range ? [`${p.age_range.start}-${p.age_range.end}`] : [],
+    }));
+
+    // Client-side Sorting
+    if (sortOption === 'Price: Low to High') {
+      return mapped.sort((a, b) => a.priceValue - b.priceValue);
+    } else if (sortOption === 'Price: High to Low') {
+      return mapped.sort((a, b) => b.priceValue - a.priceValue);
+    }
+
+    return mapped;
+  }, [productsData, sortOption]);
+
+  // Handlers
   const handleFilterChange = useCallback(() => {
-    setCurrentPage(1); 
+    setCurrentPage(1);
   }, []);
-  
-  // 1. ROUTE HANDLER: Order Now (for /pages/shipping)
+
+  // ... (Action handlers same)
   const handleOrderNow = useCallback(() => {
     router.push(`/pages/shipping`);
   }, [router]);
 
-  // 2. ROUTE HANDLER: Customize (for /pages/my-creation)
   const handleCustomizeRoute = useCallback(() => {
     router.push(`/pages/customise`);
   }, [router]);
 
-  // Filtering Logic (Unchanged)
-  const filteredProducts = useMemo(() => {
-    return allProducts
-      .filter(product => {
-        if (selectedAgeGroup !== "ALL") {
-            if (!product.suitableAge.includes(selectedAgeGroup as AgeGroupKey)) {
-                return false;
-            }
-        }
-        if (selectedProductType && product.title !== selectedProductType) {
-          return false;
-        }
-        if (selectedPriceRange) {
-            if (product.priceValue < selectedPriceRange.min || product.priceValue >= selectedPriceRange.max) {
-                return false;
-            }
-        }
-        if (selectedColors.length > 0) {
-            const hasSelectedColor = product.colors.some(productColor => selectedColors.includes(productColor));
-            if (!hasSelectedColor) {
-                return false;
-            }
-        }
-        return true;
-      })
-      .sort((a, b) => {
-        switch (sortOption) {
-          case 'Price: Low to High':
-            return a.priceValue - b.priceValue;
-          case 'Price: High to Low':
-            return b.priceValue - a.priceValue;
-          case 'Featured':
-          default:
-            if (a.isBestSeller && !b.isBestSeller) return -1;
-            if (!a.isBestSeller && b.isBestSeller) return 1;
-            if (a.isNew && !b.isNew) return -1;
-            if (!a.isNew && b.isNew) return 1;
-            return a.id - b.id;
-        }
-      });
-  }, [selectedAgeGroup, selectedProductType, selectedPriceRange, selectedColors, sortOption]);
+  const totalFilteredProducts = productsData?.data?.length || 0;
+  const canLoadMore = false;
 
-  const totalFilteredProducts = filteredProducts.length;
-  const productsToDisplay = filteredProducts.slice(0, currentPage * PRODUCTS_PER_PAGE);
-  const canLoadMore = productsToDisplay.length < totalFilteredProducts;
-  
-  // ... (Other handlers remain the same)
   const handleLoadMore = useCallback(() => {
     setCurrentPage(prevPage => prevPage + 1);
   }, []);
 
-  const handleAgeGroupSelect = useCallback((group: string) => {
-    setSelectedAgeGroup(group);
-    handleFilterChange(); 
+  const handleAgeGroupSelect = useCallback((id: number | "ALL") => {
+    setSelectedAgeGroupId(id);
+    handleFilterChange();
   }, [handleFilterChange]);
 
+  // ... (Other handlers same)
   const handleProductTypeSelect = useCallback((type: string) => {
     setSelectedProductType(prevType => prevType === type ? null : type);
     handleFilterChange();
@@ -494,10 +417,10 @@ export default function ShopPage() {
   const handleColorSelect = useCallback((hex: string) => {
     setSelectedColors(prevColors => {
       const isSelected = prevColors.includes(hex);
-      const newColors = isSelected 
+      const newColors = isSelected
         ? prevColors.filter(c => c !== hex)
         : [...prevColors, hex];
-      handleFilterChange(); 
+      handleFilterChange();
       return newColors;
     });
   }, [handleFilterChange]);
@@ -508,46 +431,54 @@ export default function ShopPage() {
   }, [handleFilterChange]);
 
   const handleFilterPanelToggle = () => {
-      alert("Filter panel toggle clicked! (Placeholder for opening/closing a sidebar/modal)");
+    alert("Filter panel toggle clicked! (Placeholder)");
   };
-
 
   return (
     <div className={`bg-white ${jostFont.className}`}>
       <div className="px-4 sm:px-6 lg:px-18 pt-6">
-        {/* Age Filters (Unchanged) */}
+        {/* Age Filters */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-gray-300/60">
           <div className="flex flex-wrap items-center space-x-2 text-sm mb-4 sm:mb-0">
             <span className="font-medium text-gray-700 tracking-wide mr-2 whitespace-nowrap">
               AGE GROUP:
             </span>
+            <span
+              className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${selectedAgeGroupId === "ALL"
+                  ? "bg-[#DFA637] text-black border-[#DFA637]"
+                  : "text-gray-700 border-gray-300 hover:border-gray-500"
+                }`}
+              onClick={() => handleAgeGroupSelect("ALL")}
+            >
+              ALL
+            </span>
             {ageGroups.map((group) => (
               <span
-                key={group}
-                className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${
-                  group === selectedAgeGroup
+                key={group.id}
+                className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${group.id === selectedAgeGroupId
                     ? "bg-[#DFA637] text-black border-[#DFA637]"
                     : "text-gray-700 border-gray-300 hover:border-gray-500"
-                }`}
-                onClick={() => handleAgeGroupSelect(group)}
+                  }`}
+                onClick={() => handleAgeGroupSelect(group.id)}
               >
-                {group}
+                {group.label}
               </span>
             ))}
           </div>
 
           {/* Filters Right (Unchanged) */}
           <div className="flex items-center space-x-4 text-sm text-gray-700">
-            <div 
-                className="flex items-center space-x-1 cursor-pointer hover:text-black"
-                onClick={handleFilterPanelToggle}
+            {/* ... unchanged ... */}
+            <div
+              className="flex items-center space-x-1 cursor-pointer hover:text-black"
+              onClick={handleFilterPanelToggle}
             >
               <span className="text-xl">&#9776;</span>
               <span className="font-semibold tracking-wider">FILTERS</span>
             </div>
 
             <div className="relative">
-              <select 
+              <select
                 className="appearance-none bg-white py-2 pl-4 pr-8 border border-gray-300/40 focus:outline-none cursor-pointer text-sm"
                 value={sortOption}
                 onChange={handleSortChange}
@@ -569,7 +500,7 @@ export default function ShopPage() {
           </div>
         </div>
 
-        {/* Product Type, Price, Colors (Unchanged filter structure) */}
+        {/* Product Type, Price, Colors (Unchanged) */}
         <div className="flex flex-wrap sm:flex-nowrap justify-between items-start pt-6 pb-4">
           {/* Product Type */}
           <div className="w-full sm:w-1/4 mb-6 sm:mb-0">
@@ -578,11 +509,10 @@ export default function ShopPage() {
             </h3>
             <ul className="space-y-1 text-sm tracking-wide text-gray-800">
               {productTypes.map((type) => (
-                <li 
-                  key={type} 
-                  className={`cursor-pointer transition ${
-                    selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
-                  }`}
+                <li
+                  key={type}
+                  className={`cursor-pointer transition ${selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
+                    }`}
                   onClick={() => handleProductTypeSelect(type)}
                 >
                   {type}
@@ -598,11 +528,10 @@ export default function ShopPage() {
             </h3>
             <ul className="space-y-1 text-sm tracking-wide text-gray-800">
               {priceRanges.map((range) => (
-                <li 
-                  key={range.name} 
-                  className={`cursor-pointer transition ${
-                    selectedPriceRange?.name === range.name ? 'text-black font-bold' : 'hover:text-black'
-                  }`}
+                <li
+                  key={range.name}
+                  className={`cursor-pointer transition ${selectedPriceRange?.name === range.name ? 'text-black font-bold' : 'hover:text-black'
+                    }`}
                   onClick={() => handlePriceRangeSelect(range)}
                 >
                   {range.name}
@@ -611,7 +540,7 @@ export default function ShopPage() {
             </ul>
           </div>
 
-          {/* COLORS */}
+          {/* COLORS (Unchanged) */}
           <div className="w-full sm:w-1/4">
             <h3 className="text-sm font-semibold text-gray-700 mb-3 tracking-wider">
               COLORS
@@ -620,26 +549,25 @@ export default function ShopPage() {
               {filterColors.map((color) => {
                 const isSelected = selectedColors.includes(color.hex);
                 const borderColor = color.border ? "border-gray-300" : "border-transparent";
-                
+
                 return (
                   <div
                     key={color.name}
-                    className={`w-6 h-6 border-2 ${
-                      isSelected ? "border-transparent" : borderColor
-                    } cursor-pointer hover:opacity-80 transition relative flex items-center justify-center`}
+                    className={`w-6 h-6 border-2 ${isSelected ? "border-transparent" : borderColor
+                      } cursor-pointer hover:opacity-80 transition relative flex items-center justify-center`}
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                     onClick={() => handleColorSelect(color.hex)}
                   >
                     {/* Checkmark icon on selection */}
                     {isSelected && (
-                      <svg 
+                      <svg
                         className={`h-4 w-4 ${color.hex === "#FFFFFF" || color.hex === "#DFA637" ? 'text-black' : 'text-white'}`}
-                        xmlns="http://www.w3.org/2000/svg" 
-                        viewBox="0 0 20 20" 
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
                         fill="currentColor"
                       >
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L10 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     )}
                   </div>
@@ -652,24 +580,30 @@ export default function ShopPage() {
 
       <GdpComplianceBanner />
 
-      {/* Product Grid (UPDATED to pass handlers) */}
+      {/* Product Grid */}
       <div className="px-4 sm:px-6 lg:px-18">
-        {productsToDisplay.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-              {productsToDisplay.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  handleOrderNow={handleOrderNow} // 👈 Passed to Card
-                  handleCustomizeRoute={handleCustomizeRoute} // 👈 Passed to Card
-                />
-              ))}
-            </div>
+        {productsData && productsToDisplay.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {productsToDisplay.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                handleOrderNow={handleOrderNow}
+                handleCustomizeRoute={handleCustomizeRoute}
+              />
+            ))}
+          </div>
         ) : (
-            <div className="text-center py-20 text-gray-600">
+          <div className="text-center py-20 text-gray-600">
+            {isLoading ? (
+              <p className="text-xl font-semibold">Loading products...</p>
+            ) : (
+              <>
                 <p className="text-xl font-semibold">No products found matching your criteria.</p>
                 <p className="mt-2">Try adjusting your filters.</p>
-            </div>
+              </>
+            )}
+          </div>
         )}
       </div>
 

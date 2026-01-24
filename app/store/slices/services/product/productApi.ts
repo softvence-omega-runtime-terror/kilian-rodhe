@@ -1,9 +1,19 @@
 import { baseBackendApi } from "../baseBackendApi";
 
 
+export interface IAgeRange {
+  id: number;
+  start: number;
+  end: number;
+}
+
 export interface ICategory {
   id: number;
   title: string;
+  description: string;
+  image: string;
+  icon: string;
+  age_range: IAgeRange[];
   total_products: number;
   total_sold: number | null;
   is_new: boolean;
@@ -65,6 +75,8 @@ export interface IProductQueryParams {
   min_price?: number;
   max_price?: number;
   color?: string;
+  age_range?: number;
+  ordering?: string;
 }
 
 export interface IProductDetailsResponse {

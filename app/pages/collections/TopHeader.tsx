@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 import { ArrowLeft } from "lucide-react";
-import Image from "next/image"; // Import Next.js Image component
+import Image, { StaticImageData } from "next/image"; // Import Next.js Image component
 
 import bgImage from "@/public/image/collections/bgImage.jpg";
 
@@ -20,7 +20,19 @@ const cormorantItalic = Cormorant_Garamond({
 
 
 // --- Collection Hero Component ---
-const CollectionHero = () => {
+interface CollectionHeroProps {
+  title?: string;
+  description?: string;
+  productCount?: number;
+  backgroundImage?: string | StaticImageData;
+}
+
+const CollectionHero = ({
+  title = "Collection",
+  description = "Sophisticated designs for the modern gentleman",
+  productCount = 0,
+  backgroundImage = bgImage,
+}: CollectionHeroProps) => {
   return (
     <div className="w-full bg-white">
       {/* Outer container for the full width */}
@@ -40,11 +52,10 @@ const CollectionHero = () => {
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
-            src={bgImage} // Replace with the correct path to your image
-            alt="Men's Collection Background"
-            layout="fill" // Ensures the image covers the entire container
-            objectFit="cover" // Ensures the image covers the div without distortion
-            className="opacity-70" // Make the background slightly transparent
+            src={backgroundImage} // Replace with the correct path to your image
+            alt={`${title} Background`}
+            fill // Ensures the image covers the entire container
+            className="opacity-70 object-cover" // Make the background slightly transparent
           />
         </div>
 
@@ -57,21 +68,21 @@ const CollectionHero = () => {
           <div
             className={`border border-white py-1 px-3 mb-4 text-xs tracking-wider uppercase ${jostFont.className}`}
           >
-            48 Products
+            {productCount} Products
           </div>
 
           {/* Collection Title */}
           <h1
             className={`text-6xl md:text-7xl lg:text-8xl mb-4 ${cormorantItalic.className}`}
           >
-            Men&apos;s Collection
+            {title}
           </h1>
 
           {/* Subtitle / Description */}
           <p
             className={`text-lg md:text-xl text-gray-200 max-w-lg ${jostFont.className}`}
           >
-            Sophisticated designs for the modern gentleman
+            {description}
           </p>
 
           {/* Separator Line */}
