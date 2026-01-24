@@ -12,12 +12,12 @@ export const baseBackendApi = createApi({
       const state = getState() as {
         auth: AuthState & PersistPartial;
       };
-        // set token to the headers new comment
+        
       const token = state.auth.access;
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
-
+    //  return the headers with token access and refresh
       return headers;
     },
 
