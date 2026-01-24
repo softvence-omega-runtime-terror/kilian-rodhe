@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Shield,
   Sparkles,
@@ -13,9 +13,13 @@ import {
   Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useDispatch } from "react-redux";
+
+import { setCredentials } from "@/app/store/slices/authSlice";
+import { useLoginMutation } from "@/app/store/slices/services/auth/authApi";
 
 // ---------- Small Reusable Components ----------
-
 type FeatureCardProps = {
   title: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -42,24 +46,72 @@ const StatItem = ({ number, label }: StatItemProps) => (
   </div>
 );
 
-// ---------- Sign In Form ----------
+// ---------- Login Response Type ----------
+interface LoginResponse {
+  access: string;
+  refresh: string;
+  user: {
+    id: number;
+    email: string;
+  };
+  profile: {
+    first_name: string;
+    last_name: string;
+    phone_number: string;
+    image: string;
+  };
+  role: string;
+}
 
+// ---------- Sign In Form ----------
 const SignInForm = () => {
   const router = useRouter();
-  const [loading, setLoading] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
+  const dispatch = useDispatch();
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const [loginApi] = useLoginMutation();
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const result: LoginResponse = await loginApi({ email, password }).unwrap();
+
+      // Store in Redux
+      dispatch(
+        setCredentials({
+          user: result.user,
+          profile: result.profile,
+          access: result.access,
+          refresh: result.refresh,
+          role: result.role,
+        })
+      );
+
+      toast.success("Logged in successfully");
       setSuccess(true);
 
       setTimeout(() => {
-        router.push("/admin");
-      }, 1000);
-    }, 1200);
+        // Navigate based on role
+        if (result.role === "superuser") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
+      }, 800);
+    } catch (err: any) {
+      console.error("Login error:", err);
+      toast.error(err?.data?.message || "Invalid email or password");
+      setLoading(false);
+    }
   };
 
   return (
@@ -75,7 +127,7 @@ const SignInForm = () => {
         Enter your credentials to access the admin dashboard
       </p>
 
-      <form className="space-y-4 sm:space-y-6">
+      <form className="space-y-4 sm:space-y-6" onSubmit={handleLogin}>
         {/* Email */}
         <div>
           <label className="block text-xs font-medium text-gray-700 mb-1 sm:mb-2">
@@ -85,6 +137,8 @@ const SignInForm = () => {
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@thundra.com"
               className="w-full pl-9 pr-3 py-2 bg-gray-100 border-2 border-[#E8E3DC] rounded-lg text-sm"
             />
@@ -99,11 +153,16 @@ const SignInForm = () => {
           <div className="relative">
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter your password"
               className="w-full pl-9 pr-9 py-2 bg-gray-100 border-2 border-[#E8E3DC] rounded-lg text-sm"
             />
-            <Eye className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer" />
+            <Eye
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 cursor-pointer"
+              onClick={() => setShowPassword(!showPassword)}
+            />
           </div>
         </div>
 
@@ -137,13 +196,10 @@ const SignInForm = () => {
 
         {/* Login Button */}
         <button
-          onClick={handleClick}
-          type="button"
+          type="submit"
           disabled={loading}
           className={`w-full py-3 bg-gradient-to-b from-[#8B6F47] to-[#7A5F3A] text-white font-semibold rounded-lg shadow-md flex items-center justify-center space-x-2 transition
-            ${
-              loading ? "opacity-70 cursor-not-allowed" : "hover:bg-stone-800"
-            }`}
+            ${loading ? "opacity-70 cursor-not-allowed" : "hover:bg-stone-800"}`}
           style={{ backgroundColor: "#8B7355" }}
         >
           {loading ? (
@@ -161,7 +217,6 @@ const SignInForm = () => {
 };
 
 // ---------- Page Layout ----------
-
 const LoginPage = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col justify-between p-4 px-4 sm:px-6 lg:px-8">
