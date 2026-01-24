@@ -48,6 +48,7 @@ interface LoginResponse {
   refresh: string;
   user: User;
   profile: UserProfile;
+   role: string; 
 }
 
 /* =======================
