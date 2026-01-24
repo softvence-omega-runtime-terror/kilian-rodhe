@@ -237,6 +237,7 @@
 
 
 "use client";
+
 import React, { useState } from "react";
 import {
   LayoutDashboard,
@@ -251,34 +252,41 @@ import {
   Loader2,
 } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 import logo from "@/public/image/admin/dashboard/logo.png";
 import discountCardIcon from "@/public/image/admin/Settings/Frame.svg";
 
-import { selectAuth, logout as logoutAction } from "@/app/store/slices/authSlice";
+import {
+  selectAuth,
+  logout as logoutAction,
+} from "@/app/store/slices/authSlice";
 import { useLogoutMutation } from "@/app/store/slices/services/auth/authApi";
 
 type IconType =
   | React.FC<React.SVGProps<SVGSVGElement>>
   | StaticImageData;
 
-const navItems: { name: string; key: string; icon: IconType }[] = [
-  { name: "Dashboard", key: "dashboard", icon: LayoutDashboard },
-  { name: "Products", key: "products", icon: Package },
-  { name: "Orders", key: "orders", icon: ShoppingCart },
-  { name: "Customers", key: "customers", icon: Users },
-  { name: "Discount Codes", key: "discounts", icon: discountCardIcon },
-  { name: "Design Quality", key: "design", icon: Sparkles },
-  { name: "Content & CMS", key: "cms", icon: FileText },
-  { name: "Settings", key: "settings", icon: Settings },
+/** 🔑 ROUTE MAP (source of truth) */
+const navItems: {
+  name: string;
+  href: string;
+  icon: IconType;
+}[] = [
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Products", href: "/admin/products", icon: Package },
+  { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
+  { name: "Customers", href: "/admin/customers", icon: Users },
+  { name: "Discount Codes", href: "/admin/discounts", icon: discountCardIcon },
+  { name: "Design Quality", href: "/admin/design", icon: Sparkles },
+  { name: "Content & CMS", href: "/admin/cms", icon: FileText },
+  { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 interface SidebarProps {
-  currentPage: string;
-  setPage: (page: string) => void;
   isOpen: boolean;
   toggleSidebar: () => void;
 }
@@ -300,23 +308,19 @@ const renderIcon = (Icon: IconType) => {
   return <LucideIcon className="mr-3 h-5 w-5" />;
 };
 
-const Sidebar: React.FC<SidebarProps> = ({
-  currentPage,
-  setPage,
-  isOpen,
-  toggleSidebar,
-}) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useDispatch();
+
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const router = useRouter();
-  const dispatch = useDispatch();
   const auth = useSelector(selectAuth);
   const { refresh } = auth;
 
   const [logoutApi] = useLogoutMutation();
 
-  // Proper logout using API + Redux (same as Header)
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setShowLogoutPopup(false);
@@ -334,7 +338,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       dispatch(logoutAction());
       toast.success("Logged out successfully!");
       router.push("/admin/signup");
-    } catch (err: any) {
+    } catch (err) {
       console.error("Logout error:", err);
       toast.error("Failed to logout via API. Cleared session locally.");
       dispatch(logoutAction());
@@ -360,8 +364,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           ${isOpen ? "translate-x-0" : "-translate-x-full"} 
           lg:translate-x-0`}
       >
-        {/* Logo + Close Button */}
         <div>
+          {/* Logo */}
           <div className="flex items-center justify-between mb-10">
             <Image
               src={logo}
@@ -381,29 +385,30 @@ const Sidebar: React.FC<SidebarProps> = ({
           {/* Navigation */}
           <nav className="space-y-2">
             {navItems.map((item) => {
-              const isCurrent = currentPage === item.key;
+              const isActive =
+                pathname === item.href ||
+                pathname.startsWith(item.href + "/");
+
               return (
-                <button
-                  key={item.key}
-                  onClick={() => {
-                    setPage(item.key);
-                    toggleSidebar();
-                  }}
-                  className={`flex items-center rounded-lg px-2 py-3 w-full text-left text-sm font-medium transition-colors duration-200 ${
-                    isCurrent
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={toggleSidebar}
+                  className={`flex items-center rounded-lg px-2 py-3 w-full text-sm font-medium transition-colors duration-200 ${
+                    isActive
                       ? "bg-[#8B6F47] text-white"
                       : "text-stone-300 hover:bg-stone-700 hover:text-white"
                   }`}
                 >
                   {renderIcon(item.icon)}
                   {item.name}
-                </button>
+                </Link>
               );
             })}
           </nav>
         </div>
 
-        {/* Logout Button */}
+        {/* Logout */}
         <div className="pt-6 border-t border-stone-800">
           <button
             onClick={() => setShowLogoutPopup(true)}
@@ -489,3 +494,4 @@ const Sidebar: React.FC<SidebarProps> = ({
 };
 
 export default Sidebar;
+
