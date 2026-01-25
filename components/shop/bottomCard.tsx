@@ -178,7 +178,7 @@ const products = [
   },
 ];
 
-import { IProduct } from "@/app/store/slices/services/product/productApi";
+import { IProduct, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
 
 interface BottomCardProps {
   products: IProduct[];
@@ -212,10 +212,20 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
   };
 
   // Handler for the Love Icon
-  const handleSaveToFavorites = useCallback((productName: string) => {
-    const message = `${productName} saved to your favorites!`;
-    setToastMessage(message);
-  }, []);
+  const [saveProduct] = useSaveProductMutation();
+
+  const handleSaveToFavorites = useCallback(async (productId: number, productName: string) => {
+    try {
+      const response = await saveProduct({ product: productId }).unwrap();
+      setToastMessage(`${productName} saved to your favorites!`);
+    } catch (err: any) {
+      if (err?.data?.message === "Product already saved") {
+        setToastMessage(`${productName} is already in favorites.`);
+      } else {
+        setToastMessage("Please login to save products.");
+      }
+    }
+  }, [saveProduct]);
 
   const handleCloseToast = () => {
     setToastMessage(null);
@@ -281,7 +291,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
                   <IconToggleButton
                     src={loveIcon}
                     alt="Save to Favorites Icon"
-                    onClick={() => handleSaveToFavorites(product.name)}
+                    onClick={() => handleSaveToFavorites(product.id, product.name)}
                   />
                   <IconToggleButton src={shopIcon} alt="Shop Icon" />
                 </div>

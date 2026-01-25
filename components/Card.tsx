@@ -57,6 +57,8 @@ export default function MensCollectionCard({
   dis,
   ageGroup,
   ageValue,
+  customAgeRanges,
+  categoryId,
 }: {
   image: string;
   tranding: number;
@@ -65,13 +67,17 @@ export default function MensCollectionCard({
   dis?: string;
   ageGroup?: number;
   ageValue?: boolean;
+  customAgeRanges?: string[];
+  categoryId?: number;
 }) {
   const imageContainerHeight = ageValue ? "h-[500px]" : "h-full";
 
   // --- Dynamic Age Group Logic ---
   const isKidsCollection = title === "Kid’s Collections";
 
-  const ageRanges = isKidsCollection
+  const ageRanges = customAgeRanges && customAgeRanges.length > 0
+    ? customAgeRanges
+    : isKidsCollection
     ? ["3-7", "7-9", "10-13", "14-18"] // Kid's Collections age groups
     : ["18-25", "26-35", "36-50", "50+"]; // Default/Men's Collections age groups
   // --- End Dynamic Age Group Logic ---
@@ -140,6 +146,7 @@ export default function MensCollectionCard({
             text="Explore Collection"
             title={title ?? ""}
             image={exploreIcon}
+            categoryId={categoryId}
           />
         </div>
       </div>

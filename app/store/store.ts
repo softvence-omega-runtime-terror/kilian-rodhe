@@ -14,6 +14,8 @@ import {
 import storage from "redux-persist/lib/storage"; 
 
 
+import { baseBackendApi } from "./slices/services/baseBackendApi";
+
 const rootReducer = combineReducers({
   auth: persistReducer(
     {
@@ -23,6 +25,7 @@ const rootReducer = combineReducers({
     },
     authReducer
   ),
+  [baseBackendApi.reducerPath]: baseBackendApi.reducer,
 });
 
 // Create store
@@ -33,7 +36,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }),
+    }).concat(baseBackendApi.middleware),
 });
 
 // Persistor for hydration

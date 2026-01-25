@@ -9,13 +9,14 @@ export const baseBackendApi = createApi({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
 
     prepareHeaders: (headers, { getState }) => {
-      const state = getState() as {
-        auth: AuthState & PersistPartial;
-      };
-        
-      const token = state.auth.access;
+      // Correctly access state - it might be RootState or any if type-safe RootState is not imported here
+      const state = getState() as any;
+      const token = state.auth?.access;
+
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        // Ensure no quotes remain (already handled in slice, but defensive)
+        const cleanToken = token.replace(/^"(.*)"$/, '$1');
+        headers.set("Authorization", `Bearer ${cleanToken}`);
       }
     //  return the headers with token access and refresh
       return headers;
@@ -24,7 +25,7 @@ export const baseBackendApi = createApi({
     credentials: "include",
   }),
 
-  tagTypes: ["Products", "Users", "Orders"],
+  tagTypes: ["Products", "Users", "Orders", "SavedProducts"],
 
   endpoints: () => ({}),
 });

@@ -16,6 +16,7 @@ import { Inter } from "next/font/google";
 // import mugIcon from "@/public/image/shopIcon/Icon (10).svg";
 // import bagsIcon from "@/public/image/shopIcon/Icon (11).svg";
 import { useGetProductCategoriesQuery } from "@/app/store/slices/services/product/productApi";
+import Image from "next/image";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -45,7 +46,7 @@ const CategorySidebar = ({
 }) => {
   const { data: categoriesData } = useGetProductCategoriesQuery();
   const allCategories = categoriesData?.results || [];
-
+  console.log(allCategories);
   // 1. State hook: Default active category hobe "All Categories"
   const [activeCategory, setActiveCategory] = useState("All Categories");
 
@@ -102,15 +103,15 @@ const CategorySidebar = ({
             >
               <div className="flex items-center">
                 {/* Image Component (Commented out) */}
-                {/* {ImageSrc && (
+                {/* {ImageSrc && ( */}
                   <Image
-                    src={ImageSrc}
+                    src={category.icon}
                     alt={category.title}
                     width={20}
                     height={20}
                     className="mr-3"
                   />
-                )} */}
+                {/* )} */}
                 <span
                   className={`${inter.className} text-[14px] leading-5 font-medium`}
                 >

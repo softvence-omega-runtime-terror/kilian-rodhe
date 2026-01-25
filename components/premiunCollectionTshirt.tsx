@@ -98,6 +98,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
   });
 
   const apiProduct = detailsData?.data;
+  console.log(apiProduct);
 
   // Fallback / Static product for when no ID is provided or API fails
   const staticProduct: ProductData = {
@@ -123,20 +124,29 @@ export default function ProductPage({ productId }: { productId?: number }) {
   };
 
   // Map API data if available
+  // Map API data if available - with robust null checks
   const displayProduct: ProductData = apiProduct ? {
-    title: apiProduct.name,
-    price: apiProduct.discounted_price,
-    originalPrice: parseFloat(apiProduct.price),
-    reviews: 127, // Mocked as API doesn't provide
-    description: apiProduct.description,
-    sizes: apiProduct.cloth_size.length > 0 ? apiProduct.cloth_size : ["S", "M", "L"],
+    title: apiProduct?.name || "Product Name",
+    price: apiProduct?.discounted_price || 0,
+    originalPrice: parseFloat(apiProduct?.price || "0"),
+    reviews: 127, // Mocked
+    description: apiProduct?.description || "No description available",
+    sizes: (apiProduct?.cloth_size && apiProduct.cloth_size.length > 0)
+      ? apiProduct.cloth_size
+      : ["S", "M", "L"],
     colors: [
-      { name: apiProduct.color_code, hex: apiProduct.color_code.toLowerCase(), selected: true },
+      {
+        name: apiProduct?.color_code || "Standard",
+        hex: (apiProduct?.color_code || "#000000").toLowerCase(),
+        selected: true
+      },
       { name: "Black", hex: "#000000" },
       { name: "Grey", hex: "#A9A9A9" },
     ],
-    mainImageSrc: apiProduct.images?.[0]?.image || mainTshirt,
-    thumbnails: apiProduct.images?.map(img => ({ src: img.image, alt: apiProduct.name })) || staticProduct.thumbnails,
+    mainImageSrc: apiProduct?.images?.[0]?.image || mainTshirt,
+    thumbnails: (apiProduct?.images && apiProduct.images.length > 0)
+      ? apiProduct.images.map(img => ({ src: img.image, alt: apiProduct?.name || "Product Image" }))
+      : staticProduct.thumbnails,
   } : staticProduct;
 
   const CustomIcon: React.FC<CustomIconProps> = ({
@@ -206,19 +216,25 @@ export default function ProductPage({ productId }: { productId?: number }) {
     100
   ).toFixed(0);
 
-  if (isLoading) return <Loader />;
-
   // Sync state if displayProduct changes (e.g. after fetch)
-  // Note: For simplicity in this demo, we'll just use the first render or key the component
-  // Better approach would be useEffect to sync when apiProduct changes.
+  // Sync state if displayProduct changes (e.g. after fetch)
   useEffect(() => {
     if (apiProduct) {
-      setMainImage({ src: apiProduct.images?.[0]?.image || mainTshirt, alt: apiProduct.name });
-      setSelectedSize(apiProduct.cloth_size[0] || "S");
-      const col = { name: apiProduct.color_code, hex: apiProduct.color_code.toLowerCase(), selected: true };
+      setMainImage({
+        src: apiProduct?.images?.[0]?.image || mainTshirt,
+        alt: apiProduct?.name || "Product Image"
+      });
+      setSelectedSize(apiProduct?.cloth_size?.[0] || "S");
+      const col = {
+        name: apiProduct?.color_code || "Standard",
+        hex: (apiProduct?.color_code || "#FFFFFF").toLowerCase(),
+        selected: true
+      };
       setSelectedColor(col);
     }
   }, [apiProduct]);
+
+  if (isLoading) return <Loader />;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-white">
@@ -227,17 +243,22 @@ export default function ProductPage({ productId }: { productId?: number }) {
         <motion.div className="lg:sticky lg:top-8 lg:h-full" {...fadeSlideIn}>
           <div className="relative aspect-square overflow-hidden bg-gray-100 ">
             {/* BEST SELLER Tag */}
-            <div
-              className={`${jostFont.className} absolute tracking-[2.4px] top-4 left-4 z-10 h-10 bg-[#D4AF37] flex justify-center items-center text-black text-[12px] px-3 py-1 uppercase`}
-            >
-              BEST SELLER
-            </div>
+            {
+              apiProduct?.is_best_seller && (
+                <div
+                  className={`${jostFont.className} absolute tracking-[2.4px] top-4 left-4 z-10 h-10 bg-[#D4AF37] flex justify-center items-center text-black text-[12px] px-3 py-1 uppercase`}
+                >
+                  BEST SELLER
+                </div>
+              )
+            }
 
             {/* Main Product Image */}
             <Image
               src={mainImage.src}
               alt={mainImage.alt}
-              className="w-full h-full object-fill transition-opacity duration-500 ease-in-out"
+              fill
+              className="object-cover w-full h-full transition-opacity duration-500 ease-in-out"
               key={mainImageIndex}
             />
             {/* Image Counter */}
@@ -267,7 +288,8 @@ export default function ProductPage({ productId }: { productId?: number }) {
                 <Image
                   src={img.src}
                   alt={img.alt}
-                  className="object-fill w-full h-full"
+                  fill
+                  className="object-cover w-full h-full"
                 />
               </div>
             ))}
@@ -278,17 +300,25 @@ export default function ProductPage({ productId }: { productId?: number }) {
         <motion.div className="mt-8 lg:mt-0 lg:row-span-3" {...rightSlideIn}>
           {/* Tags */}
           <div className="text-sm space-x-4 font-sans">
-            <span
+            {
+              apiProduct?.sub_category?.title && (
+                <span
               className={`${jostFont.className} font-medium border-[1.2px] border-[#d4af37] px-3 py-1 transition text-[#d4af37] duration-300 hover:bg-gray-50`}
             >
-              T-Shirts
+              {apiProduct?.sub_category?.title}
             </span>
+              )
+            }
 
-            <span
-              className={`${jostFont.className} font-semibold px-3 py-1 text-[#1a1a1a] bg-[#F5F5F5] border-[1.2px] border-[rgba(0,0,0,0)]`}
-            >
-              Best Seller
-            </span>
+            {
+              apiProduct?.is_best_seller && (
+                <span
+                  className={`${jostFont.className} font-semibold px-3 py-1 text-[#1a1a1a] bg-[#F5F5F5] border-[1.2px] border-[rgba(0,0,0,0)]`}
+                >
+                  Best Seller
+                </span>
+              )
+            }
           </div>
 
           {/* Title */}
