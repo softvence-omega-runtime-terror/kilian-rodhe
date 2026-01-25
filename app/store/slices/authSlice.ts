@@ -22,6 +22,7 @@ export interface AuthState {
   user: User | null;
   access: string | null;
   refresh: string | null;
+  role: string | null; // 🔹 ADD ROLE HERE
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -32,6 +33,7 @@ const initialState: AuthState = {
   user: null,
   access: null,
   refresh: null,
+  role: null, // 🔹 ADD ROLE HERE
   isAuthenticated: false,
   isLoading: false,
 };
@@ -81,11 +83,13 @@ const authSlice = createSlice({
         profile?: Profile;
         access: string;
         refresh: string;
+        role: string; // 🔹 ADD ROLE HERE
       }>
     ) => {
       state.user = parseUser(action.payload.user, action.payload.profile);
       state.access = cleanString(action.payload.access);
       state.refresh = cleanString(action.payload.refresh);
+      state.role = action.payload.role; // 🔹 ADD ROLE HERE
       state.isAuthenticated = true;
     },
 
@@ -94,6 +98,7 @@ const authSlice = createSlice({
       state.user = null;
       state.access = null;
       state.refresh = null;
+      state.role = null; // 🔹 ADD ROLE HERE
       state.isAuthenticated = false;
     },
 
@@ -115,5 +120,6 @@ export const selectAuth = (state: { auth: AuthState & PersistPartial }) => state
 export const selectAccess = (state: { auth: AuthState & PersistPartial }) => state.auth.access;
 export const selectRefresh = (state: { auth: AuthState & PersistPartial }) => state.auth.refresh;
 export const selectUser = (state: { auth: AuthState & PersistPartial }) => state.auth.user;
+export const selectRole = (state: { auth: AuthState & PersistPartial }) => state.auth.role; // 🔹 ADD ROLE SELECTOR
 export const selectIsAuthenticated = (state: { auth: AuthState & PersistPartial }) => state.auth.isAuthenticated;
 export const selectIsLoading = (state: { auth: AuthState & PersistPartial }) => state.auth.isLoading;

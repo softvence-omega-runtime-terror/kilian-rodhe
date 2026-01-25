@@ -15,6 +15,7 @@ import increamentIcon from "@/public/image/admin/products/increamentArrow.svg";
 import stockIcon from "@/public/image/admin/products/stock.svg";
 import FooterAdmin from "@/components/admin/FooterAdmin";
 import Title from "./Title";
+import { ViewChangeHandler } from "./Products";
 
 // Card wrapper
 const Card = ({ children }: { children: React.ReactNode }) => (
@@ -156,7 +157,8 @@ interface DesignOption {
 const EditProduct = ({
   onViewChange,
 }: {
-  onViewChange: (view: string) => void;
+   productId: number;   
+   onViewChange: ViewChangeHandler;
 }) => {
   // FIX 2: Define mock 'product' object for QuickStats to work
   const product = {

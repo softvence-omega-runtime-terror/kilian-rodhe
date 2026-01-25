@@ -11,10 +11,26 @@ import { useDispatch } from "react-redux";
 import emailIcon from "../../../public/image/signinIcon/Icon (2).svg";
 import lockIcon from "../../../public/image/signinIcon/Icon (4).svg";
 import eyeIcon from "../../../public/image/signinIcon/Icon (8).svg";
-import signinIcon from "../../../public/image/signinIcon/signinIcon.svg";
 
 import { setCredentials } from "@/app/store/slices/authSlice";
 import { useLoginMutation } from "@/app/store/slices/services/auth/authApi";
+
+
+interface LoginResponse {
+  access: string;
+  refresh: string;
+  user: {
+    id: number;
+    email: string;
+  };
+  profile: {
+    first_name: string;
+    last_name: string;
+    phone_number: string;
+    image: string;
+  };
+  role: string; // 🔹 Role included
+}
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -29,28 +45,34 @@ export default function LoginPage() {
   const [loginApi, { isLoading }] = useLoginMutation();
 
   /* ================= SUBMIT ================= */
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
 
     try {
-      const result = await loginApi({ email, password }).unwrap();
+      const result: LoginResponse = await loginApi({ email, password }).unwrap();
 
-      // 🔴 VERY IMPORTANT — this is the REAL response shape
-      // console.log("LOGIN RESPONSE:", result);
+     console.log(result, "login info")
 
+      // 🔹 DISPATCH TO REDUX
       dispatch(
         setCredentials({
           user: result.user,
           profile: result.profile,
           access: result.access,
           refresh: result.refresh,
+          role: result.role, // store role
         })
       );
 
       toast.success("Logged in successfully");
-      router.push("/");
+
+      // 🔹 NAVIGATE BASED ON ROLE
+      if (result.role === "superuser") {
+        router.push("/admin"); // superuser/admin dashboard
+      } else {
+        router.push("/"); // regular user home
+      }
     } catch (err: any) {
       console.error("Login error:", err);
       toast.error(err?.data?.message || "Invalid email or password");
@@ -58,7 +80,6 @@ export default function LoginPage() {
   };
 
   /* ================= UI ================= */
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#f9f7f5] p-4">
       <div className="bg-white shadow-xl rounded-2xl p-8 my-5 w-full max-w-md border border-[#E8E3DC]">
@@ -176,3 +197,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
