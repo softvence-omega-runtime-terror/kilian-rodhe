@@ -15,6 +15,7 @@ import colorIcon from "../public/image/myCreationIcon/colorStar.svg";
 import nonColorIcon from "../public/image/myCreationIcon/noncolorStar.svg";
 
 import { Jost, Cormorant_Garamond } from "next/font/google";
+import { useGetProductDetailsQuery, useGetProductReviewsQuery } from "@/app/store/slices/services/product/productApi";
 
 const jostFont = Jost({
   subsets: ["latin"],
@@ -68,647 +69,328 @@ const animationStyles = (
 // -------------------------------------------------------------
 
 // --- DATA STRUCTURE WITH ALL CONTENT (Unchanged) ---
-const TAB_DATA = [
-  {
-    value: "description",
-    label: "DESCRIPTION",
-    content: (
-      <div className="text-gray-700">
-        <p
-          className={`${jostFont.className} tracking-[0.5] text-[18px] text-[#6b6b6b]`}
-        >
-          Luxurious 100% premium cotton with superior comfort.
-        </p>
-        <p
-          className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}
-        >
-          Our Premium Cotton T-Shirt represents the perfect canvas for your
-          creative vision. Made from premium materials and constructed with
-          meticulous attention to detail, this product combines luxury with
-          functionality. Whether you&apos;re creating a personal statement or
-          designing for your brand, our AI-powered customization tools ensure
-          your vision comes to life with stunning clarity.
-        </p>
-        <ul className="list-none p-0 space-y-2 ">
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-              <Image
-                src={rightIcon}
-                alt="Checkmark Icon"
-                width={16}
-                height={16}
-                className="text-amber-700"
-              />
-            </div>
-            <span
-              className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}
-            >
-              Premium materials sourced from certified suppliers
-            </span>
-          </li>
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-              <Image
-                src={rightIcon}
-                alt="Checkmark Icon"
-                width={16}
-                height={16}
-                className="text-amber-700"
-              />
-            </div>
-            <span
-              className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}
-            >
-              Professional 300 DPI print quality for crisp, vibrant designs
-            </span>
-          </li>
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-              <Image
-                src={rightIcon}
-                alt="Checkmark Icon"
-                width={16}
-                height={16}
-                className="text-amber-700"
-              />
-            </div>
-            <span
-              className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}
-            >
-              Adobe Firefly AI integration for stunning design generation
-            </span>
-          </li>
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-              <Image
-                src={rightIcon}
-                alt="Checkmark Icon"
-                width={16}
-                height={16}
-                className="text-amber-700"
-              />
-            </div>
-            <span
-              className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}
-            >
-              Durable construction for long-lasting wear and use
-            </span>
-          </li>
-          <li className="flex items-start">
-            <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-              <Image
-                src={rightIcon}
-                alt="Checkmark Icon"
-                width={16}
-                height={16}
-                className="text-amber-700"
-              />
-            </div>
-            <span
-              className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}
-            >
-              Easy care instructions for maintaining quality
-            </span>
-          </li>
-        </ul>
-      </div>
-    ),
-  },
-  {
-    value: "specifications",
-    label: "SPECIFICATIONS",
-    content: (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-700">
-        <div>
-          <h3
-            className={`${cormorantNormal.className} tracking-[0.5] text-[20px] text-[#1a1a1a] mb-4  pb-2`}
-          >
-            Product Details
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between border-b border-[#e5e5e5]">
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3`}
-              >
-                Category
-              </span>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}
-              >
-                T-Shirts
-              </span>
-            </div>
-            <div className="flex justify-between border-b border-[#e5e5e5]">
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3`}
-              >
-                Material
-              </span>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}
-              >
-                100% Premium Cotton
-              </span>
-            </div>
-            <div className="flex justify-between border-b border-[#e5e5e5]">
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3`}
-              >
-                Print Quality
-              </span>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}
-              >
-                300 DPI Professional
-              </span>
-            </div>
-            <div className="flex justify-between border-b border-[#e5e5e5]">
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3`}
-              >
-                Available Colors
-              </span>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}
-              >
-                4 Options
-              </span>
-            </div>
-            <div className="flex justify-between border-b border-[#e5e5e5]">
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3 `}
-              >
-                Available Sizes
-              </span>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}
-              >
-                XS, S, M, L, XL, XXL
-              </span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <h3
-            className={`${cormorantNormal.className} tracking-[0.5] text-[20px] text-[#1a1a1a]  mb-4  pb-2`}
-          >
-            Care Instructions
-          </h3>
-          <ul className="list-none p-0 space-y-2">
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                  className="text-amber-700"
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Machine wash cold with like colors
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                  className="text-amber-700"
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Tumble dry low or hang dry
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                  className="text-amber-700"
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Do not bleach or dry clean
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                  className="text-amber-700"
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Iron inside out on low heat if needed
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                  className="text-amber-700"
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Print quality guaranteed for 50+ washes
-              </span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    ),
-  },
-  {
-    value: "customization",
-    label: "CUSTOMIZATION",
-    content: (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* AI Design Generator Card */}
-        <div className="border border-[#D4AF3733] p-6 bg-white shadow-sm flex flex-col items-start">
-          {/* Placeholder for icon */}
-          <div className="w-10 h-10 bg-[#D4AF37] flex items-center justify-center mb-4">
-            <Image
-              src={specialIcon}
-              alt="Checkmark Icon"
-              width={16}
-              height={16}
-            />
-          </div>
-          <h4
-            className={`${cormorantNormal.className} tracking-[0.5] text-[20px] text-[#1a1a1a] mb-2`}
-          >
-            AI Design Generator
-          </h4>
-          <p
-            className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#6B6B6B] mb-4`}
-          >
-            Create unique designs using Adobe Firefly AI. Simply describe your
-            vision, and our AI will generate professional-quality graphics in
-            seconds.
-          </p>
-          <ul className="list-none p-0 space-y-2 text-sm">
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Text-to-image generation
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Style customization options
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Instant preview on product
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                300 DPI export quality
-              </span>
-            </li>
-          </ul>
-        </div>
-
-        {/* Manual Text Creator Card */}
-        <div className="border border-[#D4AF3733] p-6 bg-white shadow-sm flex flex-col items-start">
-          {/* Placeholder for icon */}
-          <div className="w-10 h-10 bg-[#E5E5E5]  flex items-center justify-center mb-4">
-            <Image
-              src={drowIcon}
-              alt="Checkmark Icon"
-              width={16}
-              height={16}
-              className="text-amber-700"
-            />
-          </div>
-          <h4
-            className={`${cormorantNormal.className} tracking-[0.5] text-[20px] text-[#1a1a1a] mb-2`}
-          >
-            Manual Text Creator
-          </h4>
-          <p
-            className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#6B6B6B] mb-4`}
-          >
-            Design custom text layouts with full control over fonts, sizes,
-            colors, and positioning. Perfect for names, numbers, and messages.
-          </p>
-          <ul className="list-none p-0 space-y-2 text-sm">
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Multiple premium fonts
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-              </div>
-              <span>Custom colors and effects</span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                  className="text-amber-700"
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                Drag and position text
-              </span>
-            </li>
-            <li className="flex items-start">
-              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
-                <Image
-                  src={rightIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                  className="text-amber-700"
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}
-              >
-                High-resolution rendering
-              </span>
-            </li>
-          </ul>
-        </div>
-      </div>
-    ),
-  },
-  {
-    value: "reviews",
-    label: "REVIEWS (127)",
-    content: (
-      <div className="text-gray-700 ">
-        <div className="mb-8 p-4 border-gray-200 bg-white ">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-6">
-            <div className="flex flex-col items-center px-2 py-8">
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[48px] text-[#1a1a1a] text-6xl  `}
-              >
-                4.8
-              </span>
-              <div className="flex text-xl mt-2 mb-2 gap-1">
-                {/* Star icons */}
-                <Image
-                  src={colorIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-
-                <Image
-                  src={colorIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-
-                <Image
-                  src={colorIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-
-                <Image
-                  src={colorIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-
-                <Image
-                  src={nonColorIcon}
-                  alt="Checkmark Icon"
-                  width={16}
-                  height={16}
-                />
-              </div>
-              <span
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#6B6B6B]`}
-              >
-                127 Reviews
-              </span>
-            </div>
-            <div className="w-full px-2 py-8">
-              {/* Star rating bars */}
-              {[5, 4, 3, 2, 1].map((starCount) => (
-                <div key={starCount} className="flex items-center mb-2">
-                  <span
-                    className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a] w-12 mr-2`}
-                  >
-                    {starCount} Star
-                  </span>
-                  <div className="grow bg-[#F5F5F5] h-2.5 relative overflow-hidden">
-                    <div
-                      className="bg-[#F4C430] h-full "
-                      style={{
-                        width: `${starCount === 5
-                            ? (101 / 127) * 100
-                            : starCount === 4
-                              ? (19 / 127) * 100
-                              : starCount === 3
-                                ? (7 / 127) * 100
-                                : starCount === 2
-                                  ? (7 / 127) * 100
-                                  : starCount === 1
-                                    ? (7 / 127) * 100
-                                    : 0
-                          }%`,
-                      }}
-                    ></div>
-                  </div>
-                  <span
-                    className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#6B6B6B] w-10 text-left ml-2`}
-                  >
-                    {starCount === 5
-                      ? 101
-                      : starCount === 4
-                        ? 19
-                        : starCount === 3
-                          ? 7
-                          : starCount === 2
-                            ? 7
-                            : starCount === 1
-                              ? 7
-                              : 0}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Individual Review Items */}
-        {[...Array(3)].map(
-          (
-            _,
-            i // Showing 3 sample reviews
-          ) => (
-            <div
-              key={i}
-              className="mb-6 p-4 border-[#E5E5E5] border-b bg-white "
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex text-amber-500 text-lg mr-2">
-                  {/* Star icons */}
-                  <Image
-                    src={colorIcon}
-                    alt="Checkmark Icon"
-                    width={14}
-                    height={14}
-                  />
-
-                  <Image
-                    src={colorIcon}
-                    alt="Checkmark Icon"
-                    width={14}
-                    height={14}
-                  />
-
-                  <Image
-                    src={colorIcon}
-                    alt="Checkmark Icon"
-                    width={14}
-                    height={14}
-                  />
-
-                  <Image
-                    src={colorIcon}
-                    alt="Checkmark Icon"
-                    width={14}
-                    height={14}
-                  />
-
-                  <Image
-                    src={nonColorIcon}
-                    alt="Checkmark Icon"
-                    width={14}
-                    height={14}
-                  />
-                </div>
-                <span className="text-sm text-gray-500">2 days ago</span>
-              </div>
-              <p
-                className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a] mb-1`}
-              >
-                Verified Purchase
-              </p>
-              <p
-                className={`${cormorantNormal.className} tracking-[0.5] text-[18px] text-[#1a1a1a] mb-2`}
-              >
-                Amazing Quality and AI Features!
-              </p>
-
-              <p
-                className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6B6B6B]`}
-              >
-                {" "}
-                The AI customization tool is incredible! I created a unique
-                design in minutes, and the print quality exceeded my
-                expectations. Definitely ordering more.
-              </p>
-              <p
-                className={`${jostFont.className} tracking-[0.5] mt-2 text-[14px] text-[#1a1a1a]`}
-              >
-                - Sarah M.
-              </p>
-            </div>
-          )
-        )}
-      </div>
-    ),
-  },
-];
-
 // --- COMPONENT ---
 export default function ProductTabs({ productId }: { productId?: number }) {
-  const [activeTab, setActiveTab] = useState(TAB_DATA[0].value);
+  const { data: detailsData, isLoading } = useGetProductDetailsQuery(productId ?? 0, {
+    skip: !productId,
+  });
+
+  const { data: reviewsData, isLoading: reviewsLoading, error: reviewsError } = useGetProductReviewsQuery({ product_id: productId }, {
+    skip: !productId
+  });
+
+  const apiProduct = detailsData?.data;
+
+  // Helper to flatten reviews from the API structure
+  const allReviews = React.useMemo(() => {
+    if (!reviewsData?.review_details) return [];
+    
+    // The API returns an object where keys are star ratings, and values are objects containing a 'reviews' array
+    return Object.values(reviewsData.review_details)
+      .flatMap((detail: any) => detail.reviews || [])
+      .sort((a: any, b: any) => new Date(b.review.created_date).getTime() - new Date(a.review.created_date).getTime());
+  }, [reviewsData]);
+
+  // Helper to calculate average rating
+  const averageRating = React.useMemo(() => {
+    if (!reviewsData?.star_reveiw_count) return 0;
+    
+    let totalStars = 0;
+    let totalCount = 0;
+    
+    Object.entries(reviewsData.star_reveiw_count).forEach(([star, count]) => {
+      totalStars += parseInt(star) * (count as number);
+      totalCount += (count as number);
+    });
+    
+    return totalCount > 0 ? (totalStars / totalCount).toFixed(1) : 0;
+  }, [reviewsData]);
+
+  const totalReviewCount = reviewsData?.total_review || 0;
+
+  // Memoize the tab data to update when apiProduct changes
+  const tabData = React.useMemo(() => [
+    {
+      value: "description",
+      label: "DESCRIPTION",
+      content: (
+        <div className="text-gray-700">
+          <p className={`${jostFont.className} tracking-[0.5] text-[18px] text-[#6b6b6b]`}>
+            {apiProduct?.name || "Premium Product"}
+          </p>
+          <p className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}>
+            {apiProduct?.description || "No description available for this product."}
+          </p>
+          {/* Static benefits list - consistent for all premium products */}
+          <ul className="list-none p-0 space-y-2 ">
+            <li className="flex items-start">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
+                <Image src={rightIcon} alt="Checkmark Icon" width={16} height={16} className="text-amber-700" />
+              </div>
+              <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}>
+                Premium materials sourced from certified suppliers
+              </span>
+            </li>
+            <li className="flex items-start">
+              <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
+                <Image src={rightIcon} alt="Checkmark Icon" width={16} height={16} className="text-amber-700" />
+              </div>
+              <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}>
+                Professional 300 DPI print quality for crisp, vibrant designs
+              </span>
+            </li>
+            {apiProduct?.ai_gen && (
+              <li className="flex items-start">
+                <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
+                  <Image src={rightIcon} alt="Checkmark Icon" width={16} height={16} className="text-amber-700" />
+                </div>
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b]`}>
+                  Adobe Firefly AI integration for stunning design generation
+                </span>
+              </li>
+            )}
+          </ul>
+        </div>
+      ),
+    },
+    {
+      value: "specifications",
+      label: "SPECIFICATIONS",
+      content: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-700">
+          <div>
+            <h3 className={`${cormorantNormal.className} tracking-[0.5] text-[20px] text-[#1a1a1a] mb-4  pb-2`}>
+              Product Details
+            </h3>
+            <div className="space-y-3">
+              <div className="flex justify-between border-b border-[#e5e5e5]">
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3`}>
+                  Category
+                </span>
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}>
+                  {apiProduct?.category?.title || "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-[#e5e5e5]">
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3`}>
+                  Sub-Category
+                </span>
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}>
+                  {apiProduct?.sub_category?.title || "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-[#e5e5e5]">
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3`}>
+                  Primary Color
+                </span>
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}>
+                  {apiProduct?.color_code || "Varied"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b border-[#e5e5e5]">
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6b6b6b] mb-3 `}>
+                  Available Sizes
+                </span>
+                <span className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#1a1a1a] `}>
+                  {Array.isArray(apiProduct?.cloth_size) ? apiProduct?.cloth_size.join(", ") : "One Size"}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h3 className={`${cormorantNormal.className} tracking-[0.5] text-[20px] text-[#1a1a1a]  mb-4  pb-2`}>
+              Care Instructions
+            </h3>
+            {/* Standard care instructions as fallback or static content */}
+            <ul className="list-none p-0 space-y-2">
+              <li className="flex items-start">
+                <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
+                  <Image src={rightIcon} alt="Checkmark Icon" width={16} height={16} className="text-amber-700" />
+                </div>
+                <span className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}>
+                  Machine wash cold with like colors
+                </span>
+              </li>
+              <li className="flex items-start">
+                <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
+                  <Image src={rightIcon} alt="Checkmark Icon" width={16} height={16} className="text-amber-700" />
+                </div>
+                <span className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}>
+                  Tumble dry low or hang dry
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: "customization",
+      label: "CUSTOMIZATION",
+      content: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* AI Design Generator Card - Show if AI Gen is enabled */}
+          {apiProduct?.ai_gen && (
+            <div className="border border-[#D4AF3733] p-6 bg-white shadow-sm flex flex-col items-start">
+              <div className="w-10 h-10 bg-[#D4AF37] flex items-center justify-center mb-4">
+                <Image src={specialIcon} alt="Checkmark Icon" width={16} height={16} />
+              </div>
+              <h4 className={`${cormorantNormal.className} tracking-[0.5] text-[20px] text-[#1a1a1a] mb-2`}>
+                AI Design Generator
+              </h4>
+              <p className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#6B6B6B] mb-4`}>
+                Create unique designs using Adobe Firefly AI. Simply describe your vision.
+              </p>
+              <ul className="list-none p-0 space-y-2 text-sm">
+                <li className="flex items-start">
+                  <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
+                    <Image src={rightIcon} alt="Checkmark Icon" width={16} height={16} />
+                  </div>
+                  <span className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}>
+                    Text-to-image generation
+                  </span>
+                </li>
+              </ul>
+            </div>
+          )}
+
+          {/* Manual Text Creator Card - Show if Manual Lettering is enabled */}
+          {apiProduct?.ai_letter && (
+            <div className="border border-[#D4AF3733] p-6 bg-white shadow-sm flex flex-col items-start">
+              <div className="w-10 h-10 bg-[#E5E5E5]  flex items-center justify-center mb-4">
+                <Image src={drowIcon} alt="Checkmark Icon" width={16} height={16} className="text-amber-700" />
+              </div>
+              <h4 className={`${cormorantNormal.className} tracking-[0.5] text-[20px] text-[#1a1a1a] mb-2`}>
+                Manual Text Creator
+              </h4>
+              <p className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#6B6B6B] mb-4`}>
+                Design custom text layouts with full control over fonts, sizes, and colors.
+              </p>
+              <ul className="list-none p-0 space-y-2 text-sm">
+                <li className="flex items-start">
+                  <div className="mr-2 mt-0.5 w-4 h-4 shrink-0">
+                    <Image src={rightIcon} alt="Checkmark Icon" width={16} height={16} />
+                  </div>
+                  <span className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a]`}>
+                    Multiple premium fonts
+                  </span>
+                </li>
+              </ul>
+            </div>
+          )}
+
+          {/* Fallback if no customization options are available */}
+          {!apiProduct?.ai_gen && !apiProduct?.ai_letter && (
+            <div className="col-span-1 md:col-span-2 text-center py-8 text-gray-500">
+              <p>No customization options available for this product.</p>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      value: "reviews",
+      label: `REVIEWS (${totalReviewCount})`,
+      content: (
+        <div className="text-gray-700 ">
+          <div className="mb-8 p-4 border-gray-200 bg-white ">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-6">
+              <div className="flex flex-col items-center px-2 py-8">
+                <span className={`${jostFont.className} tracking-[0.5] text-[48px] text-[#1a1a1a] text-6xl`}>
+                  {averageRating}
+                </span>
+                <div className="flex text-xl mt-2 mb-2 gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Image
+                      key={star}
+                      src={star <= Math.round(Number(averageRating)) ? colorIcon : nonColorIcon}
+                      alt="Star Icon"
+                      width={16}
+                      height={16}
+                    />
+                  ))}
+                </div>
+                <span className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#6B6B6B]`}>
+                  {totalReviewCount} Reviews
+                </span>
+              </div>
+              <div className="w-full px-2 py-8">
+                {/* Star rating bars */}
+                {[5, 4, 3, 2, 1].map((starCount) => {
+                  const countForStar = reviewsData?.star_reveiw_count?.[String(starCount)] || 0;
+                  const percentage = totalReviewCount > 0 ? (countForStar / totalReviewCount) * 100 : 0;
+
+                  return (
+                    <div key={starCount} className="flex items-center mb-2">
+                      <span className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a] w-12 mr-2`}>
+                        {starCount} Star
+                      </span>
+                      <div className="grow bg-[#F5F5F5] h-2.5 relative overflow-hidden">
+                        <div
+                          className="bg-[#F4C430] h-full "
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                      <span className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#6B6B6B] w-10 text-left ml-2`}>
+                        {countForStar}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Individual Review Items */}
+          {reviewsLoading ? (
+            <p className="p-4 text-center text-gray-500">Loading reviews...</p>
+          ) : reviewsError ? (
+            <p className="p-4 text-center text-red-500">Error loading reviews.</p>
+          ) : allReviews.length > 0 ? (
+            allReviews.map((review: any) => (
+              <div key={review.id} className="mb-6 p-4 border-[#E5E5E5] border-b bg-white ">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex text-amber-500 text-lg mr-2">
+                     {[...Array(5)].map((_, j) => (
+                        <Image
+                          key={j}
+                          src={j < review.review.star ? colorIcon : nonColorIcon}
+                          alt="Star"
+                          width={14}
+                          height={14}
+                        />
+                     ))}
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {new Date(review.review.created_date).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a] mb-1`}>
+                  Verified Purchase
+                </p>
+                {/*
+                  Note: The API doesn't seem to provide a separate title,
+                  so we might omit the title or re-use part of the comment or just a generic header if needed.
+                  Using a shortened comment as a "title" placeholder if desired, or removing.
+                */}
+
+                <p className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6B6B6B]`}>
+                  {review.review.comment}
+                </p>
+                <p className={`${jostFont.className} tracking-[0.5] mt-2 text-[14px] text-[#1a1a1a]`}>
+                  - {review.user.email?.split('@')[0] || "Anonymous"}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="p-4 text-center text-gray-500">No reviews yet.</p>
+          )}
+        </div>
+      ),
+    },
+  ], [apiProduct, reviewsData, allReviews, averageRating, totalReviewCount, reviewsLoading, reviewsError]);
+
+  const [activeTab, setActiveTab] = useState("description"); // Default string to match values
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
 
@@ -722,7 +404,7 @@ export default function ProductTabs({ productId }: { productId?: number }) {
   // Function to check and update arrow visibility based on scroll position
   const updateArrowVisibility = useCallback(() => {
     // Only show arrows if on md+ screen and there's horizontal overflow
-    if (window.innerWidth >= 768) {
+    if (typeof window !== 'undefined' && window.innerWidth >= 768) {
       const scrollContainer = tabsScrollRef.current;
       if (scrollContainer) {
         setShowLeftArrow(scrollContainer.scrollLeft > 0);
@@ -780,7 +462,7 @@ export default function ProductTabs({ productId }: { productId?: number }) {
     }
   };
 
-  const content = TAB_DATA.find((tab) => tab.value === activeTab)?.content;
+  const content = tabData.find((tab) => tab.value === activeTab)?.content;
 
   return (
     <div className="w-full max-w-7xl mx-auto pt-6 px-4 sm:px-6 lg:px-8 mb-12">
@@ -813,7 +495,7 @@ export default function ProductTabs({ productId }: { productId?: number }) {
           <div className="absolute bottom-0 h-0.5 bg-gray-900 transition-all duration-300 ease-in-out" />
 
           {/* Tab Buttons */}
-          {TAB_DATA.map((tab) => (
+          {tabData.map((tab) => (
             <button
               key={tab.value}
               ref={(el) => {

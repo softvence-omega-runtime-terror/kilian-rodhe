@@ -56,15 +56,24 @@ export interface IProduct {
   description: string;
   images: IProductImage[];
   is_active: boolean;
+  is_best_seller: boolean;
   is_customize: boolean;
   created_at: string;
   updated_at: string;
 }
 
+export interface ISubCategory {
+  id: number;
+  title: string;
+}
+
 export interface IProductResponse {
   success: boolean;
   message: string;
-  data: IProduct[];
+  data: {
+    sub_categories: ISubCategory[];
+    categories: IProduct[];
+  };
   errors: unknown;
 }
 
@@ -107,8 +116,88 @@ export const productApi = baseBackendApi.injectEndpoints({
         method: "GET",
       }),
     }),
+    getSavedProducts: builder.query<ISavedProductResponse, void>({
+      query: () => ({
+        url: "/product/saved-products/",
+        method: "GET",
+      }),
+      providesTags: ["SavedProducts"],
+    }),
+    saveProduct: builder.mutation<{ message: string; data?: any }, { product: number }>({
+      query: (body) => ({
+        url: "/product/saved-products/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["SavedProducts"],
+    }),
+    deleteSavedProduct: builder.mutation<{ message: string }, number>({
+      query: (id) => ({
+        url: `/product/saved-products/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["SavedProducts"],
+    }),
+    getProductReviews: builder.query<IReviewResponse, IReviewQueryParams>({
+      query: (params) => ({
+        url: "/review/reviews/",
+        method: "GET",
+        params,
+      }),
+    }),
   }),
 });
+
+export interface ISavedProduct {
+  id: number;
+  product: IProduct;
+  user: { id: number };
+  added_at: string;
+}
+
+export interface ISavedProductResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ISavedProduct[];
+}
+
+export interface IReviewUser {
+  id: string;
+  email: string;
+}
+
+export interface IReviewProduct {
+  id: number;
+  name: string;
+}
+
+export interface IReviewContent {
+  star: number;
+  comment: string;
+  created_date: string;
+}
+
+export interface IReviewItem {
+  id: number;
+  product: IReviewProduct;
+  user: IReviewUser;
+  review: IReviewContent;
+}
+
+export interface IReviewDetail {
+  reviews: IReviewItem[];
+}
+
+export interface IReviewResponse {
+  total_review: number;
+  star_reveiw_count: { [key: string]: number };
+  review_details: { [key: string]: IReviewDetail };
+}
+
+export interface IReviewQueryParams {
+  product_id?: number; // Filter by product ID
+}
 
 /* =======================
    EXPORT HOOKS
@@ -118,5 +207,9 @@ export const {
   useGetProductCategoriesQuery,
   useGetProductsQuery,
   useGetProductDetailsQuery,
+  useGetSavedProductsQuery,
+  useSaveProductMutation,
+  useDeleteSavedProductMutation,
+  useGetProductReviewsQuery,
 } = productApi;
     

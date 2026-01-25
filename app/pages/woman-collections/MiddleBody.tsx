@@ -41,7 +41,7 @@ type AgeGroupKey = "18-25" | "26-35" | "36-50" | "50+";
 type Product = {
   id: number;
   // MODIFIED: Allows string (for external URL) or StaticImageData (for local import)
-  imageSrc: StaticImageData | string; 
+  imageSrc: StaticImageData | string;
   isBestSeller?: boolean;
   isNew?: boolean;
   title: string;
@@ -98,7 +98,7 @@ const baseWomensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     subtitle: "Vintage Graphic Print Tee",
     description: "Soft cotton tee featuring a unique vintage-inspired graphic.",
     price: "€39.99",
-    colors: ["#000000", "#D1D5DB", "#10B981", "#F97316"], 
+    colors: ["#000000", "#D1D5DB", "#10B981", "#F97316"],
     suitableAge: ["18-25", "26-35"],
   },
   {
@@ -172,9 +172,8 @@ type ColorSwatchProps = {
 
 const ColorSwatch: React.FC<ColorSwatchProps> = React.memo(({ hex, isWhite }) => (
   <div
-    className={`w-4 h-4 mr-2 ${
-      isWhite ? "border border-gray-300" : "border-none"
-    }`}
+    className={`w-4 h-4 mr-2 ${isWhite ? "border border-gray-300" : "border-none"
+      }`}
     style={{
       backgroundColor: hex,
       outline: isWhite ? "1px solid #00000010" : "none",
@@ -200,7 +199,7 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
   } = product;
 
   // ⬅️ NEW: Initialize router
-  const router = useRouter(); 
+  const router = useRouter();
 
   // If imageSrc is a string (URL), use it directly. If it's StaticImageData, use .src.
   // We use type assertion here to handle the mixed type when accessing .src
@@ -214,16 +213,16 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
   // ⬅️ MODIFIED: Update handleAction to use router.push() for specific actions
   const handleAction = (action: string) => {
     console.log(`${action} for Product ID: ${product.id}`);
-    
+
     if (action === "Customize") {
-        // Navigate to /pages/my-creation
-        router.push("/pages/customise");
+      // Navigate to /pages/my-creation
+      router.push(`/pages/customise?id=${product.id}`);
     } else if (action === "Order Now") {
-        // Navigate to /pages/shipping
-        router.push("/pages/shipping");
+      // Navigate to /pages/shipping
+      router.push("/pages/shipping");
     } else {
-        // Fallback for Wishlist/Quick Shop
-        alert(`${action} clicked for ${subtitle}!`);
+      // Fallback for Wishlist/Quick Shop
+      alert(`${action} clicked for ${subtitle}!`);
     }
   };
 
@@ -231,12 +230,15 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
     <div className="flex flex-col border-none">
       <div className="relative overflow-hidden">
         <div
-          className="w-full h-[400px] bg-cover bg-center"
+          className="w-full h-[400px] bg-cover bg-center flex items-center justify-center relative"
           style={{
-            backgroundImage: `url(${imageUrl})`, // Use the determined URL
-            backgroundColor: isLighterBgNeeded ? "#FFF" : "#F8F8F8", 
+            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+            backgroundColor: imageUrl ? (isLighterBgNeeded ? "#FFF" : "#F8F8F8") : "#F3F4F6",
           }}
         >
+          {!imageUrl && (
+            <span className="text-gray-400 font-medium">No Image</span>
+          )}
           {(isBestSeller || isNew) && (
             <div
               className={`${jostFont.className} absolute top-3 left-3 text-xs font-medium px-3 py-1 tracking-widest uppercase ${badgeColor}`}
@@ -331,10 +333,10 @@ GdpComplianceBanner.displayName = 'GdpComplianceBanner';
 
 
 type PaginationProps = {
-    totalProducts: number;
-    displayedCount: number;
-    onLoadMore: () => void;
-    canLoadMore: boolean;
+  totalProducts: number;
+  displayedCount: number;
+  onLoadMore: () => void;
+  canLoadMore: boolean;
 }
 
 const Pagination: React.FC<PaginationProps> = React.memo(
@@ -396,23 +398,23 @@ export default function WomansCollectionPage() {
     return allWomensProducts
       .filter(product => {
         if (selectedAgeGroup !== "ALL") {
-            if (!product.suitableAge.includes(selectedAgeGroup as AgeGroupKey)) {
-                return false;
-            }
+          if (!product.suitableAge.includes(selectedAgeGroup as AgeGroupKey)) {
+            return false;
+          }
         }
         if (selectedProductType && product.title !== selectedProductType) {
           return false;
         }
         if (selectedPriceRange) {
-            if (product.priceValue < selectedPriceRange.min || product.priceValue >= selectedPriceRange.max) {
-                return false;
-            }
+          if (product.priceValue < selectedPriceRange.min || product.priceValue >= selectedPriceRange.max) {
+            return false;
+          }
         }
         if (selectedColors.length > 0) {
-            const hasSelectedColor = product.colors.some(productColor => selectedColors.includes(productColor));
-            if (!hasSelectedColor) {
-                return false;
-            }
+          const hasSelectedColor = product.colors.some(productColor => selectedColors.includes(productColor));
+          if (!hasSelectedColor) {
+            return false;
+          }
         }
         return true;
       })
@@ -474,7 +476,7 @@ export default function WomansCollectionPage() {
   }, [handleFilterChange]);
 
   const handleFilterPanelToggle = () => {
-      alert("Filter panel toggle clicked! (Placeholder for opening/closing a sidebar/modal)");
+    alert("Filter panel toggle clicked! (Placeholder for opening/closing a sidebar/modal)");
   };
 
 
@@ -490,11 +492,10 @@ export default function WomansCollectionPage() {
             {ageGroups.map((group) => (
               <span
                 key={group}
-                className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${
-                  group === selectedAgeGroup
+                className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${group === selectedAgeGroup
                     ? "bg-[#DFA637] text-black border-[#DFA637]"
                     : "text-gray-700 border-gray-300 hover:border-gray-500"
-                }`}
+                  }`}
                 onClick={() => handleAgeGroupSelect(group)}
               >
                 {group}
@@ -505,8 +506,8 @@ export default function WomansCollectionPage() {
           {/* Filters Right */}
           <div className="flex items-center space-x-4 text-sm text-gray-700">
             <div
-                className="flex items-center space-x-1 cursor-pointer hover:text-black"
-                onClick={handleFilterPanelToggle}
+              className="flex items-center space-x-1 cursor-pointer hover:text-black"
+              onClick={handleFilterPanelToggle}
             >
               <span className="text-xl">&#9776;</span>
               <span className="font-semibold tracking-wider">FILTERS</span>
@@ -546,9 +547,8 @@ export default function WomansCollectionPage() {
               {productTypes.map((type) => (
                 <li
                   key={type}
-                  className={`cursor-pointer transition ${
-                    selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
-                  }`}
+                  className={`cursor-pointer transition ${selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
+                    }`}
                   onClick={() => handleProductTypeSelect(type)}
                 >
                   {type}
@@ -566,9 +566,8 @@ export default function WomansCollectionPage() {
               {priceRanges.map((range) => (
                 <li
                   key={range.name}
-                  className={`cursor-pointer transition ${
-                    selectedPriceRange?.name === range.name ? 'text-black font-bold' : 'hover:text-black'
-                  }`}
+                  className={`cursor-pointer transition ${selectedPriceRange?.name === range.name ? 'text-black font-bold' : 'hover:text-black'
+                    }`}
                   onClick={() => handlePriceRangeSelect(range)}
                 >
                   {range.name}
@@ -590,9 +589,8 @@ export default function WomansCollectionPage() {
                 return (
                   <div
                     key={color.name}
-                    className={`w-6 h-6 border-2 ${
-                      isSelected ? "border-transparent" : borderColor
-                    } cursor-pointer hover:opacity-80 transition relative flex items-center justify-center`}
+                    className={`w-6 h-6 border-2 ${isSelected ? "border-transparent" : borderColor
+                      } cursor-pointer hover:opacity-80 transition relative flex items-center justify-center`}
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                     onClick={() => handleColorSelect(color.hex)}
@@ -621,16 +619,16 @@ export default function WomansCollectionPage() {
       {/* Product Grid */}
       <div className="px-4 sm:px-6 lg:px-18">
         {productsToDisplay.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-              {productsToDisplay.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {productsToDisplay.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         ) : (
-            <div className="text-center py-20 text-gray-600">
-                <p className="text-xl font-semibold">No products found matching your criteria.</p>
-                <p className="mt-2">Try adjusting your filters.</p>
-            </div>
+          <div className="text-center py-20 text-gray-600">
+            <p className="text-xl font-semibold">No products found matching your criteria.</p>
+            <p className="mt-2">Try adjusting your filters.</p>
+          </div>
         )}
       </div>
 

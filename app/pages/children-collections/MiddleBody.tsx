@@ -34,11 +34,11 @@ const cormorantNormal = Cormorant_Garamond({
 
 
 // UPDATED: Age groups are adjusted for children (Product Data types)
-type AgeGroupKey = "2-5" | "6-10" | "11-16"; 
+type AgeGroupKey = "2-5" | "6-10" | "11-16";
 
 type Product = {
   id: number;
-  imageSrc: StaticImageData | string; 
+  imageSrc: StaticImageData | string;
   isBestSeller?: boolean;
   isNew?: boolean;
   title: string;
@@ -66,7 +66,7 @@ const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     colors: ["#FFFFFF", "#FDE047", "#10B981", "#3B82F6"],
     suitableAge: ["2-5", "6-10"],
   },
-    {
+  {
     imageSrc: "https://m.media-amazon.com/images/I/81fwhKpa7PL._AC_UY1100_.jpg",
     isNew: true,
     title: "PANTS",
@@ -76,7 +76,7 @@ const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     colors: ["#9CA3AF", "#FFFFFF", "#000000", "#F97316"],
     suitableAge: ["6-10", "11-16"],
   },
-  
+
   {
     // CHILDREN'S HOODIE 1
     imageSrc: "https://www.mypersonalisedclothing.com/wp-content/uploads/2021/04/JH01J_LS05_2021.png",
@@ -88,7 +88,7 @@ const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     colors: ["#9CA3AF", "#FFFFFF", "#000000", "#F97316"],
     suitableAge: ["6-10", "11-16"],
   },
-  
+
   // Remaining placeholders for variety
   {
     imageSrc: "https://www.xpres.co.uk/globalassets/brands/subli-tees/xp521.jpg?format=webp&quality=100&width=1200",
@@ -97,7 +97,7 @@ const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     subtitle: "Solid Color Long Sleeve Tee",
     description: "Everyday essential, soft cotton with reinforced stitching.",
     price: "€17.99",
-    colors: ["#F97316", "#000000", "#FFFFFF", "#3B82F6"], 
+    colors: ["#F97316", "#000000", "#FFFFFF", "#3B82F6"],
     suitableAge: ["2-5", "11-16"],
   },
   {
@@ -121,7 +121,7 @@ const baseChildrensProducts: Omit<Product, 'id' | 'priceValue'>[] = [
     colors: ["#9CA3AF", "#FFFFFF", "#000000", "#F97316"],
     suitableAge: ["6-10", "11-16"],
   },
-  
+
 
 ];
 
@@ -149,10 +149,10 @@ for (let i = 0; i < TOTAL_CHILDRENS_PRODUCTS; i++) {
 }
 
 // ⬅️ MODIFIED: Reverting ageGroups to the requested display values
-const ageGroups = ["ALL", "3-6", "7-9", "10-13", "14-18"]; 
+const ageGroups = ["ALL", "3-6", "7-9", "10-13", "14-18"];
 
 // UPDATED: Product types (limited to 3 main categories + others from base data)
-const productTypes = ["T-SHIRTS", "HOODIES", "PANTS"]; 
+const productTypes = ["T-SHIRTS", "HOODIES", "PANTS"];
 
 const priceRanges = [
   { name: "Under €10", min: 0, max: 10.99 },
@@ -185,9 +185,8 @@ type ColorSwatchProps = {
 
 const ColorSwatch: React.FC<ColorSwatchProps> = React.memo(({ hex, isWhite }) => (
   <div
-    className={`w-4 h-4 mr-2 ${
-      isWhite ? "border border-gray-300" : "border-none"
-    }`}
+    className={`w-4 h-4 mr-2 ${isWhite ? "border border-gray-300" : "border-none"
+      }`}
     style={{
       backgroundColor: hex,
       outline: isWhite ? "1px solid #00000010" : "none",
@@ -213,12 +212,12 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
   } = product;
 
   // ⬅️ NEW: Initialize router
-  const router = useRouter(); 
+  const router = useRouter();
 
   const imageUrl = typeof imageSrc === 'string' ? imageSrc : (imageSrc as StaticImageData).src;
 
   // UPDATED: Lighter background for items typically light/white
-  const isLighterBgNeeded = product.title === "T-SHIRTS"; 
+  const isLighterBgNeeded = product.title === "T-SHIRTS";
 
   const badgeColor = "bg-[#DFA637] text-black";
   const iconButtonColor = "bg-[#DFA637] text-black hover:bg-[#c99532]";
@@ -226,16 +225,16 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
   // ⬅️ MODIFIED: Update handleAction to use router.push() for specific actions
   const handleAction = (action: string) => {
     console.log(`${action} for Product ID: ${product.id}`);
-    
+
     if (action === "Customize") {
-        // Navigate to /pages/my-creation
-        router.push("/pages/customise");
+      // Navigate to /pages/my-creation
+      router.push(`/pages/customise?id=${product.id}`);
     } else if (action === "Order Now") {
-        // Navigate to /pages/shipping
-        router.push("/pages/shipping");
+      // Navigate to /pages/shipping
+      router.push("/pages/shipping");
     } else {
-        // Fallback for Wishlist/Quick Shop
-        alert(`${action} clicked for ${subtitle}!`);
+      // Fallback for Wishlist/Quick Shop
+      alert(`${action} clicked for ${subtitle}!`);
     }
   };
 
@@ -243,12 +242,15 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
     <div className="flex flex-col border-none">
       <div className="relative overflow-hidden">
         <div
-          className="w-full h-[400px] bg-cover bg-center"
+          className="w-full h-[400px] bg-cover bg-center flex items-center justify-center relative"
           style={{
-            backgroundImage: `url(${imageUrl})`, 
-            backgroundColor: isLighterBgNeeded ? "#FFF" : "#F8F8F8", 
+            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+            backgroundColor: imageUrl ? (isLighterBgNeeded ? "#FFF" : "#F8F8F8") : "#F3F4F6",
           }}
         >
+          {!imageUrl && (
+            <span className="text-gray-400 font-medium">No Image</span>
+          )}
           {(isBestSeller || isNew) && (
             <div
               className={`${jostFont.className} absolute top-3 left-3 text-xs font-medium px-3 py-1 tracking-widest uppercase ${badgeColor}`}
@@ -343,10 +345,10 @@ GdpComplianceBanner.displayName = 'GdpComplianceBanner';
 
 
 type PaginationProps = {
-    totalProducts: number;
-    displayedCount: number;
-    onLoadMore: () => void;
-    canLoadMore: boolean;
+  totalProducts: number;
+  displayedCount: number;
+  onLoadMore: () => void;
+  canLoadMore: boolean;
 }
 
 const Pagination: React.FC<PaginationProps> = React.memo(
@@ -396,21 +398,21 @@ Pagination.displayName = 'Pagination';
  * @returns The AgeGroupKey used in the product data, or "ALL".
  */
 const mapDisplayAgeToKey = (displayGroup: string): AgeGroupKey | "ALL" => {
-    switch (displayGroup) {
-        case "ALL":
-            return "ALL";
-        case "3-6":
-        case "7-9":
-            // Both of these fall into the 2-5 and 6-10 ranges. We'll map "3-6" to "2-5"
-            // and "7-9" to "6-10" for the best fit, but the product data is coarser.
-            return "2-5"; 
-        case "10-13":
-            return "6-10"; // Fits best into the 6-10 range (or 11-16 if we stretch it)
-        case "14-18":
-            return "11-16"; 
-        default:
-            return "ALL";
-    }
+  switch (displayGroup) {
+    case "ALL":
+      return "ALL";
+    case "3-6":
+    case "7-9":
+      // Both of these fall into the 2-5 and 6-10 ranges. We'll map "3-6" to "2-5"
+      // and "7-9" to "6-10" for the best fit, but the product data is coarser.
+      return "2-5";
+    case "10-13":
+      return "6-10"; // Fits best into the 6-10 range (or 11-16 if we stretch it)
+    case "14-18":
+      return "11-16";
+    default:
+      return "ALL";
+  }
 };
 
 
@@ -418,10 +420,10 @@ const mapDisplayAgeToKey = (displayGroup: string): AgeGroupKey | "ALL" => {
 // Main Component for Children's Collection (UPDATED)
 // ----------------------------------------------------------------------
 
-export default function ChildrensCollectionPage() { 
+export default function ChildrensCollectionPage() {
   // ⬅️ MODIFIED: State now stores the string value from the UI array
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedAgeGroup, setSelectedAgeGroup] = useState(ageGroups[0]); 
+  const [selectedAgeGroup, setSelectedAgeGroup] = useState(ageGroups[0]);
   const [selectedProductType, setSelectedProductType] = useState<string | null>(null);
   const [selectedPriceRange, setSelectedPriceRange] = useState<typeof priceRanges[number] | null>(null);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -437,13 +439,13 @@ export default function ChildrensCollectionPage() {
     // Determine the product key based on the selected display group
     const ageFilterKey = mapDisplayAgeToKey(selectedAgeGroup);
 
-    return allChildrensProducts 
+    return allChildrensProducts
       .filter(product => {
         // AGE FILTER LOGIC - Uses the mapped key
         if (ageFilterKey !== "ALL") {
-            if (!product.suitableAge.includes(ageFilterKey as AgeGroupKey)) {
-                return false;
-            }
+          if (!product.suitableAge.includes(ageFilterKey as AgeGroupKey)) {
+            return false;
+          }
         }
         // PRODUCT TYPE FILTER LOGIC
         if (selectedProductType && product.title !== selectedProductType) {
@@ -451,16 +453,16 @@ export default function ChildrensCollectionPage() {
         }
         // PRICE RANGE FILTER LOGIC
         if (selectedPriceRange) {
-            if (product.priceValue < selectedPriceRange.min || product.priceValue > selectedPriceRange.max) {
-                return false;
-            }
+          if (product.priceValue < selectedPriceRange.min || product.priceValue > selectedPriceRange.max) {
+            return false;
+          }
         }
         // COLOR FILTER LOGIC
         if (selectedColors.length > 0) {
-            const hasSelectedColor = product.colors.some(productColor => selectedColors.includes(productColor));
-            if (!hasSelectedColor) {
-                return false;
-            }
+          const hasSelectedColor = product.colors.some(productColor => selectedColors.includes(productColor));
+          if (!hasSelectedColor) {
+            return false;
+          }
         }
         return true;
       })
@@ -523,7 +525,7 @@ export default function ChildrensCollectionPage() {
   }, [handleFilterChange]);
 
   const handleFilterPanelToggle = () => {
-      alert("Filter panel toggle clicked! (Placeholder for opening/closing a sidebar/modal)");
+    alert("Filter panel toggle clicked! (Placeholder for opening/closing a sidebar/modal)");
   };
 
 
@@ -539,11 +541,10 @@ export default function ChildrensCollectionPage() {
             {ageGroups.map((group) => (
               <span
                 key={group}
-                className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${
-                  group === selectedAgeGroup
+                className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${group === selectedAgeGroup
                     ? "bg-[#DFA637] text-black border-[#DFA637]"
                     : "text-gray-700 border-gray-300 hover:border-gray-500"
-                }`}
+                  }`}
                 onClick={() => handleAgeGroupSelect(group)}
               >
                 {group}
@@ -554,8 +555,8 @@ export default function ChildrensCollectionPage() {
           {/* Filters Right */}
           <div className="flex items-center space-x-4 text-sm text-gray-700">
             <div
-                className="flex items-center space-x-1 cursor-pointer hover:text-black"
-                onClick={handleFilterPanelToggle}
+              className="flex items-center space-x-1 cursor-pointer hover:text-black"
+              onClick={handleFilterPanelToggle}
             >
               <span className="text-xl">&#9776;</span>
               <span className="font-semibold tracking-wider">FILTERS</span>
@@ -595,9 +596,8 @@ export default function ChildrensCollectionPage() {
               {productTypes.map((type) => (
                 <li
                   key={type}
-                  className={`cursor-pointer transition ${
-                    selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
-                  }`}
+                  className={`cursor-pointer transition ${selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
+                    }`}
                   onClick={() => handleProductTypeSelect(type)}
                 >
                   {type}
@@ -615,9 +615,8 @@ export default function ChildrensCollectionPage() {
               {priceRanges.map((range) => (
                 <li
                   key={range.name}
-                  className={`cursor-pointer transition ${
-                    selectedPriceRange?.name === range.name ? 'text-black font-bold' : 'hover:text-black'
-                  }`}
+                  className={`cursor-pointer transition ${selectedPriceRange?.name === range.name ? 'text-black font-bold' : 'hover:text-black'
+                    }`}
                   onClick={() => handlePriceRangeSelect(range)}
                 >
                   {range.name}
@@ -639,9 +638,8 @@ export default function ChildrensCollectionPage() {
                 return (
                   <div
                     key={color.name}
-                    className={`w-6 h-6 border-2 ${
-                      isSelected ? "border-transparent" : borderColor
-                    } cursor-pointer hover:opacity-80 transition relative flex items-center justify-center`}
+                    className={`w-6 h-6 border-2 ${isSelected ? "border-transparent" : borderColor
+                      } cursor-pointer hover:opacity-80 transition relative flex items-center justify-center`}
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                     onClick={() => handleColorSelect(color.hex)}
@@ -670,16 +668,16 @@ export default function ChildrensCollectionPage() {
       {/* Product Grid */}
       <div className="px-4 sm:px-6 lg:px-18">
         {productsToDisplay.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-              {productsToDisplay.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {productsToDisplay.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
         ) : (
-            <div className="text-center py-20 text-gray-600">
-                <p className="text-xl font-semibold">No products found matching your criteria.</p>
-                <p className="mt-2">Try adjusting your filters.</p>
-            </div>
+          <div className="text-center py-20 text-gray-600">
+            <p className="text-xl font-semibold">No products found matching your criteria.</p>
+            <p className="mt-2">Try adjusting your filters.</p>
+          </div>
         )}
       </div>
 

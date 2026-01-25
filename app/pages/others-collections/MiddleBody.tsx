@@ -150,9 +150,8 @@ type ColorSwatchProps = {
 
 const ColorSwatch: React.FC<ColorSwatchProps> = React.memo(({ hex, isWhite }) => (
   <div
-    className={`w-4 h-4 mr-2 ${
-      isWhite ? "border border-gray-300" : "border-none"
-    }`}
+    className={`w-4 h-4 mr-2 ${isWhite ? "border border-gray-300" : "border-none"
+      }`}
     style={{
       backgroundColor: hex,
       outline: isWhite ? "1px solid #00000010" : "none",
@@ -166,9 +165,9 @@ ColorSwatch.displayName = 'ColorSwatch';
 // ----------------------------------------------------------------------
 
 type ProductCardProps = {
-    product: Product;
-    handleOrderNow: () => void;
-    handleCustomizeRoute: () => void;
+  product: Product;
+  handleOrderNow: () => void;
+  handleCustomizeRoute: (id: number) => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrderNow, handleCustomizeRoute }) => {
@@ -195,7 +194,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
     if (action === "Order Now") {
       handleOrderNow();
     } else if (action === "Customize") {
-      handleCustomizeRoute(); // Redirect to /pages/my-creation
+      handleCustomizeRoute(product.id); // Redirect to /pages/my-creation
     } else {
       alert(`${action} clicked for ${subtitle}!`);
     }
@@ -205,12 +204,15 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
     <div className="flex flex-col border-none">
       <div className="relative overflow-hidden">
         <div
-          className="w-full h-[400px] bg-cover bg-center"
+          className="w-full h-[400px] bg-cover bg-center flex items-center justify-center relative"
           style={{
-            backgroundImage: `url(${imageUrl})`,
-            backgroundColor: isLighterBgNeeded ? "#FFF" : "#F8F8F8",
+            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+            backgroundColor: imageUrl ? (isLighterBgNeeded ? "#FFF" : "#F8F8F8") : "#F3F4F6",
           }}
         >
+          {!imageUrl && (
+            <span className="text-gray-400 font-medium">No Image</span>
+          )}
           {(isBestSeller || isNew) && (
             <div
               className={`${jostFont.className} absolute top-3 left-3 text-xs font-medium px-3 py-1 tracking-widest uppercase ${badgeColor}`}
@@ -339,7 +341,7 @@ Pagination.displayName = 'Pagination';
 // ----------------------------------------------------------------------
 
 export default function AllProductsCollectionPage() {
-  const router = useRouter(); 
+  const router = useRouter();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedFocus, setSelectedFocus] = useState(productFocus[0]);
@@ -351,10 +353,10 @@ export default function AllProductsCollectionPage() {
 
   // --- Routing Handlers ---
 
-  const handleCustomizeRoute = useCallback(() => {
-    router.push(`/pages/customise`);
+  const handleCustomizeRoute = useCallback((id: number) => {
+    router.push(`/pages/customise?id=${id}`);
   }, [router]);
-  
+
   const handleOrderNow = useCallback(() => {
     router.push(`/pages/shipping`);
   }, [router]);
@@ -482,11 +484,10 @@ export default function AllProductsCollectionPage() {
             {productFocus.map((focus) => (
               <span
                 key={focus}
-                className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${
-                  focus === selectedFocus
+                className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${focus === selectedFocus
                     ? "bg-[#DFA637] text-black border-[#DFA637]"
                     : "text-gray-700 border-gray-300 hover:border-gray-500"
-                }`}
+                  }`}
                 onClick={() => handleFocusSelect(focus)}
               >
                 {focus}
@@ -497,8 +498,8 @@ export default function AllProductsCollectionPage() {
           {/* Filters Right (Sort & Toggle) */}
           <div className="flex items-center space-x-4 text-sm text-gray-700">
             <div
-                className="flex items-center space-x-1 cursor-pointer hover:text-black"
-                onClick={handleFilterPanelToggle}
+              className="flex items-center space-x-1 cursor-pointer hover:text-black"
+              onClick={handleFilterPanelToggle}
             >
               <span className="text-xl">&#9776;</span>
               <span className="font-semibold tracking-wider">FILTERS</span>
@@ -538,9 +539,8 @@ export default function AllProductsCollectionPage() {
               {productTypes.map((type) => (
                 <li
                   key={type}
-                  className={`cursor-pointer transition ${
-                    selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
-                  }`}
+                  className={`cursor-pointer transition ${selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
+                    }`}
                   onClick={() => handleProductTypeSelect(type)}
                 >
                   {type}
@@ -558,9 +558,8 @@ export default function AllProductsCollectionPage() {
               {priceRanges.map((range) => (
                 <li
                   key={range.name}
-                  className={`cursor-pointer transition ${
-                    selectedPriceRange?.name === range.name ? 'text-black font-bold' : 'hover:text-black'
-                  }`}
+                  className={`cursor-pointer transition ${selectedPriceRange?.name === range.name ? 'text-black font-bold' : 'hover:text-black'
+                    }`}
                   onClick={() => handlePriceRangeSelect(range)}
                 >
                   {range.name}
@@ -582,9 +581,8 @@ export default function AllProductsCollectionPage() {
                 return (
                   <div
                     key={color.name}
-                    className={`w-6 h-6 border-2 ${
-                      isSelected ? "border-transparent" : borderColor
-                    } cursor-pointer hover:opacity-80 transition relative flex items-center justify-center`}
+                    className={`w-6 h-6 border-2 ${isSelected ? "border-transparent" : borderColor
+                      } cursor-pointer hover:opacity-80 transition relative flex items-center justify-center`}
                     style={{ backgroundColor: color.hex }}
                     title={color.name}
                     onClick={() => handleColorSelect(color.hex)}
@@ -611,21 +609,21 @@ export default function AllProductsCollectionPage() {
       {/* Product Grid */}
       <div className="px-4 sm:px-6 lg:px-18">
         {productsToDisplay.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-              {productsToDisplay.map((product) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  handleOrderNow={handleOrderNow} 
-                  handleCustomizeRoute={handleCustomizeRoute}
-                />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {productsToDisplay.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                handleOrderNow={handleOrderNow}
+                handleCustomizeRoute={handleCustomizeRoute}
+              />
+            ))}
+          </div>
         ) : (
-              <div className="text-center py-20 text-gray-600">
-                <p className="text-xl font-semibold">No products found matching your criteria.</p>
-                <p className="mt-2">Try adjusting your filters.</p>
-            </div>
+          <div className="text-center py-20 text-gray-600">
+            <p className="text-xl font-semibold">No products found matching your criteria.</p>
+            <p className="mt-2">Try adjusting your filters.</p>
+          </div>
         )}
       </div>
 

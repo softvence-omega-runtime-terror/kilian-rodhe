@@ -4,7 +4,8 @@ import React, { useState, useMemo, useCallback } from "react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 import Image, { StaticImageData } from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useGetProductsQuery, useGetProductCategoriesQuery, ICategory } from "@/app/store/slices/services/product/productApi";
+import { useGetProductsQuery, useGetProductCategoriesQuery, ICategory, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Images (Ensure you have a checkmark icon or use an SVG/Unicode character)
 import hoodi from "@/public/image/collections/imag1.jpg";
@@ -109,6 +110,39 @@ const ColorSwatch: React.FC<ColorSwatchProps> = React.memo(({ hex, isWhite }) =>
 ColorSwatch.displayName = 'ColorSwatch';
 
 
+const ToastMessage = ({ message, type, onClose }: { message: string; type: 'success' | 'info' | 'error'; onClose: () => void }) => {
+  useState(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 3000);
+    return () => clearTimeout(timer);
+  });
+
+  let bgColor = "bg-green-600";
+  let icon = "✅";
+
+  if (type === 'info') {
+    bgColor = "bg-blue-600";
+    icon = "ℹ️";
+  } else if (type === 'error') {
+    bgColor = "bg-red-600";
+    icon = "⚠️";
+  }
+
+  return (
+    <motion.div
+      className={`${jostFont.className} fixed top-24 right-4 ${bgColor} text-white px-6 py-4 rounded shadow-2xl z-[100] text-center font-medium flex items-center gap-3`}
+      initial={{ x: 100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      exit={{ x: 100, opacity: 0 }}
+      transition={{ duration: 0.4, type: "spring" }}
+    >
+      <span className="text-xl">{icon}</span>
+      <span>{message}</span>
+    </motion.div>
+  );
+}
+
 // ----------------------------------------------------------------------
 // Product Card (UPDATED with route handlers)
 // ----------------------------------------------------------------------
@@ -116,10 +150,11 @@ ColorSwatch.displayName = 'ColorSwatch';
 type ProductCardProps = {
   product: Product;
   handleOrderNow: () => void;
-  handleCustomizeRoute: () => void;
+  handleCustomizeRoute: (id: number) => void;
+  onSaveProduct: (message: string, type: 'success' | 'info' | 'error') => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrderNow, handleCustomizeRoute }) => {
+const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrderNow, handleCustomizeRoute, onSaveProduct }) => {
   const {
     title,
     subtitle,
@@ -137,15 +172,28 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
   const badgeColor = "bg-[#DFA637] text-black";
   const iconButtonColor = "bg-[#DFA637] text-black hover:bg-[#c99532]";
 
-  const handleAction = (action: string) => {
+  const [saveProduct] = useSaveProductMutation();
+
+  const handleAction = async (action: string) => {
     console.log(`${action} for Product ID: ${product.id}`);
 
     if (action === "Order Now") {
-      handleOrderNow(); // 👈 Call handler for /pages/shipping
+      handleOrderNow();
     } else if (action === "Customize") {
-      handleCustomizeRoute(); // 👈 Call handler for /pages/my-creation
+      handleCustomizeRoute(product.id);
+    } else if (action === "Wishlist") {
+      try {
+        const response = await saveProduct({ product: product.id }).unwrap();
+        onSaveProduct(response.message || "Product saved successfully!", 'success');
+      } catch (err: any) {
+        if (err?.data?.message === "Product already saved") {
+          onSaveProduct("Product is already saved!", 'info');
+        } else {
+          onSaveProduct("Unauthorized: Please login to save products.", 'error');
+        }
+      }
     } else {
-      alert(`${action} clicked for ${subtitle}!`);
+      console.log(`${action} clicked for ${subtitle}!`);
     }
   };
 
@@ -153,12 +201,15 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
     <div className="flex flex-col border-none">
       <div className="relative overflow-hidden">
         <div
-          className="w-full h-[400px] bg-cover bg-center"
+          className="w-full h-[400px] bg-cover bg-center flex items-center justify-center relative"
           style={{
-            backgroundImage: `url(${imageUrl})`,
-            backgroundColor: isDarkImage ? "#000" : "#FFF",
+            backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
+            backgroundColor: imageUrl ? (isDarkImage ? "#000" : "#FFF") : "#F3F4F6",
           }}
         >
+          {!imageUrl && (
+            <span className="text-gray-400 font-medium">No Image</span>
+          )}
           {(isBestSeller || isNew) && (
             <div
               className={`${jostFont.className} absolute top-3 left-3 text-xs font-medium px-3 py-1 tracking-widest uppercase ${badgeColor}`}
@@ -309,13 +360,14 @@ interface MiddleBodyProps {
 export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
   const categoryParam = searchParams.get("category");
   const subCategoryParam = searchParams.get("subcategory");
   const ageRangeParam = searchParams.get("age_range");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedAgeGroupId, setSelectedAgeGroupId] = useState<number | "ALL">("ALL"); // Store ID
-  const [selectedProductType, setSelectedProductType] = useState<string | null>(null);
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<number | null>(subCategoryParam ? parseInt(subCategoryParam) : null);
   const [selectedPriceRange, setSelectedPriceRange] = useState<typeof priceRanges[number] | null>(null);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<SortOption>('Featured');
@@ -342,7 +394,7 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   const { data: productsData, isLoading, isFetching } = useGetProductsQuery({
     page: currentPage,
     category: categoryParam ? parseInt(categoryParam) : undefined,
-    subcategory: subCategoryParam ? parseInt(subCategoryParam) : undefined,
+    subcategory: selectedSubCategoryId || (subCategoryParam ? parseInt(subCategoryParam) : undefined),
     age_range: selectedAgeGroupId !== "ALL" ? selectedAgeGroupId : (ageRangeParam ? parseInt(ageRangeParam) : undefined),
     min_price: selectedPriceRange?.min,
     max_price: selectedPriceRange?.max === Infinity ? undefined : selectedPriceRange?.max,
@@ -350,10 +402,10 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   });
 
   const productsToDisplay: Product[] = useMemo(() => {
-    if (!productsData?.data) return [];
+    if (!Array.isArray(productsData?.data?.categories)) return [];
 
     // Map API data to UI Product type
-    const mapped = productsData.data.map((p) => ({
+    const mapped = productsData.data.categories.map((p) => ({
       id: p.id,
       imageSrc: p.images[0]?.image || "",
       isBestSeller: false,
@@ -387,11 +439,11 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
     router.push(`/pages/shipping`);
   }, [router]);
 
-  const handleCustomizeRoute = useCallback(() => {
-    router.push(`/pages/customise`);
+  const handleCustomizeRoute = useCallback((id: number) => {
+    router.push(`/pages/customise?id=${id}`);
   }, [router]);
 
-  const totalFilteredProducts = productsData?.data?.length || 0;
+  const totalFilteredProducts = Array.isArray(productsData?.data?.categories) ? productsData.data.categories.length : 0;
   const canLoadMore = false;
 
   const handleLoadMore = useCallback(() => {
@@ -404,8 +456,8 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   }, [handleFilterChange]);
 
   // ... (Other handlers same)
-  const handleProductTypeSelect = useCallback((type: string) => {
-    setSelectedProductType(prevType => prevType === type ? null : type);
+  const handleSubCategorySelect = useCallback((id: number) => {
+    setSelectedSubCategoryId(prevId => prevId === id ? null : id);
     handleFilterChange();
   }, [handleFilterChange]);
 
@@ -431,11 +483,20 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   }, [handleFilterChange]);
 
   const handleFilterPanelToggle = () => {
-    alert("Filter panel toggle clicked! (Placeholder)");
+    // alert("Filter panel toggle clicked! (Placeholder)");
+  };
+
+  const handleCloseToast = () => {
+    setToast(null);
   };
 
   return (
     <div className={`bg-white ${jostFont.className}`}>
+      <AnimatePresence>
+        {toast && (
+          <ToastMessage message={toast.message} type={toast.type} onClose={handleCloseToast} />
+        )}
+      </AnimatePresence>
       <div className="px-4 sm:px-6 lg:px-18 pt-6">
         {/* Age Filters */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b border-gray-300/60">
@@ -445,8 +506,8 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
             </span>
             <span
               className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${selectedAgeGroupId === "ALL"
-                  ? "bg-[#DFA637] text-black border-[#DFA637]"
-                  : "text-gray-700 border-gray-300 hover:border-gray-500"
+                ? "bg-[#DFA637] text-black border-[#DFA637]"
+                : "text-gray-700 border-gray-300 hover:border-gray-500"
                 }`}
               onClick={() => handleAgeGroupSelect("ALL")}
             >
@@ -456,8 +517,8 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
               <span
                 key={group.id}
                 className={`px-3 py-1.5 cursor-pointer text-sm border font-medium transition mt-2 sm:mt-0 ${group.id === selectedAgeGroupId
-                    ? "bg-[#DFA637] text-black border-[#DFA637]"
-                    : "text-gray-700 border-gray-300 hover:border-gray-500"
+                  ? "bg-[#DFA637] text-black border-[#DFA637]"
+                  : "text-gray-700 border-gray-300 hover:border-gray-500"
                   }`}
                 onClick={() => handleAgeGroupSelect(group.id)}
               >
@@ -505,17 +566,17 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
           {/* Product Type */}
           <div className="w-full sm:w-1/4 mb-6 sm:mb-0">
             <h3 className="text-sm font-semibold text-gray-700 mb-3 tracking-wider">
-              PRODUCT TYPE
+              SUB CATEGORY
             </h3>
             <ul className="space-y-1 text-sm tracking-wide text-gray-800">
-              {productTypes.map((type) => (
+              {productsData?.data?.sub_categories?.map((sub) => (
                 <li
-                  key={type}
-                  className={`cursor-pointer transition ${selectedProductType === type ? 'text-black font-bold' : 'hover:text-black'
+                  key={sub.id}
+                  className={`cursor-pointer transition ${selectedSubCategoryId === sub.id ? 'text-black font-bold' : 'hover:text-black'
                     }`}
-                  onClick={() => handleProductTypeSelect(type)}
+                  onClick={() => handleSubCategorySelect(sub.id)}
                 >
-                  {type}
+                  {sub.title}
                 </li>
               ))}
             </ul>
@@ -590,6 +651,7 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
                 product={product}
                 handleOrderNow={handleOrderNow}
                 handleCustomizeRoute={handleCustomizeRoute}
+                onSaveProduct={(msg, type) => setToast({ message: msg, type })}
               />
             ))}
           </div>
