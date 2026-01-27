@@ -21,7 +21,7 @@ export interface ICartResponse {
   items: ICartItem[];
   total_price: number;
 }
-//git status
+
 export const orderApi = baseBackendApi.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query<any, void>({
