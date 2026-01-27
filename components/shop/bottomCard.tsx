@@ -179,6 +179,7 @@ const products = [
 ];
 
 import { IProduct, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
+import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 
 interface BottomCardProps {
   products: IProduct[];
@@ -213,6 +214,20 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
 
   // Handler for the Love Icon
   const [saveProduct] = useSaveProductMutation();
+
+  // Handler for Shop Icon (Add to Cart)
+  const [addToCart, { isLoading: isAdding }] = useAddToCartMutation();
+
+  const handleAddToCart = async (productId: number, productName: string) => {
+    setToastMessage(`Adding ${productName} to cart...`);
+    try {
+      await addToCart({ product: productId, quantity: 1 }).unwrap();
+      setToastMessage(`${productName} added to cart!`);
+    } catch (error) {
+      console.error("Failed to add to cart", error);
+      setToastMessage("Failed to add to cart. Please try again.");
+    }
+  };
 
   const handleSaveToFavorites = useCallback(async (productId: number, productName: string) => {
     try {
@@ -253,7 +268,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
       </AnimatePresence>
 
       <main className="max-w-8xl mx-auto px-4 py-8">
-        <div className="flex flex-wrap justify-center md:justify-start gap-x-[30px] gap-y-10">
+        <div className="flex flex-wrap justify-center md:justify-start gap-x-7.5 gap-y-10">
           {products.map((product, index) => (
             <motion.div
               key={product.id}
@@ -293,7 +308,11 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
                     alt="Save to Favorites Icon"
                     onClick={() => handleSaveToFavorites(product.id, product.name)}
                   />
-                  <IconToggleButton src={shopIcon} alt="Shop Icon" />
+                  <IconToggleButton
+                    src={shopIcon}
+                    alt="Shop Icon"
+                    onClick={() => handleAddToCart(product.id, product.name)}
+                  />
                 </div>
 
                 <motion.button
@@ -344,7 +363,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
                   ))}
                 </div>
                 <motion.button
-                  className={`${jostFont.className} shadow text-[14px] w-3/4 h-12 mb-8 bg-[#D4AF37] text-[#000] py-3 tracking-[2.1px] uppercase font-medium`}
+                  className={`${jostFont.className} shadow text-[14px] w-3/4 h-12 mb-8 bg-[#D4AF37] text-black py-3 tracking-[2.1px] uppercase font-medium`}
                   whileHover={{
                     scale: 1.04,
                     backgroundColor: "#c2a25b",

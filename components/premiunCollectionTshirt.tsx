@@ -6,7 +6,8 @@ import { useState, useEffect } from "react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 
 // Import types from framer-motion if you want even stricter type checking
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import ToastMessage from "./ToastMessage";
 
 // --- Image Imports ---
 import mainTshirt from "../public/image/myCreationIcon/source_image.jpg";
@@ -46,6 +47,8 @@ const cormorantNormal = Cormorant_Garamond({
 });
 
 import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
+import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
+import { useRouter } from "next/navigation";
 
 // --- Interface Definitions ---
 interface Thumbnail {
@@ -184,6 +187,9 @@ export default function ProductPage({ productId }: { productId?: number }) {
   const [selectedColor, setSelectedColor] =
     useState<ColorData>(initialSelectedColor);
   const [quantity, setQuantity] = useState<number>(1);
+  const [addToCart] = useAddToCartMutation();
+  const router = useRouter();
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
   // --- Handlers ---
   const handleThumbnailClick = (image: Thumbnail, index: number) => {
@@ -263,7 +269,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
             />
             {/* Image Counter */}
             <div
-              className={`${jostFont.className} w-[38px] text-[12px] absolute bottom-2 right-2 text-white bg-[rgba(0,0,0,0.8)] px-5 py-1 text-center flex items-center justify-center `}
+              className={`${jostFont.className} w-9.5 text-[12px] absolute bottom-2 right-2 text-white bg-[rgba(0,0,0,0.8)] px-5 py-1 text-center flex items-center justify-center `}
             >
               <span className="text-center">
                 {mainImageIndex + 1}/{displayProduct.thumbnails.length}
@@ -303,10 +309,10 @@ export default function ProductPage({ productId }: { productId?: number }) {
             {
               apiProduct?.sub_category?.title && (
                 <span
-              className={`${jostFont.className} font-medium border-[1.2px] border-[#d4af37] px-3 py-1 transition text-[#d4af37] duration-300 hover:bg-gray-50`}
-            >
-              {apiProduct?.sub_category?.title}
-            </span>
+                  className={`${jostFont.className} font-medium border-[1.2px] border-[#d4af37] px-3 py-1 transition text-[#d4af37] duration-300 hover:bg-gray-50`}
+                >
+                  {apiProduct?.sub_category?.title}
+                </span>
               )
             }
 
@@ -618,7 +624,18 @@ export default function ProductPage({ productId }: { productId?: number }) {
             {/* ADD TO CART Button */}
             <button
               type="button"
-              className={`${jostFont.className} tracking-[2.1px] w-full py-3 mt-4 bg-white border font-medium text-sm transition duration-150 hover:text-white hover:shadow-lg`}
+              onClick={async () => {
+                if (!productId) return;
+                try {
+                  await addToCart({ product: productId, quantity }).unwrap();
+                  setToast({ message: "Added to cart!", type: "success" });
+                } catch (error) {
+                  console.error("Failed to add to cart", error);
+                  setToast({ message: "Failed to add to cart", type: "error" });
+                }
+              }}
+              disabled={!productId}
+              className={`${jostFont.className} tracking-[2.1px] w-full py-3 mt-4 bg-white border font-medium text-sm transition duration-150 hover:text-white hover:shadow-lg hover:bg-black`}
               style={{ borderColor: "#000000", color: "#1a1a1a" }}
             >
               ADD TO CART
@@ -672,7 +689,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
 
             {/* 4. 300 DPI Print */}
             <div className="flex items-start">
-              <div className="w-10 h-10 border border-[#E5E5E5] flex items-center justify-center mr-3 flex-shrink-0 transition duration-300 hover:border-gray-500">
+              <div className="w-10 h-10 border border-[#E5E5E5] flex items-center justify-center mr-3 shrink-0 transition duration-300 hover:border-gray-500">
                 <CustomIcon
                   src={thanderIcon}
                   alt="Shipping Icon"
@@ -692,6 +709,15 @@ export default function ProductPage({ productId }: { productId?: number }) {
           </div>
         </motion.div>
       </div>
+      <AnimatePresence>
+        {toast && (
+          <ToastMessage
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

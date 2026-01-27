@@ -10,6 +10,8 @@ import colorStarIcon from "@/public/image/shopIcon/colorStar.svg";
 
 import { useRouter } from "next/navigation";
 import { IProductQueryParams, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
+import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
+import ToastMessage from "../ToastMessage";
 
 const jostFont = Jost({
   subsets: ["latin"],
@@ -58,8 +60,24 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
   const router = useRouter();
   const [likedProductId, setLikedProductId] = useState<number | null>(null);
 
-  const handleOrderNow = () => {
-    router.push(`/pages/shipping`);
+  const handleOrderNow = async (productId: number) => {
+    try {
+      await addToCart({ product: productId, quantity: 1 }).unwrap();
+      router.push(`/pages/shipping`);
+    } catch (error) {
+      console.error("Failed to add to cart", error);
+      setToastMessage({ message: "Failed to add to cart", type: "error" });
+    }
+  };
+
+  const handleAddToCart = async (productId: number) => {
+    try {
+      await addToCart({ product: productId, quantity: 1 }).unwrap();
+      setToastMessage({ message: "Added to cart!", type: "success" });
+    } catch (error) {
+      console.error("Failed to add to cart", error);
+      setToastMessage({ message: "Failed to add to cart", type: "error" });
+    }
   };
 
   const handleCustomize = (id: number) => {
@@ -67,49 +85,26 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
   };
 
   const [saveProduct] = useSaveProductMutation();
-  const [toastMessage, setToastMessage] = useState<{ text: string, type: 'success' | 'info' | 'error' } | null>(null);
+  const [addToCart] = useAddToCartMutation();
+  const [toastMessage, setToastMessage] = useState<{ message: string, type: 'success' | 'info' | 'error' } | null>(null);
 
   const handleLikeProduct = async (productId: number, productName: string) => {
     try {
       const response = await saveProduct({ product: productId }).unwrap();
-      setToastMessage({ text: `${productName} saved successfully!`, type: 'success' });
+      setToastMessage({ message: `${productName} saved successfully!`, type: 'success' });
     } catch (err: any) {
       if (err?.data?.message === "Product already saved") {
-        setToastMessage({ text: `${productName} is already saved!`, type: 'info' });
+        setToastMessage({ message: `${productName} is already saved!`, type: 'info' });
       } else {
-        setToastMessage({ text: "Please login to save products", type: 'error' });
+        setToastMessage({ message: "Please login to save products", type: 'error' });
       }
     }
-    
+
     // Auto-dismiss logic is handled in the Toast component or here
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const Toast = ({ message, type }: { message: string, type: 'success' | 'info' | 'error' }) => {
-    let bgColor = "bg-green-600";
-    let icon = "❤️";
-    
-    if (type === 'info') {
-      bgColor = "bg-blue-600";
-      icon = "ℹ️";
-    } else if (type === 'error') {
-      bgColor = "bg-red-600";
-      icon = "⚠️";
-    }
 
-    return (
-      <motion.div
-        className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 ${bgColor} text-white p-4 rounded-lg shadow-xl z-50 flex items-center space-x-2 font-medium`}
-        initial={{ y: 50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 50, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        <span className="text-xl">{icon}</span>
-        <span>{message}</span>
-      </motion.div>
-    );
-  };
 
   if (isLoading) {
     return <Loader />;
@@ -166,7 +161,11 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
                     alt="Love Icon"
                     onClick={() => handleLikeProduct(product.id, product.name)}
                   />
-                  <IconToggleButton src={shopIcon} alt="Shop Icon" />
+                  <IconToggleButton
+                    src={shopIcon}
+                    alt="Shop Icon"
+                    onClick={() => handleAddToCart(product.id)}
+                  />
                 </div>
 
                 {/* CUSTOMIZE Button */}
@@ -217,7 +216,7 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
                   className={`${jostFont.className} shadow text-[14px] w-full h-12 mb-8 bg-[#D4AF37] text-[#000] py-3 tracking-[2.1px] uppercase font-medium hover:bg-[#c2a25b] transition-colors duration-300`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={handleOrderNow}
+                  onClick={() => handleOrderNow(product.id)}
                 >
                   ORDER NOW
                 </motion.button>
@@ -229,7 +228,7 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
 
       <AnimatePresence>
         {toastMessage && (
-          <Toast message={toastMessage.text} type={toastMessage.type} />
+          <ToastMessage message={toastMessage.message} type={toastMessage.type} onClose={() => setToastMessage(null)} />
         )}
       </AnimatePresence>
     </div>

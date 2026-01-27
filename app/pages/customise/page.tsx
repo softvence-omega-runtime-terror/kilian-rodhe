@@ -18,7 +18,7 @@ const CustomiseContent = () => {
     <>
       <PremiunCollectionTshirt productId={productId ? parseInt(productId) : undefined} />
       <DSCRsection productId={productId ? parseInt(productId) : undefined} />
-      <MayAlsoLike />
+      <MayAlsoLike productId={productId ? parseInt(productId) : undefined} />
       <CustomDesignStudio />
     </>
   );
