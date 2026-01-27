@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Search, Eye, Edit, Trash2 } from "lucide-react";
 
-import AddNewProductScreen from "@/components/admin/AddprofuctSection";
 import CustomerDetails from "./CustomerDetails";
 import EditCustomer from "./EditCustomer";
 
@@ -9,6 +8,7 @@ import EditCustomer from "./EditCustomer";
 import orderIcon from "@/public/image/admin/products/orderIcon.svg";
 import Image from "next/image";
 import Footer from "./FooterAdmin";
+import AddNewProductScreen from "./products/createProducts/AddprofuctSection";
 
 // --- Type Definitions ---
 type ViewType = "list" | "add" | "view" | "edit";

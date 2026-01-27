@@ -15,7 +15,7 @@ import increamentIcon from "@/public/image/admin/products/increamentArrow.svg";
 import stockIcon from "@/public/image/admin/products/stock.svg";
 import FooterAdmin from "@/components/admin/FooterAdmin";
 import Title from "./Title";
-import { ViewChangeHandler } from "./Products";
+import { ViewChangeHandler } from "./products/Products";
 
 // Card wrapper
 const Card = ({ children }: { children: React.ReactNode }) => (

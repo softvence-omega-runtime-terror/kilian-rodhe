@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-// ✅ Add the missing type here
+//  Add the missing type here
 interface DesignOption {
   key: string;
   title: string;
@@ -83,7 +83,7 @@ const DesignSelectorField = () => {
               key={option.key}
               type="button"
               onClick={() => handleDesignClick(option.key)}
-              // ✅ APPLYING CUSTOM GRADIENT AND BORDER COLORS HERE
+              //  APPLYING CUSTOM GRADIENT AND BORDER COLORS HERE
               className={`p-4 border rounded-xl text-left transition-all duration-200 ${customClasses}`}
             >
               <div

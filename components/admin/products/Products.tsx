@@ -521,12 +521,12 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Eye, Edit, Trash2 } from "lucide-react";
 
-import AddNewProductScreen from "@/components/admin/AddprofuctSection";
 import ProductDetailScreen from "@/components/admin/ProductDetailsScreen";
 import EditProduct from "@/components/admin/EditProduct";
 import Footer from "@/components/admin/FooterAdmin";
 import Title from "@/components/admin/Title";
 import { useGetAllProductsQuery } from "@/app/store/slices/services/adminService/products/productsApi";
+import AddNewProductScreen from "./createProducts/AddprofuctSection";
 
 /* ================= TYPES ================= */
 
@@ -753,8 +753,7 @@ const ProductListScreen = ({
   );
 };
 
-/* ================= MAIN APP ================= */
-
+// main compo...
 const App = () => {
   const [productData, setProductData] = useState<Product[]>([]);
   const [view, setView] = useState<ViewType>("list");
