@@ -8,15 +8,12 @@ import uploadIcon from "@/public/image/admin/products/upload.svg";
 import rightRoundedIcon from "@/public/image/admin/products/rightBorderIcon.svg";
 import qualityIcon from "@/public/image/admin/products/quality.svg";
 import DesignSelectorField from "./DesignSelectorField";
-import Title from "./Title";
-import { ViewChangeHandler } from "./Products";
+import Title from "../../Title";
+import { ViewChangeHandler } from "../Products";
+import Card from "@/app/utils/shared/Card";
+import QualityAssuranceBox from "./QualityAssuranceBox";
 
-// Card wrapper
-const Card = ({ children }: { children: React.ReactNode }) => (
-  <div className="bg-white p-6 md:p-8 rounded-2xl border border-[#e8e3dc]">
-    {children}
-  </div>
-);
+;
 
 // Input Field Component (Kept for completeness, not directly used in the list view)
 interface InputFieldProps {
@@ -319,21 +316,7 @@ const AddNewProductScreen = ({
     );
   };
 
-  const QualityAssuranceBox = () => (
-    <div className="flex flex-col  px-4 p-6 bg-[#ECF3FF] border border-[#BEDBFF] rounded-xl mt-6">
-      <div className="flex items-center  mb-2">
-        <Image src={qualityIcon} alt="quality" height={24} width={24} />
-        <h4 className="text-lg font-semibold ml-3 text-gray-800">
-          Quality Assurance
-        </h4>
-      </div>
-      <p className="text-sm text-gray-700 mt-1">
-        All products support <strong>300 DPI</strong> quality checks to ensure
-        crisp, professional printing results. Customers will be notified if
-        their uploaded designs don&apos;t meet quality standards.
-      </p>
-    </div>
-  );
+ <QualityAssuranceBox/>
 
   return (
     <>

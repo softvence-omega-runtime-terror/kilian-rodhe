@@ -328,7 +328,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     if (!refresh) {
       toast.error("No refresh token found. Logging out locally...");
       dispatch(logoutAction());
-      router.push("/admin/login");
+      router.push("/admin/signup");
       return;
     }
 
