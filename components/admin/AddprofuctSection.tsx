@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useRef } from "react";
 import { Check } from "lucide-react";
 import Image from "next/image";
@@ -7,6 +9,7 @@ import rightRoundedIcon from "@/public/image/admin/products/rightBorderIcon.svg"
 import qualityIcon from "@/public/image/admin/products/quality.svg";
 import DesignSelectorField from "./DesignSelectorField";
 import Title from "./Title";
+import { ViewChangeHandler } from "./Products";
 
 // Card wrapper
 const Card = ({ children }: { children: React.ReactNode }) => (
@@ -79,7 +82,7 @@ const InputField = ({
 const AddNewProductScreen = ({
   onViewChange,
 }: {
-  onViewChange: (view: string) => void;
+   onViewChange: ViewChangeHandler;
 }) => {
   const categoryOptions = [
     { value: "clothing", label: "Clothing" },
@@ -215,6 +218,7 @@ const AddNewProductScreen = ({
     required?: boolean;
     onColorChange?: (colors: string[]) => void;
   }
+
 
   interface SizeSelectorFieldProps {
     label: string;
