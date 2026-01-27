@@ -6,7 +6,6 @@ import Image from "next/image";
 
 import uploadIcon from "@/public/image/admin/products/upload.svg";
 import rightRoundedIcon from "@/public/image/admin/products/rightBorderIcon.svg";
-import qualityIcon from "@/public/image/admin/products/quality.svg";
 import DesignSelectorField from "./DesignSelectorField";
 import Title from "../../Title";
 import { ViewChangeHandler } from "../Products";
