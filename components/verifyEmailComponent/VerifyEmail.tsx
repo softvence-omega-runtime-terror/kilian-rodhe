@@ -2,7 +2,6 @@
 
 import { setCredentials } from "@/app/store/slices/authSlice";
 import { useVerifyOtpMutation } from "@/app/store/slices/services/auth/authApi";
-import { cleanString } from "@/app/utils/cleanString";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -76,6 +75,7 @@ export default function VerifyEmail({ email }: VerifyEmailProps) {
           user: fullUser,
           access: payload.data.tokens.access || "",
           refresh: payload.data.tokens.refresh || "",
+          role: ""
         })
       );
 

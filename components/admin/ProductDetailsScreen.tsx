@@ -108,8 +108,7 @@ const ProductDetailScreen = ({
   const rawApiProduct = data?.data;
   if (!rawApiProduct) return <div className="p-8 text-red-500">Product data not available.</div>;
 
-  /* ================= ✅ FIX STARTS HERE ================= */
-
+// initialize before here img
   const images: ProductImage[] = Array.isArray(rawApiProduct.images)
     ? rawApiProduct.images
         .map((img, idx): ProductImage | null => {
@@ -141,13 +140,11 @@ const ProductDetailScreen = ({
     description: rawApiProduct.description?.trim() || "",
   };
 
-  /* ================= FIX ENDS HERE ================= */
 
   const allSizes = [...(p.cloth_size || []), ...(p.kids_size || []), ...(p.mug_size || [])];
   const selectedImage = images[selectedImageIndex] || { id: 0, image: productImage };
 
-  /* ======= REST OF YOUR JSX IS 100% UNCHANGED ======= */
-  // ⬇⬇⬇ everything below stays exactly as you wrote it
+
 
 
   return (
