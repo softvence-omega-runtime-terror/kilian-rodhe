@@ -102,6 +102,7 @@ const ProductDetailScreen = ({
 }) => {
   const { data, isLoading } = useGetSingleProductQuery(productId);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  console.log(data, "single prod info")
 
   if (isLoading) return <div className="p-8">Loading product details…</div>;
 
