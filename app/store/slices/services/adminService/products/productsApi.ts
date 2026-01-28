@@ -93,8 +93,6 @@ export const productsApi = baseBackendApi.injectEndpoints({
   overrideExisting: false,
 });
 
-/* =========================
-   EXPORT HOOKS
-========================= */
+
 
 export const { useGetAllProductsQuery, useGetSingleProductQuery } = productsApi;

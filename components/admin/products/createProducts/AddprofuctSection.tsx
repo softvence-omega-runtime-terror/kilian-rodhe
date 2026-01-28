@@ -11,6 +11,7 @@ import Title from "../../Title";
 import { ViewChangeHandler } from "../Products";
 import Card from "@/app/utils/shared/Card";
 import QualityAssuranceBox from "./QualityAssuranceBox";
+import ColorSelectorField from "./ColorSelectorField";
 
 ;
 
@@ -137,83 +138,7 @@ const AddNewProductScreen = ({
     }
   };
 
-  const ColorSelectorField = ({
-    label,
-    description,
-    colors,
-    required = true,
-    onColorChange,
-  }: ColorSelectorFieldProps) => {
-    const [selectedColors, setSelectedColors] = useState<string[]>([]);
-
-    const handleColorClick = (value: string) => {
-      setSelectedColors((prev) => {
-        const newSelected = prev.includes(value)
-          ? prev.filter((c) => c !== value)
-          : [...prev, value];
-        onColorChange?.(newSelected);
-        return newSelected;
-      });
-    };
-
-    return (
-      <div className="flex flex-col space-y-2">
-        <label className="text-lg font-semibold text-gray-800">
-          {label} {required && <span className="text-red-500">*</span>}
-        </label>
-        <p className="text-sm text-gray-500 mb-4">{description}</p>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {colors.map((color) => (
-            <button
-              key={color.value}
-              type="button"
-              onClick={() => handleColorClick(color.value)}
-              className={`flex items-center justify-start p-3 border rounded-xl transition-all duration-200 ${
-                selectedColors.includes(color.value)
-                  ? "border-[#8B6F47] ring-2 ring-[#8B6F47]/50 bg-[#8B6F47]/10"
-                  : "border-gray-300 hover:border-gray-400 bg-gray-50 hover:bg-gray-100"
-              }`}
-            >
-              <span
-                className={`w-6 h-6 rounded-full mr-3 border border-gray-200 shadow-sm flex items-center justify-center ${
-                  color.value === "white" ? "border-gray-400" : ""
-                }`}
-                style={{ backgroundColor: color.hex }}
-              >
-                {selectedColors.includes(color.value) && (
-                  <Check
-                    className={`w-4 h-4 ${
-                      color.value === "white" || color.value === "yellow"
-                        ? "text-[#8B6F47]"
-                        : "text-white"
-                    }`}
-                  />
-                )}
-              </span>
-              <span
-                className={`font-medium ${
-                  selectedColors.includes(color.value)
-                    ? "text-[#8B6F47]"
-                    : "text-gray-700"
-                }`}
-              >
-                {color.label}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  interface ColorSelectorFieldProps {
-    label: string;
-    description: string;
-    colors: { value: string; label: string; hex: string }[];
-    required?: boolean;
-    onColorChange?: (colors: string[]) => void;
-  }
+  
 
 
   interface SizeSelectorFieldProps {
