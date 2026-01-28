@@ -54,6 +54,14 @@ export const orderApi = baseBackendApi.injectEndpoints({
       }),
       invalidatesTags: ["Cart"],
     }),
+    checkout: builder.mutation<any, { card_products: any[]; shipping_id: number }>({
+      query: (body) => ({
+        url: "/order/orders/checkout/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Cart", "Orders"],
+    }),
   }),
 });
 
@@ -61,5 +69,6 @@ export const {
   useGetCartQuery,
   useAddToCartMutation,
   useUpdateCartItemMutation,
-  useDeleteCartItemMutation
+  useDeleteCartItemMutation,
+  useCheckoutMutation
 } = orderApi;

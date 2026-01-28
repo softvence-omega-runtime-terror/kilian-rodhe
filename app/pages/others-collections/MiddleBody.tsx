@@ -358,7 +358,7 @@ export default function AllProductsCollectionPage() {
   }, [router]);
 
   const handleOrderNow = useCallback(() => {
-    router.push(`/pages/shipping`);
+    router.push(`/pages/checkout`);
   }, [router]);
 
   // --- Filtering & Pagination Handlers ---

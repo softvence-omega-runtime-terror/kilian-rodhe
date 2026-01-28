@@ -205,7 +205,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const handleOrderNow = () => {
-    router.push(`/pages/shipping`);
+    router.push(`/pages/checkout`);
   };
 
   const handleCustomize = (id: number) => {

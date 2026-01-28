@@ -444,7 +444,7 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   const handleOrderNow = useCallback(async (product: Product) => {
     try {
       await addToCart({ product: product.id, quantity: 1 }).unwrap();
-      router.push(`/pages/shipping`);
+      router.push(`/pages/checkout`);
     } catch (error) {
       console.error("Failed to add to cart", error);
       setToast({ message: "Failed to add to cart. Please try again.", type: 'error' });
