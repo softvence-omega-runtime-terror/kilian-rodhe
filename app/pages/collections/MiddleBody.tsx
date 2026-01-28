@@ -5,6 +5,7 @@ import { Jost, Cormorant_Garamond } from "next/font/google";
 import Image, { StaticImageData } from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGetProductsQuery, useGetProductCategoriesQuery, ICategory, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
+import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Images (Ensure you have a checkmark icon or use an SVG/Unicode character)
@@ -149,12 +150,13 @@ const ToastMessage = ({ message, type, onClose }: { message: string; type: 'succ
 
 type ProductCardProps = {
   product: Product;
-  handleOrderNow: () => void;
+  handleOrderNow: (product: Product) => void;
+  handleAddToCart: (product: Product) => void;
   handleCustomizeRoute: (id: number) => void;
   onSaveProduct: (message: string, type: 'success' | 'info' | 'error') => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrderNow, handleCustomizeRoute, onSaveProduct }) => {
+const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrderNow, handleAddToCart, handleCustomizeRoute, onSaveProduct }) => {
   const {
     title,
     subtitle,
@@ -178,7 +180,9 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
     console.log(`${action} for Product ID: ${product.id}`);
 
     if (action === "Order Now") {
-      handleOrderNow();
+      handleOrderNow(product);
+    } else if (action === "Quick Shop") {
+      handleAddToCart(product);
     } else if (action === "Customize") {
       handleCustomizeRoute(product.id);
     } else if (action === "Wishlist") {
@@ -435,9 +439,27 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   }, []);
 
   // ... (Action handlers same)
-  const handleOrderNow = useCallback(() => {
-    router.push(`/pages/shipping`);
-  }, [router]);
+  const [addToCart] = useAddToCartMutation();
+
+  const handleOrderNow = useCallback(async (product: Product) => {
+    try {
+      await addToCart({ product: product.id, quantity: 1 }).unwrap();
+      router.push(`/pages/shipping`);
+    } catch (error) {
+      console.error("Failed to add to cart", error);
+      setToast({ message: "Failed to add to cart. Please try again.", type: 'error' });
+    }
+  }, [router, addToCart]);
+
+  const handleAddToCart = useCallback(async (product: Product) => {
+    try {
+      await addToCart({ product: product.id, quantity: 1 }).unwrap();
+      setToast({ message: "Added to cart successfully!", type: 'success' });
+    } catch (error) {
+      console.error("Failed to add to cart", error);
+      setToast({ message: "Failed to add to cart. Please try again.", type: 'error' });
+    }
+  }, [addToCart]);
 
   const handleCustomizeRoute = useCallback((id: number) => {
     router.push(`/pages/customise?id=${id}`);
@@ -650,6 +672,7 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
                 key={product.id}
                 product={product}
                 handleOrderNow={handleOrderNow}
+                handleAddToCart={handleAddToCart}
                 handleCustomizeRoute={handleCustomizeRoute}
                 onSaveProduct={(msg, type) => setToast({ message: msg, type })}
               />
