@@ -124,8 +124,6 @@ export const createProductApi = baseBackendApi.injectEndpoints({
   overrideExisting: false,
 });
 
-/* =========================
-   EXPORT HOOK
-========================= */
+  //  EXPORT HOOK
 
 export const { useCreateProductMutation } = createProductApi;

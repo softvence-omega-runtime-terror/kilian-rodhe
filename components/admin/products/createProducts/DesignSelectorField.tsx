@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 //  Add the missing type here
 interface DesignOption {
@@ -8,7 +8,14 @@ interface DesignOption {
   icon: React.ReactNode;
 }
 
-const DesignSelectorField = () => {
+// 🔹 Add onDesignChange prop
+interface DesignSelectorFieldProps {
+  onDesignChange?: (selected: string[]) => void;
+}
+
+const DesignSelectorField: React.FC<DesignSelectorFieldProps> = ({
+  onDesignChange,
+}) => {
   const designOptions: DesignOption[] = [
     {
       key: "ai",
@@ -30,13 +37,20 @@ const DesignSelectorField = () => {
     },
   ];
 
-  const [selectedDesigns, setSelectedDesigns] = useState<string[]>([]); // Changed to empty array for cleaner selection state
+  const [selectedDesigns, setSelectedDesigns] = useState<string[]>([]);
 
   const handleDesignClick = (key: string) => {
     setSelectedDesigns((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     );
   };
+
+  // 🔹 Notify parent whenever selection changes
+  useEffect(() => {
+    if (onDesignChange) {
+      onDesignChange(selectedDesigns);
+    }
+  }, [selectedDesigns, onDesignChange]);
 
   // --- Helper function to get card styles ---
   const getCardStyles = (key: string, isSelected: boolean) => {
@@ -83,7 +97,6 @@ const DesignSelectorField = () => {
               key={option.key}
               type="button"
               onClick={() => handleDesignClick(option.key)}
-              //  APPLYING CUSTOM GRADIENT AND BORDER COLORS HERE
               className={`p-4 border rounded-xl text-left transition-all duration-200 ${customClasses}`}
             >
               <div

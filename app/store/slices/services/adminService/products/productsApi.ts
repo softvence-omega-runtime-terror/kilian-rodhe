@@ -84,7 +84,7 @@ export const productsApi = baseBackendApi.injectEndpoints({
     // Get single product by ID
     getSingleProduct: builder.query<GetSingleProductResponse, number>({
       query: (id) => ({
-        url: `/product/products/${id}`,
+        url: `/product/products/${id}/`,
         method: "GET",
       }),
       providesTags: (result, error, id) => [{ type: "Products", id }],
