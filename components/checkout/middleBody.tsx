@@ -193,13 +193,13 @@ const CheckoutReview: React.FC = () => {
       .filter(item => selectedItems.includes(item.id))
       .map(item => {
         const sizes = [
-          ...(item.product.cloth_size || []),
-          ...(item.product.kids_size || []),
-          ...(item.product.mug_size || [])
+          ...(item?.product?.cloth_size || []),
+          ...(item?.product?.kids_size || []),
+          ...(item?.product?.mug_size || [])
         ];
-        const colors = item.product.colors && item.product.colors.length > 0
-          ? item.product.colors
-          : (item.product.color_code ? [item.product.color_code] : []);
+        const colors = item?.product?.colors && item?.product?.colors.length > 0
+          ? item?.product?.colors
+          : (item?.product?.color_code ? [item?.product?.color_code] : []);
 
         return {
           checkout_card_id: item.id,
@@ -331,9 +331,9 @@ const CheckoutReview: React.FC = () => {
                             <label className="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-1 block">Size</label>
                             {(() => {
                               const sizes = [
-                                ...(item.product.cloth_size || []),
-                                ...(item.product.kids_size || []),
-                                ...(item.product.mug_size || [])
+                                ...(item?.product?.cloth_size || []),
+                                ...(item?.product?.kids_size || []),
+                                ...(item?.product?.mug_size || [])
                               ];
                               if (sizes.length === 0) return <p className="text-xs text-red-500 italic">No sizes available</p>;
                               return (
