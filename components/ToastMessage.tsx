@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect } from "react";
+import { motion } from "framer-motion";
 import { Jost } from "next/font/google";
 
 const jostFont = Jost({
@@ -26,14 +26,14 @@ const ToastMessage = ({ message, type, onClose, duration = 3000 }: ToastProps) =
     }, [onClose, duration]);
 
     let bgColor = "bg-green-600";
-    let icon = "✅";
+    let icon = "";
 
     if (type === "info") {
         bgColor = "bg-blue-600";
-        icon = "ℹ️";
+        icon = "ℹ";
     } else if (type === "error") {
         bgColor = "bg-red-600";
-        icon = "⚠️";
+        icon = "";
     }
 
     return (

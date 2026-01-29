@@ -270,21 +270,21 @@ type IconType =
   | React.FC<React.SVGProps<SVGSVGElement>>
   | StaticImageData;
 
-/** 🔑 ROUTE MAP (source of truth) */
+/**  ROUTE MAP (source of truth) */
 const navItems: {
   name: string;
   href: string;
   icon: IconType;
 }[] = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Products", href: "/admin/products", icon: Package },
-  { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
-  { name: "Customers", href: "/admin/customers", icon: Users },
-  { name: "Discount Codes", href: "/admin/discounts", icon: discountCardIcon },
-  { name: "Design Quality", href: "/admin/design", icon: Sparkles },
-  { name: "Content & CMS", href: "/admin/cms", icon: FileText },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
-];
+    { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+    { name: "Products", href: "/admin/products", icon: Package },
+    { name: "Orders", href: "/admin/orders", icon: ShoppingCart },
+    { name: "Customers", href: "/admin/customers", icon: Users },
+    { name: "Discount Codes", href: "/admin/discounts", icon: discountCardIcon },
+    { name: "Design Quality", href: "/admin/design", icon: Sparkles },
+    { name: "Content & CMS", href: "/admin/cms", icon: FileText },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
+  ];
 
 interface SidebarProps {
   isOpen: boolean;
@@ -318,6 +318,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
 
   const auth = useSelector(selectAuth);
   const { refresh } = auth;
+  console.log(auth, "auth inof")
 
   const [logoutApi] = useLogoutMutation();
 
@@ -352,9 +353,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
     <>
       {/* Backdrop (Mobile) */}
       <div
-        className={`fixed inset-0 bg-black/50 z-40 transition-opacity lg:hidden ${
-          isOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className={`fixed inset-0 bg-black/50 z-40 transition-opacity lg:hidden ${isOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
         onClick={toggleSidebar}
       />
 
@@ -394,11 +394,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
                   key={item.href}
                   href={item.href}
                   onClick={toggleSidebar}
-                  className={`flex items-center rounded-lg px-2 py-3 w-full text-sm font-medium transition-colors duration-200 ${
-                    isActive
-                      ? "bg-[#8B6F47] text-white"
-                      : "text-stone-300 hover:bg-stone-700 hover:text-white"
-                  }`}
+                  className={`flex items-center rounded-lg px-2 py-3 w-full text-sm font-medium transition-colors duration-200 ${isActive
+                    ? "bg-[#8B6F47] text-white"
+                    : "text-stone-300 hover:bg-stone-700 hover:text-white"
+                    }`}
                 >
                   {renderIcon(item.icon)}
                   {item.name}

@@ -48,7 +48,7 @@ const cormorantNormal = Cormorant_Garamond({
 
 import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 
 // --- Interface Definitions ---
 interface Thumbnail {
@@ -75,7 +75,7 @@ interface ProductData {
 }
 
 interface CustomIconProps {
-  src: any;
+  src: string | StaticImageData;
   alt: string;
   className?: string;
   style?: React.CSSProperties;
@@ -188,7 +188,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
     useState<ColorData>(initialSelectedColor);
   const [quantity, setQuantity] = useState<number>(1);
   const [addToCart] = useAddToCartMutation();
-  const router = useRouter();
+  // const router = useRouter();
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
   // --- Handlers ---

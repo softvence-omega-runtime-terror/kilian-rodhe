@@ -36,11 +36,10 @@ const NavLink = ({
     <Link
       href={href}
       onClick={onClick}
-      className={`text-sm font-medium tracking-[1.8px] uppercase py-1 transition duration-300 ease-in-out cursor-pointer block ${
-        isActive
+      className={`text-sm font-medium tracking-[1.8px] uppercase py-1 transition duration-300 ease-in-out cursor-pointer block ${isActive
           ? "text-[#795548] border-b-2 border-[#795548]"
           : "text-[#1a1a1a] hover:text-[#795548] hover:border-b-2 hover:border-[#795548]/50"
-      }`}
+        }`}
     >
       {children}
     </Link>
@@ -84,7 +83,7 @@ const Header: NextPage = () => {
   const auth = useSelector(selectAuth);
   const { refresh, isAuthenticated } = auth;
 
-  const [logoutApi, { isLoading: isLoggingOut }] = useLogoutMutation();
+  const [logoutApi] = useLogoutMutation();
 
   // Click outside handler
   useEffect(() => {
@@ -122,26 +121,26 @@ const Header: NextPage = () => {
 
   // Inside your Header component (logot)
   const handleLogout = async () => {
-  if (!refresh) {
-    toast.error("No refresh token found. Logging out locally...");
-    dispatch(logoutAction());
-    router.push("/");
-    return;
-  }
+    if (!refresh) {
+      toast.error("No refresh token found. Logging out locally...");
+      dispatch(logoutAction());
+      router.push("/");
+      return;
+    }
 
-  try {
-    toast.loading("Logging out..."); 
-    await logoutApi({ refresh }).unwrap();
-    dispatch(logoutAction());
-    toast.success("Logged out successfully!"); 
-    router.push("/");
-  } catch (err: any) {
-    console.error("Logout error:", err);
-    toast.error("Failed to logout via API. Cleared session locally.");
-    dispatch(logoutAction());
-    router.push("/");
-  }
-};
+    try {
+      toast.loading("Logging out...");
+      await logoutApi({ refresh }).unwrap();
+      dispatch(logoutAction());
+      toast.success("Logged out successfully!");
+      router.push("/");
+    } catch (err: unknown) {
+      console.error("Logout error:", err);
+      toast.error("Failed to logout via API. Cleared session locally.");
+      dispatch(logoutAction());
+      router.push("/");
+    }
+  };
 
 
   return (
@@ -212,9 +211,8 @@ const Header: NextPage = () => {
       {/* User Dropdown */}
       <div
         ref={userMenuRef}
-        className={`absolute top-full right-0 mt-2 w-40 bg-white shadow-lg rounded-md transition-all duration-300 ease-in-out ${
-          isUserMenuOpen ? "opacity-100 max-h-40" : "opacity-0 max-h-0"
-        }`}
+        className={`absolute top-full right-0 mt-2 w-40 bg-white shadow-lg rounded-md transition-all duration-300 ease-in-out ${isUserMenuOpen ? "opacity-100 max-h-40" : "opacity-0 max-h-0"
+          }`}
         style={{ overflow: "hidden" }}
       >
         {isAuthenticated ? (

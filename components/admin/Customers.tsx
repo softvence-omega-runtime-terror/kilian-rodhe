@@ -8,7 +8,7 @@ import EditCustomer from "./EditCustomer";
 import orderIcon from "@/public/image/admin/products/orderIcon.svg";
 import Image from "next/image";
 import Footer from "./FooterAdmin";
-import AddNewProductScreen from "./products/createProducts/AddprofuctSection";
+import AddNewProductScreen from "./products/createProducts/AddProductSection";
 
 // --- Type Definitions ---
 type ViewType = "list" | "add" | "view" | "edit";
@@ -104,9 +104,8 @@ const SegmentBadge = ({ segment }: { segment: "Regular" | "New" }) => {
   const isRegular = segment === "Regular";
   return (
     <span
-      className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-        isRegular ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
-      }`}
+      className={`px-3 py-1 rounded-lg text-xs font-semibold ${isRegular ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
+        }`}
     >
       {segment}
     </span>

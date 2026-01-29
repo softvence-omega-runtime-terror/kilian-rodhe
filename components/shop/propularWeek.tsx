@@ -9,7 +9,7 @@ import arrowIcon from "@/public/image/shopIcon/arrowIcon.svg";
 import colorStarIcon from "@/public/image/shopIcon/colorStar.svg";
 
 import { useRouter } from "next/navigation";
-import { IProductQueryParams, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
+import { useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 import ToastMessage from "../ToastMessage";
 
@@ -58,7 +58,7 @@ import { IProduct } from "@/app/store/slices/services/product/productApi";
 
 export default function PopularWeek({ products, isLoading }: { products: IProduct[], isLoading: boolean }) {
   const router = useRouter();
-  const [likedProductId, setLikedProductId] = useState<number | null>(null);
+  // const [likedProductId, setLikedProductId] = useState<number | null>(null);
 
   const handleOrderNow = async (productId: number) => {
     try {
@@ -90,10 +90,10 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
 
   const handleLikeProduct = async (productId: number, productName: string) => {
     try {
-      const response = await saveProduct({ product: productId }).unwrap();
+      await saveProduct({ product: productId }).unwrap();
       setToastMessage({ message: `${productName} saved successfully!`, type: 'success' });
-    } catch (err: any) {
-      if (err?.data?.message === "Product already saved") {
+    } catch (err: unknown) {
+      if ((err as { data?: { message?: string } })?.data?.message === "Product already saved") {
         setToastMessage({ message: `${productName} is already saved!`, type: 'info' });
       } else {
         setToastMessage({ message: "Please login to save products", type: 'error' });
