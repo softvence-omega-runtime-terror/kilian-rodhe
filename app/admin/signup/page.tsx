@@ -107,9 +107,10 @@ const SignInForm = () => {
           router.push("/");
         }
       }, 800);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
-      toast.error(err?.data?.message || "Invalid email or password");
+      const errorMessage = (err as { data?: { message?: string } })?.data?.message || "Invalid email or password";
+      toast.error(errorMessage);
       setLoading(false);
     }
   };

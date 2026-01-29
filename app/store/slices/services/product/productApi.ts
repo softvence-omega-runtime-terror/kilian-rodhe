@@ -123,7 +123,7 @@ export const productApi = baseBackendApi.injectEndpoints({
       }),
       providesTags: ["SavedProducts"],
     }),
-    saveProduct: builder.mutation<{ message: string; data?: any }, { product: number }>({
+    saveProduct: builder.mutation<{ message: string; data?: unknown }, { product: number }>({
       query: (body) => ({
         url: "/product/saved-products/",
         method: "POST",
@@ -212,4 +212,3 @@ export const {
   useDeleteSavedProductMutation,
   useGetProductReviewsQuery,
 } = productApi;
-    

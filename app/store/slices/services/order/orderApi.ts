@@ -24,14 +24,14 @@ export interface ICartResponse {
 
 export const orderApi = baseBackendApi.injectEndpoints({
   endpoints: (builder) => ({
-    getCart: builder.query<any, void>({
+    getCart: builder.query<ICartResponse, void>({
       query: () => ({
         url: "/order/cart/",
         method: "GET",
       }),
       providesTags: ["Cart"],
     }),
-    addToCart: builder.mutation<any, { product: number; quantity: number }>({
+    addToCart: builder.mutation<ICartResponse, { product: number; quantity: number }>({
       query: (body) => ({
         url: "/order/cart/",
         method: "POST",
@@ -39,7 +39,7 @@ export const orderApi = baseBackendApi.injectEndpoints({
       }),
       invalidatesTags: ["Cart"],
     }),
-    updateCartItem: builder.mutation<any, { product_id: number; quantity: number }>({
+    updateCartItem: builder.mutation<ICartResponse, { product_id: number; quantity: number }>({
       query: ({ product_id, quantity }) => ({
         url: `/order/cart/${product_id}/`,
         method: "PATCH",
@@ -47,7 +47,7 @@ export const orderApi = baseBackendApi.injectEndpoints({
       }),
       invalidatesTags: ["Cart"],
     }),
-    deleteCartItem: builder.mutation<any, number>({
+    deleteCartItem: builder.mutation<{ success: boolean }, number>({
       query: (id) => ({
         url: `/order/cart/${id}/`,
         method: "DELETE",

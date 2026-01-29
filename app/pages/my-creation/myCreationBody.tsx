@@ -2,14 +2,13 @@
 import { useState } from "react";
 import { Cormorant_Garamond } from "next/font/google";
 // 1. IMPORT ROUTER FOR REAL NAVIGATION
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 // Placeholder image for standalone environment
-const ICON_PLACEHOLDER_URL =
-  "https://placehold.co/112x112/E0E7FF/4338CA/png?text=%E2%9C%A8";
+
 
 // Ensure you have this path or replace with a local placeholder if needed
-import emptyIcon from "@/public/image/myCreationIcon/Icon.svg"; 
+import emptyIcon from "@/public/image/myCreationIcon/Icon.svg";
 import Image from "next/image";
 
 const cormorantItalic = Cormorant_Garamond({
@@ -238,7 +237,7 @@ const ProductCard = ({ product, tabType, onDelete }: ProductCardProps) => {
           src={product.image}
           className="w-full h-full object-cover"
           alt={product.title}
-          // Using a standard <img> tag for external URLs 
+        // Using a standard <img> tag for external URLs 
         />
 
         {isOrdered && (
@@ -296,7 +295,7 @@ const EmptyCreationsState = ({
         src={emptyIcon}
         alt="No Creations Icon"
         className="w-full h-full object-contain opacity-90"
-        priority 
+        priority
       />
     </div>
 
@@ -309,9 +308,8 @@ const EmptyCreationsState = ({
     <button
       onClick={onFindProduct}
       disabled={isLoading}
-      className={`px-8 py-3 bg-[#D4AF37] text-white font-bold flex items-center justify-center mx-auto ${
-        isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-[#c9a632]"
-      }`}
+      className={`px-8 py-3 bg-[#D4AF37] text-white font-bold flex items-center justify-center mx-auto ${isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-[#c9a632]"
+        }`}
     >
       {isLoading ? (
         <>
@@ -351,7 +349,7 @@ const EmptyCreationsState = ({
 export default function App() {
   // Initialize Next.js Router
   const router = useRouter();
-  
+
   const [activeTab, setActiveTab] =
     useState<"ordered" | "saved" | "my">("ordered");
 
@@ -381,7 +379,7 @@ export default function App() {
 
     setTimeout(() => {
       // REAL NEXT.JS ROUTER NAVIGATION
-      router.push("/pages/shop"); 
+      router.push("/pages/shop");
       setIsLoading(false);
     }, 1000);
   };
@@ -427,7 +425,7 @@ export default function App() {
     const deleteHandler =
       tab === "saved" || tab === "my"
         ? (id: string, title: string) =>
-            openDeleteModal(id, title, tab)
+          openDeleteModal(id, title, tab)
         : undefined;
 
     return (
@@ -467,19 +465,17 @@ export default function App() {
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`w-full md:w-auto flex justify-center items-center space-x-2 py-3 px-4 transition-all ${
-                activeTab === t.id
+              className={`w-full md:w-auto flex justify-center items-center space-x-2 py-3 px-4 transition-all ${activeTab === t.id
                   ? "text-white bg-indigo-600"
                   : "text-gray-600 bg-white"
-              }`}
+                }`}
             >
               <span className="uppercase">{t.label}</span>
               <span
-                className={`rounded-full px-2 text-xs font-bold ${
-                  activeTab === t.id
+                className={`rounded-full px-2 text-xs font-bold ${activeTab === t.id
                     ? "bg-white text-indigo-600"
                     : "bg-gray-200"
-                }`}
+                  }`}
               >
                 {t.count}
               </span>

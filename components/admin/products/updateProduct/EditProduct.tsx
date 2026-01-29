@@ -6,7 +6,7 @@ import { X, Check, ArrowLeftIcon } from "lucide-react";
 
 // Local icons
 import uploadIcon from "@/public/image/admin/products/upload.svg";
-import rightRoundedIcon from "@/public/image/admin/products/rightBorderIcon.svg";
+// import rightRoundedIcon from "@/public/image/admin/products/rightBorderIcon.svg";
 import qualityIcon from "@/public/image/admin/products/quality.svg";
 import dollerIcon from "@/public/image/admin/products/doller.svg";
 import increamentIcon from "@/public/image/admin/products/increamentArrow.svg";
@@ -88,7 +88,7 @@ interface InputFieldProps {
   required?: boolean;
   options?: { value: string; label: string }[];
   value?: string | number;
-  onChange?: (e: any) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   disabled?: boolean;
 }
 
@@ -400,9 +400,9 @@ const EditProduct = ({
       toast.success("Product updated successfully!");
       onViewChange("list");
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Update failed:", err);
-      const msg = err?.data?.message || err?.message || "Failed to update product";
+      const msg = (err as { data?: { message?: string }; message?: string })?.data?.message || (err as { message?: string })?.message || "Failed to update product";
       toast.error(msg);
     }
   };
@@ -476,7 +476,7 @@ const EditProduct = ({
         </label>
         <p className="text-sm text-gray-500 mb-4">{description}</p>
 
-        {sizeGroups.map((group, idx) => (
+        {sizeGroups.map((group) => (
           <div key={group.type}>
             <h4 className="text-base font-medium text-gray-700 mb-3 mt-4">{group.title}</h4>
             <div className="flex flex-wrap gap-3 mb-4">

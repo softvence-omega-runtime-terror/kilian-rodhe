@@ -35,7 +35,7 @@ interface ApiResponse {
     profile: UserProfile;
     tokens: Tokens;
   };
-  errors?: any;
+  errors?: unknown;
 }
 
 /* =======================
@@ -48,7 +48,7 @@ interface LoginResponse {
   refresh: string;
   user: User;
   profile: UserProfile;
-   role: string; 
+  role: string;
 }
 
 /* =======================

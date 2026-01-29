@@ -8,7 +8,7 @@ import calanderIcon from "@/public/image/admin/products/calanderIcon.svg";
 import crossIcon from "@/public/image/admin/products/crossIcon.svg";
 import { useGetSingleProductQuery } from "@/app/store/slices/services/adminService/products/productsApi";
 import { ViewChangeHandler } from "./products/Products";
-import { Product, ProductImage } from "@/app/utils/types/productTypes";
+import { ProductImage } from "@/app/utils/types/productTypes";
 import Card from "@/app/utils/shared/Card";
 import {
   useGetAllCategoriesQuery,
@@ -143,7 +143,7 @@ const ProductDetailScreen = ({
   const sourceImages = rawApiProduct.images_data || rawApiProduct.images || [];
   const images: ProductImage[] = Array.isArray(sourceImages)
     ? sourceImages
-      .map((img: any, idx: number): ProductImage | null => {
+      .map((img: string | { id?: number; image: string }, idx: number): ProductImage | null => {
         if (typeof img === "string" && img.trim()) return { id: idx, image: img };
         if (typeof img === "object" && img?.image) return { id: img.id || idx, image: img.image };
         return null;
@@ -153,7 +153,7 @@ const ProductDetailScreen = ({
 
   // --- Normalize Sizes ---
   // Can be string[] OR object { XS: 1, L: 1 }
-  const normalizeSizes = (sizes: any): string[] => {
+  const normalizeSizes = (sizes: unknown): string[] => {
     if (Array.isArray(sizes)) return sizes;
     if (typeof sizes === "object" && sizes !== null) return Object.keys(sizes);
     return [];
@@ -173,8 +173,8 @@ const ProductDetailScreen = ({
       else resolvedColors.push(c);
     });
   } else if (typeof rawApiProduct.colors === "string") {
-    // @ts-ignore
-    resolvedColors = rawApiProduct.colors.split(",");
+  } else if (typeof rawApiProduct.colors === "string") {
+    resolvedColors = (rawApiProduct.colors as string).split(",");
   }
 
   // Construct display object

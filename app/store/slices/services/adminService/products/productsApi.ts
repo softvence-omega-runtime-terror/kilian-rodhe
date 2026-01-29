@@ -62,8 +62,8 @@ interface GetSingleProductResponse {
 interface BasicApiResponse {
   success: boolean;
   message: string;
-  data: any;
-  errors?: any;
+  data: unknown;
+  errors?: unknown;
 }
 
 /* ===========================
@@ -200,7 +200,7 @@ export const productsApi = baseBackendApi.injectEndpoints({
       invalidatesTags: ["Products"],
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 /* ===========================

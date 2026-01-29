@@ -4,19 +4,12 @@ import React, { useState, useMemo, useCallback } from "react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 import Image, { StaticImageData } from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useGetProductsQuery, useGetProductCategoriesQuery, ICategory, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
+import { useGetProductsQuery, ICategory, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 import { motion, AnimatePresence } from "framer-motion";
 
 // Images (Ensure you have a checkmark icon or use an SVG/Unicode character)
-import hoodi from "@/public/image/collections/imag1.jpg";
-import cap from "@/public/image/collections/imag2.jpg";
-import hoodi2 from "@/public/image/collections/image.jpg";
-import tshirt from "@/public/image/collections/image4.jpg";
 
-import cap2 from "@/public/image/collections/img4.jpg";
-import hoodi3 from "@/public/image/collections/img5.jpg";
-import tshirt2 from "@/public/image/collections/img7.jpg";
 
 import shop from "@/public/image/collections/shop.svg";
 import heart from "@/public/image/collections/heartIcon.svg";
@@ -63,16 +56,15 @@ export type Product = {
 };
 
 // Helper to extract numerical price
-const getPriceValue = (price: string) => parseFloat(price.replace(/[^0-9.]/g, ''));
+
 
 // Static data removed in favor of API
-const PRODUCTS_PER_PAGE = 8;
+
 
 // ----------------------------------------------------------------------
 // Filters (Unchanged)
 // ----------------------------------------------------------------------
-const ageGroups = ["ALL", "18-25", "26-35", "36-50", "50+"];
-const productTypes = ["T-SHIRTS", "HOODIES", "CAPS", "MUGS"];
+
 const priceRanges = [
   { name: "Under €25", min: 0, max: 25 },
   { name: "€25 - €50", min: 25, max: 50 },
@@ -189,8 +181,9 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
       try {
         const response = await saveProduct({ product: product.id }).unwrap();
         onSaveProduct(response.message || "Product saved successfully!", 'success');
-      } catch (err: any) {
-        if (err?.data?.message === "Product already saved") {
+      } catch (err: unknown) {
+        const errorData = (err as { data?: { message?: string } })?.data;
+        if (errorData?.message === "Product already saved") {
           onSaveProduct("Product is already saved!", 'info');
         } else {
           onSaveProduct("Unauthorized: Please login to save products.", 'error');
@@ -395,7 +388,7 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   // For now, let's prioritize local interaction updating the query.
 
   // API Query
-  const { data: productsData, isLoading, isFetching } = useGetProductsQuery({
+  const { data: productsData, isLoading } = useGetProductsQuery({
     page: currentPage,
     category: categoryParam ? parseInt(categoryParam) : undefined,
     subcategory: selectedSubCategoryId || (subCategoryParam ? parseInt(subCategoryParam) : undefined),

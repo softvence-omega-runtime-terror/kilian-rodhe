@@ -37,7 +37,7 @@ interface CategoryListResponse {
     success: boolean;
     message: string;
     data: Category[];
-    errors?: any;
+    errors?: unknown;
 }
 
 interface CategorySingleResponse {

@@ -287,9 +287,9 @@ const App = () => {
               try {
                 await deleteProduct(id).unwrap();
                 toast.success("Product deleted successfully");
-              } catch (err: any) {
+              } catch (err: unknown) {
                 console.error("Delete error:", err);
-                toast.error(err?.data?.message || "Failed to delete product");
+                toast.error((err as { data?: { message?: string } })?.data?.message || "Failed to delete product");
               }
             }
           }}

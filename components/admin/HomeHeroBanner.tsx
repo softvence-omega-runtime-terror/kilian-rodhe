@@ -20,7 +20,7 @@ const handleSaveSettings = (e: React.MouseEvent<HTMLButtonElement>) => {
 const HomeHeroBanner: React.FC = () => {
   // 1. STATE for Image Upload
   const [heroImage, setHeroImage] = useState<string | null>(null); // Stores the URL for preview
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // Stores the File object
+  const [, setSelectedFile] = useState<File | null>(null); // Stores the File object
 
   // 2. REF for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,21 +90,20 @@ const HomeHeroBanner: React.FC = () => {
             onClick={() => fileInputRef.current?.click()} // Programmatically click the hidden input
             className={`
               relative flex justify-center items-center h-80 border-2 rounded-lg cursor-pointer transition-colors
-              ${
-                heroImage
-                  ? "border-transparent" // No border when an image is loaded
-                  : "bg-[linear-gradient(135deg,#faf9f7,rgba(232,227,220,0.3))] border-[#e8e3dc] hover:border-gray-400"
+              ${heroImage
+                ? "border-transparent" // No border when an image is loaded
+                : "bg-[linear-gradient(135deg,#faf9f7,rgba(232,227,220,0.3))] border-[#e8e3dc] hover:border-gray-400"
               }
             `}
             style={
               heroImage
                 ? {
-                    backgroundImage: `url(${heroImage})`,
-                    backgroundSize: "contain",
-                    backgroundRepeat: "no-repeat",
+                  backgroundImage: `url(${heroImage})`,
+                  backgroundSize: "contain",
+                  backgroundRepeat: "no-repeat",
 
-                    backgroundPosition: "center",
-                  }
+                  backgroundPosition: "center",
+                }
                 : {}
             }
           >

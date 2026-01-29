@@ -22,7 +22,7 @@
 //   required?: boolean;
 //   options?: { value: string; label: string }[];
 //   value?: string;
-//   onChange?: (e: any) => void;
+//   onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
 // }
 
 // const InputField = ({
@@ -452,7 +452,7 @@ interface InputFieldProps {
   required?: boolean;
   options?: { value: string; label: string }[];
   value?: string;
-  onChange?: (e: any) => void;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
 }
 
 const InputField = ({
@@ -675,10 +675,10 @@ const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler
       await createProduct(payload).unwrap();
       toast.success("Product created successfully!");
       onViewChange("list");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error creating product:", err);
       // Try to extract a meaningful error message
-      const errMsg = err?.data?.message || err?.message || "Failed to create product.";
+      const errMsg = (err as { data?: { message?: string }; message?: string })?.data?.message || (err as { message?: string })?.message || "Failed to create product.";
       toast.error(errMsg);
     }
   };

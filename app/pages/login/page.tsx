@@ -52,7 +52,7 @@ export default function LoginPage() {
     try {
       const result: LoginResponse = await loginApi({ email, password }).unwrap();
 
-     console.log(result, "login info")
+      console.log(result, "login info")
 
       // 🔹 DISPATCH TO REDUX
       dispatch(
@@ -73,9 +73,10 @@ export default function LoginPage() {
       } else {
         router.push("/"); // regular user home
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login error:", err);
-      toast.error(err?.data?.message || "Invalid email or password");
+      const errorMsg = (err as { data?: { message?: string } })?.data?.message || "Invalid email or password";
+      toast.error(errorMsg);
     }
   };
 
@@ -171,9 +172,8 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full text-white py-3 rounded-xl mt-6 font-semibold transition ${
-              isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#7a5e3e]"
-            }`}
+            className={`w-full text-white py-3 rounded-xl mt-6 font-semibold transition ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-[#7a5e3e]"
+              }`}
             style={{
               background: `linear-gradient(to right, ${ACCENT_COLOR}, #7A5F3A)`,
             }}

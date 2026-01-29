@@ -38,11 +38,11 @@ export interface ProductRequest {
    COMMON RESPONSE
 =========================== */
 
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
   data: T;
-  errors?: any;
+  errors?: unknown;
 }
 
 /* ===========================
@@ -201,7 +201,7 @@ export const productsApi = baseBackendApi.injectEndpoints({
       invalidatesTags: ["Products"],
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 /* ===========================
