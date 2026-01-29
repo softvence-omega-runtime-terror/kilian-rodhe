@@ -204,8 +204,14 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
   // State for Toast Message
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const handleOrderNow = () => {
-    router.push(`/pages/checkout`);
+  const handleOrderNow = async (productId: number) => {
+    try {
+      await addToCart({ product: productId, quantity: 1 }).unwrap();
+      router.push(`/pages/checkout`);
+    } catch (error) {
+      console.error("Failed to add to cart", error);
+      setToastMessage("Failed to add to cart. Please try again.");
+    }
   };
 
   const handleCustomize = (id: number) => {
@@ -371,7 +377,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
                     transition: { duration: 0.2 },
                   }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={handleOrderNow}
+                  onClick={() => handleOrderNow(product.id)}
                 >
                   ORDER NOW
                 </motion.button>

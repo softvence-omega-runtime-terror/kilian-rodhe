@@ -9,7 +9,7 @@ import arrowIcon from "@/public/image/shopIcon/arrowIcon.svg";
 import colorStarIcon from "@/public/image/shopIcon/colorStar.svg";
 
 import { useRouter } from "next/navigation";
-import { IProductQueryParams, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
+import { useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 import ToastMessage from "../ToastMessage";
 
@@ -63,7 +63,7 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
   const handleOrderNow = async (productId: number) => {
     try {
       await addToCart({ product: productId, quantity: 1 }).unwrap();
-      router.push(`/pages/shipping`);
+      router.push(`/pages/checkout`);
     } catch (error) {
       console.error("Failed to add to cart", error);
       setToastMessage({ message: "Failed to add to cart", type: "error" });
@@ -213,7 +213,7 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
 
                 {/* ORDER NOW Button */}
                 <motion.button
-                  className={`${jostFont.className} shadow text-[14px] w-full h-12 mb-8 bg-[#D4AF37] text-[#000] py-3 tracking-[2.1px] uppercase font-medium hover:bg-[#c2a25b] transition-colors duration-300`}
+                  className={`${jostFont.className} shadow text-[14px] w-full h-12 mb-8 bg-[#D4AF37] text-black py-3 tracking-[2.1px] uppercase font-medium hover:bg-[#c2a25b] transition-colors duration-300`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleOrderNow(product.id)}

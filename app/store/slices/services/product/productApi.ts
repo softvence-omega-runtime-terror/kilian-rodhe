@@ -42,6 +42,7 @@ export interface IProduct {
   discounted_price: number;
   stock_quantity: number;
   color_code: string;
+  colors?: string[];
   cloth_size: string[];
   kids_size: string[];
   mug_size: string[];
@@ -212,4 +213,3 @@ export const {
   useDeleteSavedProductMutation,
   useGetProductReviewsQuery,
 } = productApi;
-    
