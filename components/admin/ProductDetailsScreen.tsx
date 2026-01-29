@@ -10,18 +10,17 @@ import { useGetSingleProductQuery } from "@/app/store/slices/services/adminServi
 import { ViewChangeHandler } from "./products/Products";
 import { Product, ProductImage } from "@/app/utils/types/productTypes";
 import Card from "@/app/utils/shared/Card";
-
-
-
-
-
-
+import {
+  useGetAllCategoriesQuery,
+  useGetAllSubCategoriesQuery,
+  useGetAllClassificationsQuery,
+  useGetAllAgeRangesQuery,
+} from "@/app/store/slices/services/adminService/products/productMetadata";
 
 const StatusBadge = ({ active }: { active: boolean }) => (
   <span
-    className={`px-4 py-2 flex items-center gap-1 rounded-xl text-xs font-semibold ${
-      active ? "bg-[#dcfce7] text-[#008236]" : "bg-[#fde2e8] text-[#9b002c]"
-    }`}
+    className={`px-4 py-2 flex items-center gap-1 rounded-xl text-xs font-semibold ${active ? "bg-[#dcfce7] text-[#008236]" : "bg-[#fde2e8] text-[#9b002c]"
+      }`}
   >
     <Image src={crossIcon} alt="status" width={15} height={15} />
     {active ? "Active" : "Inactive"}
@@ -63,9 +62,8 @@ const SalesStat = ({ label, value, change }: { label: string; value: string; cha
     <p className="text-sm font-medium text-gray-500 mb-1">{label}</p>
     <p className="text-xl font-semibold text-gray-800">{value}</p>
     <span
-      className={`text-xs mt-1 ${
-        change.startsWith("+") ? "text-green-600" : change.startsWith("-") ? "text-red-600" : "text-gray-500"
-      }`}
+      className={`text-xs mt-1 ${change.startsWith("+") ? "text-green-600" : change.startsWith("-") ? "text-red-600" : "text-gray-500"
+        }`}
     >
       {change}
     </span>
@@ -104,45 +102,91 @@ const ProductDetailScreen = ({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   console.log(data, "single prod info")
 
+  const { data: categories } = useGetAllCategoriesQuery();
+  const { data: subCategories } = useGetAllSubCategoriesQuery();
+  const { data: classifications } = useGetAllClassificationsQuery();
+  const { data: ageRanges } = useGetAllAgeRangesQuery();
+
   if (isLoading) return <div className="p-8">Loading product details…</div>;
 
   const rawApiProduct = data?.data;
   if (!rawApiProduct) return <div className="p-8 text-red-500">Product data not available.</div>;
 
-// initialize before here img
-  const images: ProductImage[] = Array.isArray(rawApiProduct.images)
-    ? rawApiProduct.images
-        .map((img, idx): ProductImage | null => {
-          if (typeof img === "string" && img.trim()) {
-            return { id: idx, image: img };
-          }
-          if (img && typeof img === "object" && "image" in img) {
-            return {
-              id: typeof (img as any).id === "number" ? (img as any).id : idx,
-              image: (img as any).image ?? productImage,
-            };
-          }
-          return null;
-        })
-        .filter((img): img is ProductImage => img !== null)
-    : [];
-
-  const p: Product = {
-    ...rawApiProduct,
-    cloth_size: Array.isArray(rawApiProduct.cloth_size) ? rawApiProduct.cloth_size : [],
-    kids_size: Array.isArray(rawApiProduct.kids_size) ? rawApiProduct.kids_size : [],
-    mug_size: Array.isArray(rawApiProduct.mug_size) ? rawApiProduct.mug_size : [],
-    images,
-    stock_quantity: rawApiProduct.stock_quantity ?? null,
-    total_sold: rawApiProduct.total_sold ?? 0,
-    price: rawApiProduct.price ?? null,
-    discounted_price: rawApiProduct.discounted_price ?? null,
-    color_code: rawApiProduct.color_code?.trim() || "",
-    description: rawApiProduct.description?.trim() || "",
+  // --- Helper to resolve ID to Title ---
+  const getCategoryTitle = (val: number | { title: string } | undefined) => {
+    if (typeof val === "object" && val?.title) return val.title;
+    if (typeof val === "number") return categories?.find((c) => c.id === val)?.title;
+    return "Not available";
+  };
+  const getSubCategoryTitle = (val: number | { title: string } | undefined) => {
+    if (typeof val === "object" && val?.title) return val.title;
+    if (typeof val === "number") return subCategories?.find((c) => c.id === val)?.title;
+    return "Not available";
+  };
+  const getClassificationTitle = (val: number | { title: string } | undefined) => {
+    if (typeof val === "object" && val?.title) return val.title;
+    if (typeof val === "number") return classifications?.find((c) => c.id === val)?.title;
+    return "Not available";
+  };
+  const getAgeRangeLabel = (val: number | { start: number; end: number } | undefined) => {
+    if (typeof val === "object" && val !== null && "start" in val) return `${val.start}-${val.end}`;
+    if (typeof val === "number") {
+      const found = ageRanges?.find((a) => a.id === val);
+      return found ? `${found.start}-${found.end}` : "Not available";
+    }
+    return "Not available";
   };
 
 
-  const allSizes = [...(p.cloth_size || []), ...(p.kids_size || []), ...(p.mug_size || [])];
+  // --- Normalize Images ---
+  // The API might return `images` (strings or objs) OR `images_data` (objs)
+  const sourceImages = rawApiProduct.images_data || rawApiProduct.images || [];
+  const images: ProductImage[] = Array.isArray(sourceImages)
+    ? sourceImages
+      .map((img: any, idx: number): ProductImage | null => {
+        if (typeof img === "string" && img.trim()) return { id: idx, image: img };
+        if (typeof img === "object" && img?.image) return { id: img.id || idx, image: img.image };
+        return null;
+      })
+      .filter((img): img is ProductImage => img !== null)
+    : [];
+
+  // --- Normalize Sizes ---
+  // Can be string[] OR object { XS: 1, L: 1 }
+  const normalizeSizes = (sizes: any): string[] => {
+    if (Array.isArray(sizes)) return sizes;
+    if (typeof sizes === "object" && sizes !== null) return Object.keys(sizes);
+    return [];
+  };
+
+  const resolvedClothSizes = normalizeSizes(rawApiProduct.cloth_size);
+  const resolvedKidsSizes = normalizeSizes(rawApiProduct.kids_size);
+  const resolvedMugSizes = normalizeSizes(rawApiProduct.mug_size);
+  const allSizes = [...resolvedClothSizes, ...resolvedKidsSizes, ...resolvedMugSizes];
+
+  // --- Normalize Colors ---
+  // "colors": ["black,white"] or ["black", "white"]
+  let resolvedColors: string[] = [];
+  if (Array.isArray(rawApiProduct.colors)) {
+    rawApiProduct.colors.forEach(c => {
+      if (c.includes(",")) resolvedColors.push(...c.split(","));
+      else resolvedColors.push(c);
+    });
+  } else if (typeof rawApiProduct.colors === "string") {
+    // @ts-ignore
+    resolvedColors = rawApiProduct.colors.split(",");
+  }
+
+  // Construct display object
+  const p = {
+    ...rawApiProduct,
+    categoryTitle: getCategoryTitle(rawApiProduct.category),
+    subCategoryTitle: getSubCategoryTitle(rawApiProduct.sub_category),
+    classificationTitle: getClassificationTitle(rawApiProduct.classification),
+    ageRangeLabel: getAgeRangeLabel(rawApiProduct.age_range),
+    colors: resolvedColors,
+  };
+
   const selectedImage = images[selectedImageIndex] || { id: 0, image: productImage };
 
 
@@ -197,9 +241,8 @@ const ProductDetailScreen = ({
                     {images.map((img, index) => (
                       <div
                         key={img.id}
-                        className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 ${
-                          index === selectedImageIndex ? "border-[#8B6F47]" : "border-transparent"
-                        } cursor-pointer`}
+                        className={`relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 ${index === selectedImageIndex ? "border-[#8B6F47]" : "border-transparent"
+                          } cursor-pointer`}
                         onClick={() => setSelectedImageIndex(index)}
                       >
                         <Image src={img.image || productImage} alt={`Variant ${index + 1}`} fill className="object-cover" />
@@ -220,13 +263,19 @@ const ProductDetailScreen = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500">Category</span>
-                <span className="text-sm font-semibold">{p.category?.title || "Not available"}</span>
+                <span className="text-sm font-semibold">{p.categoryTitle}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">Sub Category</span>
+                <span className="text-sm font-semibold">{p.subCategoryTitle}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">Classification</span>
+                <span className="text-sm font-semibold">{p.classificationTitle}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-500">Age Group</span>
-                <span className="text-sm font-semibold">
-                  {p.age_range ? `${p.age_range.start}-${p.age_range.end}` : "Not available"}
-                </span>
+                <span className="text-sm font-semibold">{p.ageRangeLabel}</span>
               </div>
             </div>
           </Card>
@@ -283,14 +332,41 @@ const ProductDetailScreen = ({
             {/* Colors */}
             <h2 className="text-lg font-semibold mt-4">Available Colors</h2>
             <div className="flex flex-wrap gap-3">
-              {p.color_code ? (
-                <div className="flex items-center gap-2 px-4 py-2 border rounded-xl cursor-pointer">
-                  <div className={`w-5 h-5 rounded-full ${getColorSwatchClass(p.color_code)}`} />
-                  {p.color_code}
-                </div>
+              {p.colors && p.colors.length > 0 ? (
+                p.colors.map((color, idx) => (
+                  <div key={idx} className="flex items-center gap-2 px-4 py-2 border rounded-xl">
+                    <div className={`w-5 h-5 rounded-full ${getColorSwatchClass(color.trim())}`} />
+                    <span className="capitalize">{color}</span>
+                  </div>
+                ))
               ) : (
                 <p>Not available</p>
               )}
+            </div>
+
+            {/* AI Integration Flags */}
+            <h2 className="text-lg font-semibold mt-6">Product Attributes</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${p.ai_gen ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                <span className="text-sm text-gray-700">AI Generated</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${p.ai_letter ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                <span className="text-sm text-gray-700">AI Letter</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${p.ai_upload ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                <span className="text-sm text-gray-700">AI Upload</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${p.is_customize ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                <span className="text-sm text-gray-700">Customizable</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${p.is_universal_size ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                <span className="text-sm text-gray-700">Universal Size</span>
+              </div>
             </div>
 
             {/* Sizes */}

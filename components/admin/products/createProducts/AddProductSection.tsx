@@ -435,8 +435,14 @@ import Card from "@/app/utils/shared/Card";
 import QualityAssuranceBox from "./QualityAssuranceBox";
 import ColorSelectorField from "./ColorSelectorField";
 import SizeSelectorField from "./SizeSelectorField";
-import { useGetProductCategoriesQuery } from "@/app/store/slices/services/product/productApi";
+import {
+  useGetAllCategoriesQuery,
+  useGetAllSubCategoriesQuery,
+  useGetAllClassificationsQuery,
+  useGetAllAgeRangesQuery,
+} from "@/app/store/slices/services/adminService/products/productMetadata";
 import { useCreateProductMutation } from "@/app/store/slices/services/adminService/products/createProductApi";
+import { toast } from "sonner";
 
 // Input Field Component
 interface InputFieldProps {
@@ -516,23 +522,37 @@ const booleanOptions = [
 // --- Add New Product Screen ---
 const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler }) => {
 
-  const { data: categoriesData } = useGetProductCategoriesQuery();
+  // --- Metadata Queries ---
+  const { data: categoriesData } = useGetAllCategoriesQuery();
+  const { data: subCategoriesData } = useGetAllSubCategoriesQuery();
+  const { data: classificationsData } = useGetAllClassificationsQuery();
+  const { data: ageRangesData } = useGetAllAgeRangesQuery();
+
   const [createProduct, { isLoading }] = useCreateProductMutation();
 
   const categoryOptions =
-    categoriesData?.results?.map((category: any) => ({
-      value: String(category.id),
-      label: category.title,
+    categoriesData?.map((cat) => ({
+      value: String(cat.id),
+      label: cat.title,
     })) || [];
 
-  const subCategoryOptions: { value: string; label: string }[] = []; // populate dynamically if needed
-  const classificationOptions: { value: string; label: string }[] = []; // populate dynamically if needed
+  const subCategoryOptions =
+    subCategoriesData?.map((sub) => ({
+      value: String(sub.id),
+      label: sub.title,
+    })) || [];
 
-  const ageGroupOptions = [
-    { value: "1", label: "Adult" },
-    { value: "2", label: "Kids" },
-    { value: "3", label: "Toddlers" },
-  ];
+  const classificationOptions =
+    classificationsData?.map((cls) => ({
+      value: String(cls.id),
+      label: cls.title,
+    })) || [];
+
+  const ageGroupOptions =
+    ageRangesData?.map((age) => ({
+      value: String(age.id),
+      label: `${age.start} - ${age.end}`,
+    })) || [];
 
   const availableColors = [
     { value: "black", label: "Black", hex: "#000000" },
@@ -641,16 +661,25 @@ const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler
   // -------------------------
   // ADD / CANCEL ACTION
   // -------------------------
+
+  // ... (existing helper function mapUIToRequest) ...
+
+  // -------------------------
+  // ADD / CANCEL ACTION
+  // -------------------------
   const handleAction = async (action: "cancel" | "add") => {
     if (action === "cancel") return onViewChange("list");
 
     try {
       const payload = mapUIToRequest();
       await createProduct(payload).unwrap();
+      toast.success("Product created successfully!");
       onViewChange("list");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error creating product:", err);
-      alert("Failed to create product. Check console for details.");
+      // Try to extract a meaningful error message
+      const errMsg = err?.data?.message || err?.message || "Failed to create product.";
+      toast.error(errMsg);
     }
   };
 
@@ -717,9 +746,16 @@ const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler
               </div>
 
               {productData.images.length > 0 ? (
-                <div className="flex flex-wrap gap-2 justify-center">
+                <div className="flex flex-wrap gap-4 justify-center">
                   {productData.images.map((file, idx) => (
-                    <p key={idx} className="text-xs text-gray-500">{file.name}</p>
+                    <div key={idx} className="relative w-24 h-24 border rounded-lg overflow-hidden shadow-sm">
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        alt={`Preview ${idx}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -813,58 +849,58 @@ const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler
                 label="Price (USD)"
                 type="number"
                 value={productData.price}
-                onChange={(e) => setProductData({ ...productData, price: e.target.value })} placeholder={""}              />
+                onChange={(e) => setProductData({ ...productData, price: e.target.value })} placeholder={""} />
               <InputField
                 label="Stock Quantity"
                 type="number"
                 value={productData.stock}
-                onChange={(e) => setProductData({ ...productData, stock: e.target.value })} placeholder={""}              />
+                onChange={(e) => setProductData({ ...productData, stock: e.target.value })} placeholder={""} />
               <InputField
                 label="SKU (Stock Keeping Unit)"
                 value={productData.sku}
                 onChange={(e) => setProductData({ ...productData, sku: e.target.value })}
-                required={false} placeholder={""}              />
+                required={false} placeholder={""} />
               <InputField
                 label="Discount %"
                 type="number"
                 value={productData.discount_percentage}
-                onChange={(e) => setProductData({ ...productData, discount_percentage: e.target.value })} placeholder={""}              />
+                onChange={(e) => setProductData({ ...productData, discount_percentage: e.target.value })} placeholder={""} />
               <InputField
                 label="Universal Size"
                 type="select"
                 value={productData.is_universal_size}
                 onChange={(e) => setProductData({ ...productData, is_universal_size: e.target.value })}
-                options={booleanOptions} placeholder={""}              />
+                options={booleanOptions} placeholder={""} />
               <InputField
                 label="AI Gen"
                 type="select"
                 value={productData.ai_gen}
                 onChange={(e) => setProductData({ ...productData, ai_gen: e.target.value })}
-                options={booleanOptions} placeholder={""}              />
+                options={booleanOptions} placeholder={""} />
               <InputField
                 label="AI Letter"
                 type="select"
                 value={productData.ai_letter}
                 onChange={(e) => setProductData({ ...productData, ai_letter: e.target.value })}
-                options={booleanOptions} placeholder={""}              />
+                options={booleanOptions} placeholder={""} />
               <InputField
                 label="AI Upload"
                 type="select"
                 value={productData.ai_upload}
                 onChange={(e) => setProductData({ ...productData, ai_upload: e.target.value })}
-                options={booleanOptions} placeholder={""}              />
+                options={booleanOptions} placeholder={""} />
               <InputField
                 label="Customizable"
                 type="select"
                 value={productData.is_customize}
                 onChange={(e) => setProductData({ ...productData, is_customize: e.target.value })}
-                options={booleanOptions} placeholder={""}              />
+                options={booleanOptions} placeholder={""} />
               <InputField
                 label="Active"
                 type="select"
                 value={productData.is_active}
                 onChange={(e) => setProductData({ ...productData, is_active: e.target.value })}
-                options={booleanOptions} placeholder={""}              />
+                options={booleanOptions} placeholder={""} />
             </div>
           </Card>
 
