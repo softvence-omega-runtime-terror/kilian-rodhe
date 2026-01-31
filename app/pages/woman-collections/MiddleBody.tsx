@@ -219,7 +219,7 @@ const ProductCard: React.FC<{ product: Product }> = React.memo(({ product }) => 
       router.push(`/pages/customise?id=${product.id}`);
     } else if (action === "Order Now") {
       // Navigate to /pages/shipping
-      router.push("/pages/shipping");
+      router.push("/pages/checkout");
     } else {
       // Fallback for Wishlist/Quick Shop
       alert(`${action} clicked for ${subtitle}!`);

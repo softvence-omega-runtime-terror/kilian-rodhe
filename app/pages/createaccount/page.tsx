@@ -7,8 +7,7 @@ import userIcon from "../../../public/image/signinIcon/Icon (1).svg";
 import emailIcon from "../../../public/image/signinIcon/Icon (2).svg";
 import phoneIcon from "../../../public/image/signinIcon/Icon (3).svg";
 import lockIcon from "../../../public/image/signinIcon/Icon (4).svg";
-// removed unused icon
-// usage check: userIcon2 is NOT used in the file content I read. So I can delete it.
+// import userIcon2 from "../../../public/image/signinIcon/Icon (7).svg";
 import eyeIcon from "../../../public/image/signinIcon/Icon (8).svg";
 import { FaEyeSlash } from "react-icons/fa";
 import { useRegisterMutation } from "@/app/store/slices/services/auth/authApi";

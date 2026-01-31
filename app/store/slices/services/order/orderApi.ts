@@ -7,6 +7,10 @@ export interface ICartItemProduct {
   discounted_price: number | null;
   images: { id: number; image: string }[];
   color_code?: string;
+  colors?: string[];
+  cloth_size?: string[];
+  kids_size?: string[];
+  mug_size?: string[];
 }
 
 export interface ICartItem {
@@ -54,6 +58,14 @@ export const orderApi = baseBackendApi.injectEndpoints({
       }),
       invalidatesTags: ["Cart"],
     }),
+    checkout: builder.mutation<any, { card_products: any[]; shipping_id: number }>({
+      query: (body) => ({
+        url: "/order/orders/checkout/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Cart", "Orders"],
+    }),
   }),
 });
 
@@ -61,5 +73,6 @@ export const {
   useGetCartQuery,
   useAddToCartMutation,
   useUpdateCartItemMutation,
-  useDeleteCartItemMutation
+  useDeleteCartItemMutation,
+  useCheckoutMutation
 } = orderApi;

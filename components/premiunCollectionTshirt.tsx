@@ -48,7 +48,6 @@ const cormorantNormal = Cormorant_Garamond({
 
 import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
-// import { useRouter } from "next/navigation";
 
 // --- Interface Definitions ---
 interface Thumbnail {

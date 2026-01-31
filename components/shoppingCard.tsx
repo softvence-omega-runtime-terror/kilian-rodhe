@@ -59,7 +59,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ toggleCart }) => {
 
   const handleCheckout = () => {
     toggleCart();
-    router.push("/pages/shipping");
+    router.push("/pages/checkout");
   };
 
   // State to track which item is being modified

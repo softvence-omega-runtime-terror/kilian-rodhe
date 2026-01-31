@@ -9,7 +9,14 @@ import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi
 import { motion, AnimatePresence } from "framer-motion";
 
 // Images (Ensure you have a checkmark icon or use an SVG/Unicode character)
+// import hoodi from "@/public/image/collections/imag1.jpg";
+// import cap from "@/public/image/collections/imag2.jpg";
+// import hoodi2 from "@/public/image/collections/image.jpg";
+// import tshirt from "@/public/image/collections/image4.jpg";
 
+// import cap2 from "@/public/image/collections/img4.jpg";
+// import hoodi3 from "@/public/image/collections/img5.jpg";
+// import tshirt2 from "@/public/image/collections/img7.jpg";
 
 import shop from "@/public/image/collections/shop.svg";
 import heart from "@/public/image/collections/heartIcon.svg";
@@ -56,15 +63,16 @@ export type Product = {
 };
 
 // Helper to extract numerical price
-
+// const getPriceValue = (price: string) => parseFloat(price.replace(/[^0-9.]/g, ''));
 
 // Static data removed in favor of API
-
+// const PRODUCTS_PER_PAGE = 8;
 
 // ----------------------------------------------------------------------
 // Filters (Unchanged)
 // ----------------------------------------------------------------------
-
+// const ageGroups = ["ALL", "18-25", "26-35", "36-50", "50+"];
+// const productTypes = ["T-SHIRTS", "HOODIES", "CAPS", "MUGS"];
 const priceRanges = [
   { name: "Under €25", min: 0, max: 25 },
   { name: "€25 - €50", min: 25, max: 50 },
@@ -437,7 +445,7 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   const handleOrderNow = useCallback(async (product: Product) => {
     try {
       await addToCart({ product: product.id, quantity: 1 }).unwrap();
-      router.push(`/pages/shipping`);
+      router.push(`/pages/checkout`);
     } catch (error) {
       console.error("Failed to add to cart", error);
       setToast({ message: "Failed to add to cart. Please try again.", type: 'error' });

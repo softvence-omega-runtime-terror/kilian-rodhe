@@ -215,7 +215,7 @@ const ShippingPage: React.FC = () => {
 
       {/* Progress Bar */}
       <div className="w-full border-b pb-3 border-t pt-3 bg-[#ffffff] border-[#E8E3DC] flex flex-col sm:flex-row items-center justify-center mb-12 sm:px-0">
-        {["Product Details", "Shipping Info", "Payment"].map((label, index) => (
+        {["Check Out", "Shipping Info", "Payment"].map((label, index) => (
           <Step
             key={index}
             index={index}
