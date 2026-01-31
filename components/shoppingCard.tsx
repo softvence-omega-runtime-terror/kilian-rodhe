@@ -36,7 +36,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ toggleCart }) => {
   const shopPath = "/pages/collections"; // Updated to likely main shop page
 
   // API Hooks
-  const { data: cartData, isLoading, isError } = useGetCartQuery();
+  const { data: cartData, isLoading } = useGetCartQuery();
   const [updateCartItem] = useUpdateCartItemMutation();
   const [deleteCartItem] = useDeleteCartItemMutation();
 
@@ -52,10 +52,10 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ toggleCart }) => {
     return total + (itemPrice * item.quantity);
   }, 0);
 
-  const handleApplyCoupon = () => {
-    // Placeholder for coupon logic
-    console.log("Apply coupon clicked");
-  };
+  // const handleApplyCoupon = () => {
+  //   // Placeholder for coupon logic
+  //   console.log("Apply coupon clicked");
+  // };
 
   const handleCheckout = () => {
     toggleCart();

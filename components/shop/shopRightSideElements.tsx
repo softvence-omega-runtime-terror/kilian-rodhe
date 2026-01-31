@@ -12,7 +12,7 @@ const ShopRightSideElements = ({ filters }: { filters: IProductQueryParams }) =>
   });
 
   const products = Array.isArray(productsData?.data?.categories) ? productsData.data.categories : [];
-  const totalCount = 0; // The API doesn't seem to return total count yet, or maybe it does in 'count'
+  // const totalCount = 0; // The API doesn't seem to return total count yet, or maybe it does in 'count'
   // Let's check IProductResponse again. It had success, message, data, errors. 
   // Wait, I noticed ICategoryResponse had results and count, but IProductResponse only has data.
   // I should check if I should update the API response interface.

@@ -58,7 +58,7 @@ import { IProduct } from "@/app/store/slices/services/product/productApi";
 
 export default function PopularWeek({ products, isLoading }: { products: IProduct[], isLoading: boolean }) {
   const router = useRouter();
-  const [likedProductId, setLikedProductId] = useState<number | null>(null);
+  // const [likedProductId, setLikedProductId] = useState<number | null>(null);
 
   const handleOrderNow = async (productId: number) => {
     try {
@@ -90,7 +90,7 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
 
   const handleLikeProduct = async (productId: number, productName: string) => {
     try {
-      const response = await saveProduct({ product: productId }).unwrap();
+      await saveProduct({ product: productId }).unwrap();
       setToastMessage({ message: `${productName} saved successfully!`, type: 'success' });
     } catch (err: any) {
       if (err?.data?.message === "Product already saved") {

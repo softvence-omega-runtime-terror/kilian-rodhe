@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Plus, Minus, Trash2, Check, ShoppingBag } from "lucide-react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 
@@ -34,8 +34,8 @@ const cormorantItalic = Cormorant_Garamond({
   style: ["italic"],
 });
 
-const ACCENT_COLOR = "#8b6f47";
-const GOLD_COLOR = "#DFA637";
+// const ACCENT_COLOR = "#8b6f47";
+// const GOLD_COLOR = "#DFA637";
 
 // ---------------- Types ----------------
 
