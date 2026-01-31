@@ -21,7 +21,7 @@ const HomeHeroBanner: React.FC = () => {
   // 1. STATE for Image Upload
   const [heroImage, setHeroImage] = useState<string | null>(null); // Stores the URL for preview
   const [selectedFile, setSelectedFile] = useState<File | null>(null); // Stores the File object
-
+console.log(selectedFile)
   // 2. REF for the hidden file input
   const fileInputRef = useRef<HTMLInputElement>(null);
 

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ShoppingBag, X, Plus, Minus, Trash2 } from "lucide-react"; // Icons
 import Link from "next/link";
@@ -36,7 +36,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ toggleCart }) => {
   const shopPath = "/pages/collections"; // Updated to likely main shop page
 
   // API Hooks
-  const { data: cartData, isLoading, isError } = useGetCartQuery();
+  const { data: cartData, isLoading } = useGetCartQuery();
   const [updateCartItem] = useUpdateCartItemMutation();
   const [deleteCartItem] = useDeleteCartItemMutation();
 
@@ -52,14 +52,14 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ toggleCart }) => {
     return total + (itemPrice * item.quantity);
   }, 0);
 
-  const handleApplyCoupon = () => {
-    // Placeholder for coupon logic
-    console.log("Apply coupon clicked");
-  };
+  // const handleApplyCoupon = () => {
+  //   // Placeholder for coupon logic
+  //   console.log("Apply coupon clicked");
+  // };
 
   const handleCheckout = () => {
     toggleCart();
-    router.push("/pages/shipping");
+    router.push("/pages/checkout");
   };
 
   // State to track which item is being modified

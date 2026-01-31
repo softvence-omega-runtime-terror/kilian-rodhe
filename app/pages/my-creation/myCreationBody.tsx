@@ -5,8 +5,8 @@ import { Cormorant_Garamond } from "next/font/google";
 import { useRouter } from "next/navigation"; 
 
 // Placeholder image for standalone environment
-const ICON_PLACEHOLDER_URL =
-  "https://placehold.co/112x112/E0E7FF/4338CA/png?text=%E2%9C%A8";
+// const ICON_PLACEHOLDER_URL =
+//   "https://placehold.co/112x112/E0E7FF/4338CA/png?text=%E2%9C%A8";
 
 // Ensure you have this path or replace with a local placeholder if needed
 import emptyIcon from "@/public/image/myCreationIcon/Icon.svg"; 

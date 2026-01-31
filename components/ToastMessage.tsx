@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect } from "react";
+import { motion } from "framer-motion";
 import { Jost } from "next/font/google";
 
 const jostFont = Jost({

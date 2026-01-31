@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation"; // Added router for navigation
 import {
   useGetProductDetailsQuery,
   useGetProductsQuery,
-  IProduct as ApiProduct,
 } from "@/app/store/slices/services/product/productApi";
 
 import { Jost, Cormorant_Garamond } from "next/font/google";

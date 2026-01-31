@@ -71,7 +71,7 @@ const animationStyles = (
 // --- DATA STRUCTURE WITH ALL CONTENT (Unchanged) ---
 // --- COMPONENT ---
 export default function ProductTabs({ productId }: { productId?: number }) {
-  const { data: detailsData, isLoading } = useGetProductDetailsQuery(productId ?? 0, {
+  const { data: detailsData } = useGetProductDetailsQuery(productId ?? 0, {
     skip: !productId,
   });
 

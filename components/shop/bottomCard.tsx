@@ -2,22 +2,22 @@
 "use client";
 import Image, { StaticImageData } from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useCallback } from "react";
 
 import { Jost, Roboto_Flex } from "next/font/google";
 import { useRouter } from "next/navigation";
 
 // --- Imported Assets ---
-import mugImage from "@/public/image/shopIcon/mugImage.jpg";
-import cupImage from "@/public/image/shopIcon/cup.jpg";
+// import mugImage from "@/public/image/shopIcon/mugImage.jpg";
+// import cupImage from "@/public/image/shopIcon/cup.jpg";
 import loveIcon from "@/public/image/shopIcon/loveIcon.svg";
 import shopIcon from "@/public/image/shopIcon/shopIcon.svg";
 import arrowIcon from "@/public/image/shopIcon/arrowIcon.svg";
 import colorStarIcon from "@/public/image/shopIcon/colorStar.svg";
 
-import tshirtsImage from "@/public/image/shopIcon/tshirts.jpg";
-import girlTshitImage from "@/public/image/shopIcon/girlTshirt.jpg";
-import hoodyImage from "@/public/image/shopIcon/hoody.jpg";
+// import tshirtsImage from "@/public/image/shopIcon/tshirts.jpg";
+// import girlTshitImage from "@/public/image/shopIcon/girlTshirt.jpg";
+// import hoodyImage from "@/public/image/shopIcon/hoody.jpg";
 import nextButtonImage from "@/public/image/shopIcon/nextArrow.svg";
 // -----------------------
 
@@ -84,99 +84,99 @@ const ToastMessage = ({ message, onClose }: ToastMessageProps) => {
 // -----------------------
 
 // Card Data Array (Unchanged)
-const products = [
-  {
-    name: "Women's Fitted Tee",
-    price: "€32.99",
-    image: tshirtsImage,
-    alt: "Women's Fitted Tee",
-    delay: 0.2,
-  },
-  {
-    name: "Kids Fun T-Shirt",
-    price: "€19.99",
-    image: girlTshitImage,
-    alt: "Kids Fun T-Shirt",
-    delay: 0.4,
-  },
-  {
-    name: "Oversized Hoodie",
-    price: "€49.99",
-    image: hoodyImage,
-    alt: "Oversized Hoodie",
-    delay: 0.6,
-  },
-  {
-    name: "Classic Coffee Mug",
-    price: "€14.50",
-    image: mugImage,
-    alt: "Classic Coffee Mug",
-    delay: 0.1,
-  },
-  {
-    name: "Travel Tumbler (Steel)",
-    price: "€28.99",
-    image: cupImage,
-    alt: "Travel Tumbler",
-    delay: 0.2,
-  },
-  {
-    name: "Vintage Crewneck Tee",
-    price: "€35.00",
-    image: tshirtsImage,
-    alt: "Vintage Crewneck Tee",
-    delay: 0.3,
-  },
-  {
-    name: "Unisex Heavy Hoodie",
-    price: "€55.99",
-    image: hoodyImage,
-    alt: "Unisex Heavy Hoodie",
-    delay: 0.4,
-  },
-  {
-    name: "Toddler Graphic Tee",
-    price: "€15.99",
-    image: girlTshitImage,
-    alt: "Toddler Graphic Tee",
-    delay: 0.5,
-  },
-  {
-    name: "Large Custom Mug",
-    price: "€18.00",
-    image: mugImage,
-    alt: "Large Custom Mug",
-    delay: 0.6,
-  },
-  {
-    name: "Insulated Sports Cup",
-    price: "€25.00",
-    image: cupImage,
-    alt: "Insulated Sports Cup",
-    delay: 0.7,
-  },
-  {
-    name: "Premium V-Neck T-shirt",
-    price: "€39.99",
-    image: tshirtsImage,
-    alt: "Premium V-Neck T-shirt",
-    delay: 0.8,
-  },
-  {
-    name: "Zip-Up Fleece Hoodie",
-    price: "€62.00",
-    image: hoodyImage,
-    alt: "Zip-Up Fleece Hoodie",
-    delay: 0.9,
-  },
-  {
-    name: "Infant Onesie",
-    price: "€12.99",
-    image: girlTshitImage,
-    alt: "Infant Onesie",
-    delay: 1.0,
-  },
-];
+// const products = [
+//   {
+//     name: "Women's Fitted Tee",
+//     price: "€32.99",
+//     image: tshirtsImage,
+//     alt: "Women's Fitted Tee",
+//     delay: 0.2,
+//   },
+//   {
+//     name: "Kids Fun T-Shirt",
+//     price: "€19.99",
+//     image: girlTshitImage,
+//     alt: "Kids Fun T-Shirt",
+//     delay: 0.4,
+//   },
+//   {
+//     name: "Oversized Hoodie",
+//     price: "€49.99",
+//     image: hoodyImage,
+//     alt: "Oversized Hoodie",
+//     delay: 0.6,
+//   },
+//   {
+//     name: "Classic Coffee Mug",
+//     price: "€14.50",
+//     image: mugImage,
+//     alt: "Classic Coffee Mug",
+//     delay: 0.1,
+//   },
+//   {
+//     name: "Travel Tumbler (Steel)",
+//     price: "€28.99",
+//     image: cupImage,
+//     alt: "Travel Tumbler",
+//     delay: 0.2,
+//   },
+//   {
+//     name: "Vintage Crewneck Tee",
+//     price: "€35.00",
+//     image: tshirtsImage,
+//     alt: "Vintage Crewneck Tee",
+//     delay: 0.3,
+//   },
+//   {
+//     name: "Unisex Heavy Hoodie",
+//     price: "€55.99",
+//     image: hoodyImage,
+//     alt: "Unisex Heavy Hoodie",
+//     delay: 0.4,
+//   },
+//   {
+//     name: "Toddler Graphic Tee",
+//     price: "€15.99",
+//     image: girlTshitImage,
+//     alt: "Toddler Graphic Tee",
+//     delay: 0.5,
+//   },
+//   {
+//     name: "Large Custom Mug",
+//     price: "€18.00",
+//     image: mugImage,
+//     alt: "Large Custom Mug",
+//     delay: 0.6,
+//   },
+//   {
+//     name: "Insulated Sports Cup",
+//     price: "€25.00",
+//     image: cupImage,
+//     alt: "Insulated Sports Cup",
+//     delay: 0.7,
+//   },
+//   {
+//     name: "Premium V-Neck T-shirt",
+//     price: "€39.99",
+//     image: tshirtsImage,
+//     alt: "Premium V-Neck T-shirt",
+//     delay: 0.8,
+//   },
+//   {
+//     name: "Zip-Up Fleece Hoodie",
+//     price: "€62.00",
+//     image: hoodyImage,
+//     alt: "Zip-Up Fleece Hoodie",
+//     delay: 0.9,
+//   },
+//   {
+//     name: "Infant Onesie",
+//     price: "€12.99",
+//     image: girlTshitImage,
+//     alt: "Infant Onesie",
+//     delay: 1.0,
+//   },
+// ];
 
 import { IProduct, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
@@ -204,8 +204,14 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
   // State for Toast Message
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const handleOrderNow = () => {
-    router.push(`/pages/shipping`);
+  const handleOrderNow = async (productId: number) => {
+    try {
+      await addToCart({ product: productId, quantity: 1 }).unwrap();
+      router.push(`/pages/checkout`);
+    } catch (error) {
+      console.error("Failed to add to cart", error);
+      setToastMessage("Failed to add to cart. Please try again.");
+    }
   };
 
   const handleCustomize = (id: number) => {
@@ -231,7 +237,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
 
   const handleSaveToFavorites = useCallback(async (productId: number, productName: string) => {
     try {
-      const response = await saveProduct({ product: productId }).unwrap();
+      await saveProduct({ product: productId }).unwrap();
       setToastMessage(`${productName} saved to your favorites!`);
     } catch (err: any) {
       if (err?.data?.message === "Product already saved") {
@@ -254,7 +260,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
     if (currentPage > 1) onPageChange(currentPage - 1);
   };
 
-  const defaultClasses = `${roboto.className} sm:w-10 sm:h-10 flex items-center justify-center rounded-md border-[1.5] sm:text-[18px] transition-colors duration-150 border-[#795548] bg-white text-[#795548] hover:bg-stone-50`;
+  // const defaultClasses = `${roboto.className} sm:w-10 sm:h-10 flex items-center justify-center rounded-md border-[1.5] sm:text-[18px] transition-colors duration-150 border-[#795548] bg-white text-[#795548] hover:bg-stone-50`;
   const activeClasses = `${roboto.className} sm:w-10 sm:h-10 flex items-center justify-center rounded-md border-[1.5] sm:text-[18px] transition-colors duration-150 border-[#795548] bg-[#795548] text-white`;
 
   if (isLoading) return <Loader />;
@@ -371,7 +377,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
                     transition: { duration: 0.2 },
                   }}
                   whileTap={{ scale: 0.96 }}
-                  onClick={handleOrderNow}
+                  onClick={() => handleOrderNow(product.id)}
                 >
                   ORDER NOW
                 </motion.button>
