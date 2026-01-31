@@ -2,7 +2,7 @@ import { Mail } from "lucide-react";
 import React from "react";
 
 const EmailCampaignPerformance = () => {
-  // Define the data for the metric cards
+  //  derfice dummy data for the email campaign performance
   const metrics = [
     {
       value: "45,892",

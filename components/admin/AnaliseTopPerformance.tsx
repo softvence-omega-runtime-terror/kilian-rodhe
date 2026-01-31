@@ -52,7 +52,8 @@ const SeriesCard: React.FC<SeriesCardProps> = ({
   );
 };
 
-// --- Main Component: TopPerformingSeries ---
+// main component
+
 const TopPerformingSeries = () => {
   const seriesData = [
     {
@@ -61,7 +62,7 @@ const TopPerformingSeries = () => {
       redeemed: 2842,
       rate: "80.8%",
       revenue: "€45,280",
-      progress: 80.8, // Directly use the percentage for width
+      progress: 80.8,
     },
     {
       seriesName: "WELCOME10",
