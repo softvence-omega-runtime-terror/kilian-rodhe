@@ -6,25 +6,25 @@ import increnent from "@/public/image/admin/Discount/increament.svg";
 import Image from "next/image";
 
 const ExportReports = () => {
-  // Define the data for the report cards
+  //  derfice dummy data for the report cards 
   const reports = [
     {
       title: "Performance Report",
       description: "Detailed analytics CSV",
       icon: <Image src={increnent} alt="icon" height={20} width={20} />,
-      iconBgColor: "bg-purple-50", // Light purple background for the icon
+      iconBgColor: "bg-purple-50",
     },
     {
       title: "Email Report",
       description: "Campaign metrics CSV",
       icon: <Image src={mail} alt="icon" height={20} width={20} />,
-      iconBgColor: "bg-blue-50", // Light blue background for the icon
+      iconBgColor: "bg-blue-50",
     },
     {
       title: "Redemption Report",
       description: "All redemptions CSV",
       icon: <Image src={right} alt="icon" height={20} width={20} />,
-      iconBgColor: "bg-green-50", // Light green background for the icon
+      iconBgColor: "bg-green-50",
     },
   ];
 

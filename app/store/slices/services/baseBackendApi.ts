@@ -24,7 +24,7 @@ export const baseBackendApi = createApi({
     credentials: "include",
   }),
 
-  tagTypes: ["Products", "Users", "Orders", "SavedProducts", "Cart", "ProductMetadata"],
+  tagTypes: ["Products", "Users", "Orders", "SavedProducts", "Cart", "ProductMetadata", "DiscountCodes"],
 
   endpoints: () => ({}),
 });

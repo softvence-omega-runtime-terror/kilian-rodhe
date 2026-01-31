@@ -32,7 +32,7 @@ const RedemptionItem: React.FC<RedemptionItemProps> = ({ code, email, savedAmoun
   );
 };
 
-// --- Main Component: RecentRedemptions ---
+// main component for the remdemptions
 const RecentRedemptions = () => {
   const redemptionData = [
     {

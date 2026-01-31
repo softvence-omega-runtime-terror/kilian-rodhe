@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Plus, ArrowLeft } from "lucide-react";
 import Image, { StaticImageData } from "next/image";
 
-// --- SVG Imports ---
 import RawGenerateIcon from "@/public/image/admin/Discount/grandIcon.svg";
 import RawClockIcon from "@/public/image/admin/Discount/clockIcon.svg";
 import RawCrossIcon from "@/public/image/admin/Discount/crossIcon.svg";
@@ -15,6 +14,7 @@ import DiscountAutomation from "./DiscountAutomation";
 import CreateDiscountCard from "./CreateDiscountCard";
 import DiscountAnalysis from "./DiscountAnalysis";
 import AnalysisBodyTable from "./AnalysisBodyTable";
+import { useGetAdminDiscountUsageStatsQuery } from "@/app/store/slices/services/adminService/adminStats/adminStatsApi";
 
 /* -----------------------------------------
     SAFE SVG TYPE (supports both component & image)
@@ -28,10 +28,10 @@ type SvgIconType =
 ------------------------------------------ */
 const getSvgIcon = (mod: unknown): SvgIconType => {
   return typeof mod === "object" && mod !== null && "default" in mod
-    ? // @ts-expect-error - Replacing @ts-ignore
-      mod.default
-    : // @ts-expect-error - Replacing @ts-ignore
-      mod;
+    ? // @ts-expect-error - SVG imports might have a default property depending on loader
+    mod.default
+    : // @ts-expect-error - Fallback for other module formats
+    mod;
 };
 
 const GenerateIcon = getSvgIcon(RawGenerateIcon);
@@ -58,52 +58,9 @@ interface CreateDiscountCodePageProps {
 }
 
 /* -----------------------------------------
-    Tabs & Dashboard Data
+    Tabs
 ------------------------------------------ */
 const tabs = ["Manage Codes", "Email Sending", "Automation", "Analytics"];
-
-const dashboardCardsData: CardData[] = [
-  {
-    id: 1,
-    icon: GenerateIcon,
-    iconBgColor: "bg-blue-100",
-    iconColor: "text-blue-600",
-    value: "12,458",
-    label: "Total Codes Generated",
-    footerText: "+245 this week",
-    footerTextColor: "text-green-600",
-  },
-  {
-    id: 2,
-    icon: RightIcon,
-    iconBgColor: "bg-green-100",
-    iconColor: "text-green-600",
-    value: "8,942",
-    label: "Redeemed",
-    footerText: "71.8% redemption rate",
-    footerTextColor: "text-green-600",
-  },
-  {
-    id: 3,
-    icon: ClockIcon,
-    iconBgColor: "bg-yellow-100",
-    iconColor: "text-yellow-600",
-    value: "3,516",
-    label: "Active Codes",
-    footerText: "Available for use",
-    footerTextColor: "text-green-600",
-  },
-  {
-    id: 4,
-    icon: CrossIcon,
-    iconBgColor: "bg-red-100",
-    iconColor: "text-red-600",
-    value: "1,284",
-    label: "Expired/Invalid",
-    footerText: "10.3% of total",
-    footerTextColor: "text-red-600",
-  },
-];
 
 /* -----------------------------------------
     DashboardCard Component
@@ -136,17 +93,68 @@ const DashboardCard: React.FC<{ data: CardData }> = ({ data }) => {
 };
 
 /* -----------------------------------------
-    DashboardCards Component
+    DashboardCards Component (DYNAMIC)
 ------------------------------------------ */
-const DashboardCards: React.FC = () => (
-  <div className="mb-8">
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {dashboardCardsData.map((card) => (
-        <DashboardCard key={card.id} data={card} />
-      ))}
+const DashboardCards: React.FC = () => {
+  const { data, isLoading, isError } = useGetAdminDiscountUsageStatsQuery();
+
+  if (isLoading || isError || !data) return null;
+
+  const overview = data.overview;
+
+  const dashboardCardsData: CardData[] = [
+    {
+      id: 1,
+      icon: GenerateIcon,
+      iconBgColor: "bg-blue-100",
+      iconColor: "text-blue-600",
+      value: String(overview.total_codes_created),
+      label: "Total Codes Generated",
+      footerText: "",
+      footerTextColor: "text-green-600",
+    },
+    {
+      id: 2,
+      icon: RightIcon,
+      iconBgColor: "bg-green-100",
+      iconColor: "text-green-600",
+      value: String(overview.total_codes_redeemed),
+      label: "Redeemed",
+      footerText: "",
+      footerTextColor: "text-green-600",
+    },
+    {
+      id: 3,
+      icon: ClockIcon,
+      iconBgColor: "bg-yellow-100",
+      iconColor: "text-yellow-600",
+      value: String(overview.active_codes),
+      label: "Active Codes",
+      footerText: "",
+      footerTextColor: "text-green-600",
+    },
+    {
+      id: 4,
+      icon: CrossIcon,
+      iconBgColor: "bg-red-100",
+      iconColor: "text-red-600",
+      value: String(overview.invalid_codes),
+      label: "Expired/Invalid",
+      footerText: "",
+      footerTextColor: "text-red-600",
+    },
+  ];
+
+  return (
+    <div className="mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {dashboardCardsData.map((card) => (
+          <DashboardCard key={card.id} data={card} />
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* -----------------------------------------
     CreateDiscountCodePage Component
@@ -171,11 +179,10 @@ const CreateDiscountCodePage: React.FC<CreateDiscountCodePageProps> = ({
           <button
             key={tab}
             onClick={() => setActiveSubTab(tab)}
-            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-              activeSubTab === tab
-                ? "bg-[#FFFFFF] text-[#000000]"
-                : "text-gray-600 hover:bg-gray-50"
-            }`}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeSubTab === tab
+              ? "bg-[#FFFFFF] text-[#000000]"
+              : "text-gray-600 hover:bg-gray-50"
+              }`}
           >
             {tab}
           </button>
@@ -223,11 +230,10 @@ const DiscountPage: React.FC = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-                activeTab === tab
-                  ? "bg-gray-100 text-gray-900 shadow-sm"
-                  : "text-gray-600 hover:bg-gray-50"
-              }`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === tab
+                ? "bg-gray-100 text-gray-900 shadow-sm"
+                : "text-gray-600 hover:bg-gray-50"
+                }`}
             >
               {tab}
             </button>

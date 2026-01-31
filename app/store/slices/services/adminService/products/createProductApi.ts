@@ -11,7 +11,7 @@ export interface ProductRequest {
   category: number;
   sub_category: number;
   classification: number;
-  age_range: number;
+  age_range?: number; // Made optional to allow omitting when not selected
 
   description: string;
   price: number;
@@ -65,7 +65,12 @@ export const productsApi = baseBackendApi.injectEndpoints({
           formData.append("category", String(payload.category));
           formData.append("sub_category", String(payload.sub_category));
           formData.append("classification", String(payload.classification));
-          formData.append("age_range", String(payload.age_range));
+
+          // Only append age_range if it's provided and not 0
+          if (payload.age_range !== undefined && payload.age_range !== 0) {
+            formData.append("age_range", String(payload.age_range));
+          }
+
           formData.append("description", payload.description);
           formData.append("price", String(payload.price));
           formData.append(
@@ -137,7 +142,12 @@ export const productsApi = baseBackendApi.injectEndpoints({
         formData.append("category", String(data.category));
         formData.append("sub_category", String(data.sub_category));
         formData.append("classification", String(data.classification));
-        formData.append("age_range", String(data.age_range));
+
+        // Only append age_range if it's provided and not 0
+        if (data.age_range !== undefined && data.age_range !== 0) {
+          formData.append("age_range", String(data.age_range));
+        }
+
         formData.append("description", data.description);
         formData.append("price", String(data.price));
         formData.append(

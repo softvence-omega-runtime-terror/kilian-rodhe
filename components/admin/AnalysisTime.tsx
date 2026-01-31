@@ -12,9 +12,7 @@ const codeUsageData = [
   { day: "Sun", percentage: 35, total: 42, hasPattern: false },
 ];
 
-// Tailwind classes for the gradient background of the progress bar
-// Note: In a real Next.js/Tailwind setup, you might define complex gradients
-// in your tailwind.config.js if you use them often.
+// custom gradient for the progress bar
 const gradientClasses = "bg-gradient-to-r from-purple-500 to-blue-500";
 
 const CodeUsageTimeline = () => {
