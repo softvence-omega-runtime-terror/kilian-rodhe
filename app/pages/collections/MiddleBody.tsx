@@ -189,8 +189,9 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({ product, handleOrd
       try {
         const response = await saveProduct({ product: product.id }).unwrap();
         onSaveProduct(response.message || "Product saved successfully!", 'success');
-      } catch (err: any) {
-        if (err?.data?.message === "Product already saved") {
+      } catch (err: unknown) {
+        const errorData = (err as { data?: { message?: string } })?.data;
+        if (errorData?.message === "Product already saved") {
           onSaveProduct("Product is already saved!", 'info');
         } else {
           onSaveProduct("Unauthorized: Please login to save products.", 'error');

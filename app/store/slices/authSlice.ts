@@ -8,14 +8,14 @@ export interface Profile {
   last_name?: string;
   phone_number?: string;
   image?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface User {
   id: number;
   email: string;
   profile?: Profile;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface AuthState {

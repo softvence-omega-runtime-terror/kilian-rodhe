@@ -2,7 +2,6 @@
 
 import { setCredentials } from "@/app/store/slices/authSlice";
 import { useVerifyOtpMutation } from "@/app/store/slices/services/auth/authApi";
-import { cleanString } from "@/app/utils/cleanString";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -76,6 +75,7 @@ export default function VerifyEmail({ email }: VerifyEmailProps) {
           user: fullUser,
           access: payload.data.tokens.access || "",
           refresh: payload.data.tokens.refresh || "",
+          role: ""
         })
       );
 
@@ -83,8 +83,8 @@ export default function VerifyEmail({ email }: VerifyEmailProps) {
       console.log("Full user with profile dispatched:", fullUser);
 
       router.push("/"); // navigate home
-    } catch (err: any) {
-      toast.error(err?.data?.message || "OTP verification failed");
+    } catch (err: unknown) {
+      toast.error((err as { data?: { message?: string } })?.data?.message || "OTP verification failed");
     }
   };
 
@@ -117,7 +117,7 @@ export default function VerifyEmail({ email }: VerifyEmailProps) {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-gradient-to-b from-[#8b6f47] to-[#7a5f3a] h-12 text-white rounded-lg hover:opacity-90 transition disabled:opacity-50"
+            className="w-full bg-linear-to-b from-[#8b6f47] to-[#7a5f3a] h-12 text-white rounded-lg hover:opacity-90 transition disabled:opacity-50"
           >
             {isLoading ? "Verifying..." : "Verify Email"}
           </button>

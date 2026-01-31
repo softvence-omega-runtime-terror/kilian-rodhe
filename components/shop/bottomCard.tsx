@@ -222,7 +222,7 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
   const [saveProduct] = useSaveProductMutation();
 
   // Handler for Shop Icon (Add to Cart)
-  const [addToCart, { isLoading: isAdding }] = useAddToCartMutation();
+  const [addToCart] = useAddToCartMutation();
 
   const handleAddToCart = async (productId: number, productName: string) => {
     setToastMessage(`Adding ${productName} to cart...`);
@@ -239,8 +239,8 @@ export default function BottomCard({ products, isLoading, currentPage, onPageCha
     try {
       await saveProduct({ product: productId }).unwrap();
       setToastMessage(`${productName} saved to your favorites!`);
-    } catch (err: any) {
-      if (err?.data?.message === "Product already saved") {
+    } catch (err: unknown) {
+      if ((err as { data?: { message?: string } })?.data?.message === "Product already saved") {
         setToastMessage(`${productName} is already in favorites.`);
       } else {
         setToastMessage("Please login to save products.");

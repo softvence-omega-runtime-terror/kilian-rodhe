@@ -24,12 +24,12 @@ const ShopRightSideElements = ({ filters }: { filters: IProductQueryParams }) =>
   return (
     <div className="px-4 lg:px-0 md:px-0">
       <HeaderElement />
-      <PropularWeek 
-        products={products?.slice(0, 2)} 
+      <PropularWeek
+        products={products?.slice(0, 2)}
         isLoading={isLoading}
       />
-      <BottomCard 
-        products={products?.slice(2)} 
+      <BottomCard
+        products={products?.slice(2)}
         isLoading={isLoading}
         currentPage={currentPage}
         onPageChange={handlePageChange}

@@ -60,9 +60,10 @@ export default function CreateAccount() {
       if (response?.message) {
         setShowVerify(true);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Registration failed:", err);
-      alert(err?.data?.message || "Registration failed. Try again.");
+      const errorMsg = (err as { data?: { message?: string } })?.data?.message || "Registration failed. Try again.";
+      alert(errorMsg);
     }
   };
 

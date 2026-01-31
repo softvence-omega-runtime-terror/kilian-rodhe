@@ -42,7 +42,7 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({ toggleCart }) => {
 
   // Helper to safely get cart items (handles correct API structure)
   // API response structure: { success: boolean, message: string, cards: ICartItem[], errors: any }
-  const cartItems: ICartItem[] = cartData?.cards || [];
+  const cartItems: ICartItem[] = cartData?.items || [];
 
   const cartTotal = cartItems.reduce((total, item) => {
     // Check if discounted_price exists and is valid, otherwise use price

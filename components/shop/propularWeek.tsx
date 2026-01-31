@@ -92,8 +92,8 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
     try {
       await saveProduct({ product: productId }).unwrap();
       setToastMessage({ message: `${productName} saved successfully!`, type: 'success' });
-    } catch (err: any) {
-      if (err?.data?.message === "Product already saved") {
+    } catch (err: unknown) {
+      if ((err as { data?: { message?: string } })?.data?.message === "Product already saved") {
         setToastMessage({ message: `${productName} is already saved!`, type: 'info' });
       } else {
         setToastMessage({ message: "Please login to save products", type: 'error' });

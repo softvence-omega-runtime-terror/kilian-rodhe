@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-// ✅ Add the missing type here
+//  Add the missing type here
 interface DesignOption {
   key: string;
   title: string;
@@ -8,7 +8,14 @@ interface DesignOption {
   icon: React.ReactNode;
 }
 
-const DesignSelectorField = () => {
+//  Add onDesignChange prop
+interface DesignSelectorFieldProps {
+  onDesignChange?: (selected: string[]) => void;
+}
+
+const DesignSelectorField: React.FC<DesignSelectorFieldProps> = ({
+  onDesignChange,
+}) => {
   const designOptions: DesignOption[] = [
     {
       key: "ai",
@@ -30,12 +37,15 @@ const DesignSelectorField = () => {
     },
   ];
 
-  const [selectedDesigns, setSelectedDesigns] = useState<string[]>([]); // Changed to empty array for cleaner selection state
+  const [selectedDesigns, setSelectedDesigns] = useState<string[]>([]);
 
   const handleDesignClick = (key: string) => {
-    setSelectedDesigns((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
+    const newSelection = selectedDesigns.includes(key)
+      ? selectedDesigns.filter((k) => k !== key)
+      : [...selectedDesigns, key];
+
+    setSelectedDesigns(newSelection);
+    onDesignChange?.(newSelection);
   };
 
   // --- Helper function to get card styles ---
@@ -83,17 +93,15 @@ const DesignSelectorField = () => {
               key={option.key}
               type="button"
               onClick={() => handleDesignClick(option.key)}
-              // ✅ APPLYING CUSTOM GRADIENT AND BORDER COLORS HERE
               className={`p-4 border rounded-xl text-left transition-all duration-200 ${customClasses}`}
             >
               <div
-                className={`w-10 h-10 rounded-lg mb-3 flex items-center justify-center ${
-                  option.key === "ai"
-                    ? "bg-purple-100 border-2 border-purple-200"
-                    : option.key === "letter"
+                className={`w-10 h-10 rounded-lg mb-3 flex items-center justify-center ${option.key === "ai"
+                  ? "bg-purple-100 border-2 border-purple-200"
+                  : option.key === "letter"
                     ? "bg-blue-100 border-2 border-blue-200"
                     : "bg-green-100 border-2 border-green-200"
-                }`}
+                  }`}
               >
                 {option.icon}
               </div>

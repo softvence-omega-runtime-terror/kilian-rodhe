@@ -84,25 +84,25 @@ export default function ProductTabs({ productId }: { productId?: number }) {
   // Helper to flatten reviews from the API structure
   const allReviews = React.useMemo(() => {
     if (!reviewsData?.review_details) return [];
-    
+
     // The API returns an object where keys are star ratings, and values are objects containing a 'reviews' array
     return Object.values(reviewsData.review_details)
-      .flatMap((detail: any) => detail.reviews || [])
-      .sort((a: any, b: any) => new Date(b.review.created_date).getTime() - new Date(a.review.created_date).getTime());
+      .flatMap((detail: unknown) => (detail as { reviews: unknown[] }).reviews || [])
+      .sort((a: unknown, b: unknown) => new Date((b as { review: { created_date: string } }).review.created_date).getTime() - new Date((a as { review: { created_date: string } }).review.created_date).getTime());
   }, [reviewsData]);
 
   // Helper to calculate average rating
   const averageRating = React.useMemo(() => {
     if (!reviewsData?.star_reveiw_count) return 0;
-    
+
     let totalStars = 0;
     let totalCount = 0;
-    
+
     Object.entries(reviewsData.star_reveiw_count).forEach(([star, count]) => {
       totalStars += parseInt(star) * (count as number);
       totalCount += (count as number);
     });
-    
+
     return totalCount > 0 ? (totalStars / totalCount).toFixed(1) : 0;
   }, [reviewsData]);
 
@@ -347,41 +347,39 @@ export default function ProductTabs({ productId }: { productId?: number }) {
           ) : reviewsError ? (
             <p className="p-4 text-center text-red-500">Error loading reviews.</p>
           ) : allReviews.length > 0 ? (
-            allReviews.map((review: any) => (
-              <div key={review.id} className="mb-6 p-4 border-[#E5E5E5] border-b bg-white ">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex text-amber-500 text-lg mr-2">
-                     {[...Array(5)].map((_, j) => (
+            allReviews.map((review: unknown) => {
+              const r = review as { id: number; review: { star: number; comment: string; created_date: string }; user: { email: string } };
+              return (
+                <div key={r.id} className="mb-6 p-4 border-[#E5E5E5] border-b bg-white ">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex text-amber-500 text-lg mr-2">
+                      {[...Array(5)].map((_, j) => (
                         <Image
                           key={j}
-                          src={j < review.review.star ? colorIcon : nonColorIcon}
+                          src={j < r.review.star ? colorIcon : nonColorIcon}
                           alt="Star"
                           width={14}
                           height={14}
                         />
-                     ))}
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-500">
+                      {new Date(r.review.created_date).toLocaleDateString()}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-500">
-                    {new Date(review.review.created_date).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a] mb-1`}>
-                  Verified Purchase
-                </p>
-                {/*
-                  Note: The API doesn't seem to provide a separate title,
-                  so we might omit the title or re-use part of the comment or just a generic header if needed.
-                  Using a shortened comment as a "title" placeholder if desired, or removing.
-                */}
+                  <p className={`${jostFont.className} tracking-[0.5] text-[14px] text-[#1a1a1a] mb-1`}>
+                    Verified Purchase
+                  </p>
 
-                <p className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6B6B6B]`}>
-                  {review.review.comment}
-                </p>
-                <p className={`${jostFont.className} tracking-[0.5] mt-2 text-[14px] text-[#1a1a1a]`}>
-                  - {review.user.email?.split('@')[0] || "Anonymous"}
-                </p>
-              </div>
-            ))
+                  <p className={`${jostFont.className} tracking-[0.5] text-[16px] text-[#6B6B6B]`}>
+                    {r.review.comment}
+                  </p>
+                  <p className={`${jostFont.className} tracking-[0.5] mt-2 text-[14px] text-[#1a1a1a]`}>
+                    - {r.user.email?.split('@')[0] || "Anonymous"}
+                  </p>
+                </div>
+              );
+            })
           ) : (
             <p className="p-4 text-center text-gray-500">No reviews yet.</p>
           )}

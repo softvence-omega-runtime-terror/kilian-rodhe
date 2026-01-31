@@ -11,7 +11,7 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage"; 
+import storage from "redux-persist/lib/storage";
 
 
 import { baseBackendApi } from "./slices/services/baseBackendApi";
@@ -21,7 +21,7 @@ const rootReducer = combineReducers({
     {
       key: "auth",
       storage,
-      whitelist: ["user", "access", "refresh", "isAuthenticated"], 
+      whitelist: ["user", "access", "refresh", "isAuthenticated", "role"],
     },
     authReducer
   ),

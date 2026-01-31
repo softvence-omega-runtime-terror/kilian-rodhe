@@ -26,15 +26,15 @@ const MiddleBody = () => {
 
   // Handle 401 or other errors
   if (error) {
-    const isUnauthorized = (error as any).status === 401;
+    const isUnauthorized = (error as { status?: number })?.status === 401;
     return (
       <div className="text-center py-20 text-gray-600">
         <p className="text-xl font-semibold uppercase tracking-widest">
           {isUnauthorized ? "Please Login" : "Oops! Something went wrong"}
         </p>
         <p className="mt-2 text-sm italic">
-          {isUnauthorized 
-            ? "You need to be logged in to view saved products." 
+          {isUnauthorized
+            ? "You need to be logged in to view saved products."
             : "We couldn't fetch your saved items at this time."}
         </p>
       </div>

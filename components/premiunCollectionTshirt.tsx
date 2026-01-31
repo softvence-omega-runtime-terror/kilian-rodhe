@@ -74,7 +74,7 @@ interface ProductData {
 }
 
 interface CustomIconProps {
-  src: any;
+  src: string | StaticImageData;
   alt: string;
   className?: string;
   style?: React.CSSProperties;
