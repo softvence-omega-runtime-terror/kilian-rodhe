@@ -7,7 +7,7 @@ interface EmailCampaignPerformanceProps {
 }
 
 const EmailCampaignPerformance: React.FC<EmailCampaignPerformanceProps> = ({ data }) => {
-  // Define metrics based on dynamic data and placeholders for missing API fields
+  // define metrics based on api data
   const metrics = [
     {
       value: data?.total_emails_sent?.toLocaleString() ?? "0",
