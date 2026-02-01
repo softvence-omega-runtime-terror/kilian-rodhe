@@ -1,42 +1,11 @@
-import React, { useState, useCallback } from "react";
-import { Search, Filter, Download, Copy, Eye, Trash2, Loader2 } from "lucide-react";
-import { useGetAllDiscountCodesQuery, DiscountCodeItem } from "@/app/store/slices/services/adminService/adminPromos/adminPromoApi";
+import React, { useState, useCallback, useMemo } from "react";
+import { Search, Filter, Download, Copy, Eye, Trash2, Loader2, Trash } from "lucide-react";
+import { useGetAllDiscountCodesQuery, DiscountCodeItem, useBulkDeleteDiscountMutation } from "@/app/store/slices/services/adminService/adminPromos/adminPromoApi";
+import { toast } from "sonner";
 
 const ITEMS_PER_PAGE = 10;
 
-// --- Custom Toast System ---
-const useToast = () => {
-  const [toastState, setToastState] = useState<{ visible: boolean, message: string, type: 'success' | 'error' | 'info' }>({
-    visible: false,
-    message: '',
-    type: 'info'
-  });
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'info') => {
-    setToastState({ visible: true, message, type });
-    setTimeout(() => {
-      setToastState((prev) => ({ ...prev, visible: false }));
-    }, 3000);
-  }, []);
-
-  const ToastComponent = () => {
-    if (!toastState.visible) return null;
-    const baseClasses = "fixed bottom-5 right-5 p-4 rounded-xl shadow-2xl z-50 transition-all duration-300 transform";
-    let typeClasses = "";
-    switch (toastState.type) {
-      case 'success': typeClasses = "bg-green-600 text-white"; break;
-      case 'error': typeClasses = "bg-red-600 text-white"; break;
-      default: typeClasses = "bg-blue-600 text-white"; break;
-    }
-    return (
-      <div className={`${baseClasses} ${typeClasses}`} role="alert">
-        <p className="font-semibold">{toastState.message}</p>
-      </div>
-    );
-  };
-
-  return { showToast, ToastComponent };
-};
 
 const CouponCodeManager = () => {
   const [activeTab, setActiveTab] = useState<string>("All");
@@ -45,8 +14,11 @@ const CouponCodeManager = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedCode, setSelectedCode] = useState<DiscountCodeItem | null>(null);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState<boolean>(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-  const { showToast, ToastComponent } = useToast();
+  // Deletion mutation
+  const [bulkDeleteDiscount, { isLoading: isDeletingMutation }] = useBulkDeleteDiscountMutation();
 
   // Fetch dynamic data
   const { data: allCodesApi, isLoading, isError } = useGetAllDiscountCodesQuery();
@@ -115,12 +87,36 @@ const CouponCodeManager = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      showToast(`Copied code: ${text}`, 'success');
+      toast.success(`Copied code: ${text}`);
     }).catch(err => {
       console.error('Failed to copy text', err);
-      showToast("Failed to copy to clipboard", 'error');
+      toast.error("Failed to copy to clipboard");
     });
   };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      const allCurrentIds = currentCodes.map(code => code.id);
+      setSelectedIds(prev => {
+        const uniqueIds = new Set([...prev, ...allCurrentIds]);
+        return Array.from(uniqueIds);
+      });
+    } else {
+      const allCurrentIds = currentCodes.map(code => code.id);
+      setSelectedIds(prev => prev.filter(id => !allCurrentIds.includes(id)));
+    }
+  };
+
+  const handleSelectOne = (id: number) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const isAllSelected = useMemo(() =>
+    currentCodes.length > 0 && currentCodes.every(code => selectedIds.includes(code.id)),
+    [currentCodes, selectedIds]
+  );
 
   const highlightText = (text: string) => {
     if (!searchTerm) return text;
@@ -158,7 +154,7 @@ const CouponCodeManager = () => {
     link.setAttribute("href", url);
     link.setAttribute("download", "coupon_codes.csv");
     link.click();
-    showToast("Exporting filtered codes to coupon_codes.csv", 'info');
+    toast.info("Exporting filtered codes to coupon_codes.csv");
   };
 
   const openModal = (code: DiscountCodeItem) => {
@@ -170,11 +166,29 @@ const CouponCodeManager = () => {
     setIsModalOpen(false);
     setSelectedCode(null);
     setIsDeleting(false);
+    setIsBulkDeleting(false);
   };
 
-  const confirmDelete = () => {
-    showToast(`Deletion of ${selectedCode?.code} is not implemented in this view yet.`, 'info');
-    closeModal();
+  const confirmDelete = async () => {
+    try {
+      const idsToDelete = isBulkDeleting ? selectedIds : (selectedCode ? [selectedCode.id] : []);
+      if (idsToDelete.length === 0) return;
+
+      const response = await bulkDeleteDiscount({
+        target: "discount_code",
+        ids: idsToDelete
+      }).unwrap();
+
+      if (response.success) {
+        toast.success(response.message || (isBulkDeleting ? "Codes deleted successfully" : "Code deleted successfully"));
+        setSelectedIds(prev => prev.filter(id => !idsToDelete.includes(id)));
+        closeModal();
+      } else {
+        toast.error(response.message || "Failed to delete");
+      }
+    } catch (err: any) {
+      toast.error(err?.data?.message || "An error occurred while deleting");
+    }
   };
 
   if (isLoading) {
@@ -216,7 +230,19 @@ const CouponCodeManager = () => {
               />
             </div>
             <div className="flex space-x-3">
-              <button className={headerButtonClasses} onClick={() => showToast("Filter functionality is automatic via tabs.", 'info')}>
+              {selectedIds.length > 0 && (
+                <button
+                  className={`${headerButtonClasses} bg-red-50 text-red-600 border-red-200 hover:bg-red-100 hover:text-red-700`}
+                  onClick={() => {
+                    setIsBulkDeleting(true);
+                    setIsDeleting(true);
+                  }}
+                >
+                  <Trash className="h-4 w-4" />
+                  <span>Delete Selected ({selectedIds.length})</span>
+                </button>
+              )}
+              <button className={headerButtonClasses} onClick={() => toast.info("Filter functionality is automatic via tabs.")}>
                 <Filter className="h-4 w-4" />
                 <span>Filter</span>
               </button>
@@ -251,6 +277,14 @@ const CouponCodeManager = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead>
                 <tr className="bg-gray-50">
+                  <th className="px-6 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                      checked={isAllSelected}
+                      onChange={handleSelectAll}
+                    />
+                  </th>
                   {["CODE", "SERIES", "STATUS", "DISCOUNT", "REDEEMED BY", "EXPIRY", "ACTIONS"].map((header) => (
                     <th key={header} className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{header}</th>
                   ))}
@@ -260,7 +294,15 @@ const CouponCodeManager = () => {
                 {currentCodes.map((item) => {
                   const normalizedStatus = getNormalizedStatus(item.status);
                   return (
-                    <tr key={item.id} className="hover:bg-purple-50">
+                    <tr key={item.id} className={`${selectedIds.includes(item.id) ? "bg-purple-50" : "hover:bg-purple-50"} transition-colors`}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                          checked={selectedIds.includes(item.id)}
+                          onChange={() => handleSelectOne(item.id)}
+                        />
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         <div className="bg-purple-50 px-3 py-1.5 rounded-lg inline-flex items-center border border-purple-200 shadow-sm font-mono">
                           {highlightText(item.code)}
@@ -338,7 +380,7 @@ const CouponCodeManager = () => {
               <p className="flex justify-between items-center pt-2"><strong className="text-gray-600">Expiry:</strong> <span className="text-gray-800">{formatDate(selectedCode.expiry)}</span></p>
             </div>
             <div className="flex justify-end space-x-3 mt-6">
-              <button onClick={() => setIsDeleting(true)} className="py-2 px-4 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors text-sm font-medium flex items-center shadow-md"><Trash2 className="h-4 w-4 mr-2" /> Delete</button>
+              <button onClick={() => { setIsBulkDeleting(false); setIsDeleting(true); }} className="py-2 px-4 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors text-sm font-medium flex items-center shadow-md"><Trash2 className="h-4 w-4 mr-2" /> Delete</button>
               <button onClick={closeModal} className="py-2 px-4 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors text-sm font-medium shadow-md">Close</button>
             </div>
           </div>
@@ -349,16 +391,24 @@ const CouponCodeManager = () => {
       {isDeleting && (
         <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-xl shadow-3xl max-w-sm w-full border-t-4 border-red-500 animate-in fade-in zoom-in duration-300">
-            <h3 className="text-xl font-bold mb-4 text-red-600 flex items-center"><Trash2 className="h-5 w-5 mr-2" /> Confirm Deletion</h3>
-            <p className="mb-6 text-gray-700">Are you sure you want to permanently delete coupon code <span className="font-mono font-semibold bg-gray-50 px-1 py-0.5 rounded text-gray-900">{selectedCode?.code || 'this code'}</span>? This action cannot be undone.</p>
+            <h3 className="text-xl font-bold mb-4 text-red-600 flex items-center"><Trash2 className="h-5 w-5 mr-2" /> {isBulkDeleting ? "Confirm Bulk Deletion" : "Confirm Deletion"}</h3>
+            <p className="mb-6 text-gray-700">
+              {isBulkDeleting
+                ? `Are you sure you want to permanently delete the ${selectedIds.length} selected coupon codes? This action cannot be undone.`
+                : <>Are you sure you want to permanently delete coupon code <span className="font-mono font-semibold bg-gray-50 px-1 py-0.5 rounded text-gray-900">{selectedCode?.code || 'this code'}</span>? This action cannot be undone.</>
+              }
+            </p>
             <div className="flex justify-end space-x-4">
-              <button onClick={() => setIsDeleting(false)} className="py-2 px-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors text-sm font-medium shadow-sm">Cancel</button>
-              <button onClick={confirmDelete} className="py-2 px-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors text-sm font-medium shadow-md">Delete Permanently</button>
+              <button onClick={() => { setIsDeleting(false); setIsBulkDeleting(false); }} className="py-2 px-4 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors text-sm font-medium shadow-sm" disabled={isDeletingMutation}>Cancel</button>
+              <button onClick={confirmDelete} className="py-2 px-4 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors text-sm font-medium shadow-md flex items-center" disabled={isDeletingMutation}>
+                {isDeletingMutation && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {isDeletingMutation ? "Deleting..." : "Delete Permanently"}
+              </button>
             </div>
           </div>
         </div>
       )}
-      <ToastComponent />
+      {/* ToastComponent removed as we use sonner */}
     </div>
   );
 };

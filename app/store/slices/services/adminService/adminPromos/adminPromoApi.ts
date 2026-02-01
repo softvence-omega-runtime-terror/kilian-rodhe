@@ -94,6 +94,21 @@ export interface GetAllDiscountCodesResponse {
 }
 
 
+// types for bulk delete
+
+export type BulkDeleteTarget = "discount_code_series" | "discount_code";
+
+export interface BulkDeleteDiscountRequest {
+    target: BulkDeleteTarget;
+    ids: number[];
+}
+
+export interface BulkDeleteDiscountResponse {
+    success: boolean;
+    message: string;
+}
+
+
 // Injection to the base url
 
 export const adminPromApi = baseBackendApi.injectEndpoints({
@@ -122,6 +137,19 @@ export const adminPromApi = baseBackendApi.injectEndpoints({
                 response.results,
             providesTags: ["DiscountCodes"],
         }),
+
+        // delete as bulk
+        bulkDeleteDiscount: builder.mutation<
+            BulkDeleteDiscountResponse,
+            BulkDeleteDiscountRequest
+        >({
+            query: (body) => ({
+                url: "/discount/discount-codes/bulk-delete/",
+                method: "DELETE",
+                body,
+            }),
+            invalidatesTags: ["DiscountCodes"],
+        }),
     }),
     overrideExisting: true,
 });
@@ -132,4 +160,5 @@ export const adminPromApi = baseBackendApi.injectEndpoints({
 export const {
     useCreateDiscountCodesMutation,
     useGetAllDiscountCodesQuery,
+    useBulkDeleteDiscountMutation,
 } = adminPromApi;

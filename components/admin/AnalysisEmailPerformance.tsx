@@ -1,32 +1,25 @@
 import { Mail } from "lucide-react";
 import React from "react";
+import { EmailLogs } from "@/app/store/slices/services/adminService/adminStats/adminStatsApi";
 
-const EmailCampaignPerformance = () => {
-  //  derfice dummy data for the email campaign performance
+interface EmailCampaignPerformanceProps {
+  data?: EmailLogs;
+}
+
+const EmailCampaignPerformance: React.FC<EmailCampaignPerformanceProps> = ({ data }) => {
+  // Define metrics based on dynamic data and placeholders for missing API fields
   const metrics = [
     {
-      value: "45,892",
+      value: data?.total_emails_sent?.toLocaleString() ?? "0",
       label: "Emails Sent",
-      bgColor: "bg-blue-50", // Light blue background
+      bgColor: "bg-blue-50",
       textColor: "text-blue-900",
     },
     {
-      value: "98.5%",
+      value: `${data?.email_success_rate ?? 0}%`,
       label: "Delivery Rate",
-      bgColor: "bg-green-50", // Light green background
+      bgColor: "bg-green-50",
       textColor: "text-green-900",
-    },
-    {
-      value: "42.8%",
-      label: "Open Rate",
-      bgColor: "bg-purple-50", // Light purple background
-      textColor: "text-purple-900",
-    },
-    {
-      value: "18.2%",
-      label: "Click Rate",
-      bgColor: "bg-amber-50", // Light amber/orange background
-      textColor: "text-amber-900",
     },
   ];
 

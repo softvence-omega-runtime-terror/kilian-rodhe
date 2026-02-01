@@ -68,6 +68,8 @@ const MetricCard: React.FC<MetricCardProps> = ({
 const AnalyticsDashboard = () => {
   const { data, isLoading, isError } = useGetAdminDiscountUsageStatsQuery();
 
+  console.log(data, "code analysis data")
+
   if (isLoading) return <div>Loading analytics...</div>;
   if (isError || !data) return <div>Failed to load analytics.</div>;
 
@@ -142,11 +144,11 @@ const AnalyticsDashboard = () => {
       </div>
 
       <div>
-        <AnalysisEmailPerformance />
+        <AnalysisEmailPerformance data={meta?.email_logs} />
       </div>
 
       <div>
-        <AnalysisTime />
+        <AnalysisTime data={meta?.redemption_last_7_days} />
       </div>
 
       <div>
