@@ -278,22 +278,35 @@ const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler
       onViewChange("list");
     } catch (err: unknown) {
       console.error("Full error creating product:", err);
-      console.error("Error details:", JSON.stringify(err, null, 2));
 
-      // Try to extract a meaningful error message
       let errMsg = "Failed to create product.";
 
-      if (err && typeof err === 'object') {
-        const error = err as { data?: unknown; message?: string; status?: string };
+      if (err && typeof err === "object") {
+        const error = err as { data?: unknown; status?: string | number };
 
-        // Check if it's a parsing error with data
-        if (error.status === 'PARSING_ERROR' && error.data) {
+        if (error.status === "PARSING_ERROR" && error.data) {
           errMsg = `Server error: ${String(error.data).substring(0, 200)}`;
-        } else if (error.data && typeof error.data === 'object') {
-          const data = error.data as { message?: string; detail?: string;[key: string]: unknown };
-          errMsg = data.message || data.detail || JSON.stringify(data);
-        } else if (error.message) {
-          errMsg = error.message;
+        } else if (error.data && typeof error.data === "object") {
+          const data = error.data as Record<string, unknown>;
+
+          // Handle standard DRF errors which might be { field: ["error"] } or { detail: "error" }
+          if (data.detail && typeof data.detail === "string") {
+            errMsg = data.detail;
+          } else if (data.message && typeof data.message === "string") {
+            errMsg = data.message;
+          } else {
+            // Extract the first error message from any field
+            const firstKey = Object.keys(data)[0];
+            const firstError = data[firstKey];
+
+            if (Array.isArray(firstError) && typeof firstError[0] === "string") {
+              errMsg = `${firstKey}: ${firstError[0]}`;
+            } else if (typeof firstError === "string") {
+              errMsg = `${firstKey}: ${firstError}`;
+            } else {
+              errMsg = JSON.stringify(data);
+            }
+          }
         }
       }
 

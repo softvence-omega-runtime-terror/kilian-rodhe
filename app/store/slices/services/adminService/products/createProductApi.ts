@@ -84,16 +84,16 @@ export const productsApi = baseBackendApi.injectEndpoints({
           // ---------- BOOLEAN FIELDS ----------
           formData.append(
             "is_universal_size",
-            String(payload.is_universal_size)
+            payload.is_universal_size ? "1" : "0"
           );
-          formData.append("ai_gen", String(payload.ai_gen));
-          formData.append("ai_letter", String(payload.ai_letter));
-          formData.append("ai_upload", String(payload.ai_upload));
+          formData.append("ai_gen", payload.ai_gen ? "1" : "0");
+          formData.append("ai_letter", payload.ai_letter ? "1" : "0");
+          formData.append("ai_upload", payload.ai_upload ? "1" : "0");
           formData.append(
             "is_customize",
-            String(payload.is_customize ?? false)
+            (payload.is_customize ?? false) ? "1" : "0"
           );
-          formData.append("is_active", String(payload.is_active));
+          formData.append("is_active", payload.is_active ? "1" : "0");
 
           // ---------- SIZE OBJECTS ----------
           if (payload.cloth_size) {
@@ -161,16 +161,16 @@ export const productsApi = baseBackendApi.injectEndpoints({
         // ---------- BOOLEAN FIELDS ----------
         formData.append(
           "is_universal_size",
-          String(data.is_universal_size)
+          data.is_universal_size ? "1" : "0"
         );
-        formData.append("ai_gen", String(data.ai_gen));
-        formData.append("ai_letter", String(data.ai_letter));
-        formData.append("ai_upload", String(data.ai_upload));
+        formData.append("ai_gen", data.ai_gen ? "1" : "0");
+        formData.append("ai_letter", data.ai_letter ? "1" : "0");
+        formData.append("ai_upload", data.ai_upload ? "1" : "0");
         formData.append(
           "is_customize",
-          String(data.is_customize ?? false)
+          (data.is_customize ?? false) ? "1" : "0"
         );
-        formData.append("is_active", String(data.is_active));
+        formData.append("is_active", data.is_active ? "1" : "0");
 
         // ---------- SIZE OBJECTS ----------
         if (data.cloth_size) {

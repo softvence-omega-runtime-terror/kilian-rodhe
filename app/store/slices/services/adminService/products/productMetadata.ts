@@ -31,6 +31,23 @@ interface AgeRangeSingleResponse {
 export interface Category {
     id: number;
     title: string;
+    description: string;
+    is_active: boolean;
+    age_range: number[]; // Array of AgeRange IDs
+    image?: string;
+    icon?: string;
+    banner?: string;
+    created_at: string;
+}
+
+export interface CategoryPayload {
+    title: string;
+    description: string;
+    is_active: boolean;
+    age_range: number[]; // Array of AgeRange IDs
+    image?: File;
+    icon?: File;
+    banner?: File;
 }
 
 interface CategoryListResponse {
@@ -46,14 +63,27 @@ interface CategorySingleResponse {
     data: Category;
 }
 
-interface CreateCategoryRequest {
-    title: string;
-}
+/* =========================
+   HELPERS
+========================= */
 
-interface UpdateCategoryRequest {
-    id: number;
-    title: string;
-}
+const buildCategoryFormData = (payload: CategoryPayload) => {
+    const formData = new FormData();
+    formData.append("title", payload.title);
+    formData.append("description", payload.description);
+    formData.append("is_active", String(payload.is_active));
+
+    // multiple age range IDs
+    payload.age_range.forEach((id) => {
+        formData.append("age_range", String(id));
+    });
+
+    if (payload.image) formData.append("image", payload.image);
+    if (payload.icon) formData.append("icon", payload.icon);
+    if (payload.banner) formData.append("banner", payload.banner);
+
+    return formData;
+};
 
 /* =========================
    CLASSIFICATION TYPES
@@ -135,6 +165,18 @@ export const productMetadataApi = baseBackendApi.injectEndpoints({
             ],
         }),
 
+        // DELETE: /product/ages/{id}/
+        deleteAgeRange: builder.mutation<{ success: boolean }, number>({
+            query: (id) => ({
+                url: `/product/ages/${id}/`,
+                method: "DELETE",
+            }),
+            invalidatesTags: (_result, _error, id) => [
+                { type: "ProductMetadata", id },
+                { type: "ProductMetadata", id: "AGE_RANGE_LIST" },
+            ],
+        }),
+
         /* ========= CATEGORY ========= */
 
         // GET: /product/categories/
@@ -163,22 +205,22 @@ export const productMetadataApi = baseBackendApi.injectEndpoints({
         }),
 
         // POST: /product/categories/
-        createCategory: builder.mutation<Category, CreateCategoryRequest>({
-            query: (body) => ({
+        createCategory: builder.mutation<Category, CategoryPayload>({
+            query: (payload) => ({
                 url: "/product/categories/",
                 method: "POST",
-                body,
+                body: buildCategoryFormData(payload),
             }),
             transformResponse: (response: CategorySingleResponse) => response.data,
             invalidatesTags: [{ type: "ProductMetadata", id: "CATEGORY_LIST" }],
         }),
 
-        // PATCH: /product/categories/{id}/
-        updateCategory: builder.mutation<Category, UpdateCategoryRequest>({
-            query: ({ id, title }) => ({
+        // PUT: /product/categories/{id}/
+        updateCategory: builder.mutation<Category, { id: number; payload: CategoryPayload }>({
+            query: ({ id, payload }) => ({
                 url: `/product/categories/${id}/`,
-                method: "PATCH",
-                body: { title },
+                method: "PUT",
+                body: buildCategoryFormData(payload),
             }),
             transformResponse: (response: CategorySingleResponse) => response.data,
             invalidatesTags: (_result, _error, { id }) => [
@@ -273,6 +315,18 @@ export const productMetadataApi = baseBackendApi.injectEndpoints({
             ],
         }),
 
+        // POST: /product/sub-categories/
+        createSubCategory: builder.mutation<SubCategory, { title: string }>({
+            query: (body) => ({
+                url: "/product/sub-categories/",
+                method: "POST",
+                body,
+            }),
+            transformResponse: (response: SubCategorySingleResponse) =>
+                response.data,
+            invalidatesTags: [{ type: "ProductMetadata", id: "SUB_CATEGORY_LIST" }],
+        }),
+
         // PATCH: /product/sub-categories/{id}/
         updateSubCategory: builder.mutation<
             SubCategory,
@@ -304,7 +358,7 @@ export const productMetadataApi = baseBackendApi.injectEndpoints({
         }),
     }),
 
-    overrideExisting: false,
+    overrideExisting: true,
 });
 
 /* =========================
@@ -315,6 +369,7 @@ export const {
     // Age Range
     useGetAllAgeRangesQuery,
     useGetAgeRangeByIdQuery,
+    useDeleteAgeRangeMutation,
 
     // Category
     useGetAllCategoriesQuery,
@@ -330,6 +385,7 @@ export const {
     // Sub-Category
     useGetAllSubCategoriesQuery,
     useGetSubCategoryByIdQuery,
+    useCreateSubCategoryMutation,
     useUpdateSubCategoryMutation,
     useDeleteSubCategoryMutation,
 } = productMetadataApi;
