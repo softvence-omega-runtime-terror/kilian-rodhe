@@ -386,8 +386,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           <nav className="space-y-2">
             {navItems.map((item) => {
               const isActive =
-                pathname === item.href ||
-                pathname.startsWith(item.href + "/");
+                item.href === "/admin"
+                  ? pathname === "/admin"
+                  : pathname === item.href || pathname.startsWith(item.href + "/");
 
               return (
                 <Link
