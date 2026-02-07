@@ -1,8 +1,8 @@
 // components/SendDiscountCodes.jsx
 import { Send, UploadIcon, Users2Icon } from "lucide-react";
 import DiscountEmailPReview from "@/components/admin/DiscountEmailPreview";
-import React, { useState } from "react"; // Import useState
-import DiscountSendButton from "./DiscountSendButton";
+import React, { useState } from "react";
+import DiscountSendButton from "../DiscountSendButton";
 
 // Define recipient types for easy state management
 const RECIPIENT_TYPES = {
@@ -21,11 +21,10 @@ const SendDiscountCodes = () => {
   const getCardClasses = (type: string) => {
     const isSelected = activeRecipientType === type;
     // Removed flex-1 here as grid controls the width
-    return `p-6 rounded-xl cursor-pointer transition duration-150 ease-in-out ${
-      isSelected
-        ? "border-2 border-purple-500 bg-purple-50"
-        : "border border-gray-200 hover:border-gray-300"
-    }`;
+    return `p-6 rounded-xl cursor-pointer transition duration-150 ease-in-out ${isSelected
+      ? "border-2 border-purple-500 bg-purple-50"
+      : "border border-gray-200 hover:border-gray-300"
+      }`;
   };
 
   // Helper function to determine the icon's styling

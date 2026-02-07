@@ -1,5 +1,5 @@
 "use client"
-import DiscountCard from '@/components/admin/DiscountCard'
+import DiscountCard from '@/components/admin/emailsComponent/DiscountCard'
 function page() {
   return (
     <div>
