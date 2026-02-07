@@ -294,7 +294,7 @@ function EmailTemplateTab() {
                                         <textarea
                                             value={body}
                                             onChange={(e) => setBody(e.target.value)}
-                                            placeholder="Hi {customer_name}, here is your discount..."
+                                            placeholder="Hi {{ customer_name }}, here is your discount..."
                                             className="min-h-[400px] w-full resize-none bg-transparent font-mono text-sm text-gray-700 outline-none placeholder:text-gray-400"
                                         />
                                     </div>
@@ -332,11 +332,11 @@ function EmailTemplateTab() {
                                         <div key={idx} className="group mb-2 flex flex-col rounded-lg border border-gray-100 bg-gray-50 p-3 hover:border-purple-200 hover:bg-purple-50">
                                             <div className="flex items-center justify-between">
                                                 <code className="rounded bg-white px-1.5 py-0.5 text-xs font-bold text-purple-700 border border-gray-200">
-                                                    {`{${ph.slug_name}}`}
+                                                    {`{{ ${ph.slug_name} }}`}
                                                 </code>
                                                 <div className="flex items-center gap-2">
                                                     <button
-                                                        onClick={() => navigator.clipboard.writeText(`{${ph.slug_name}}`)}
+                                                        onClick={() => navigator.clipboard.writeText(`{{ ${ph.slug_name} }}`)}
                                                         className="text-gray-400 hover:text-purple-600 cursor-pointer"
                                                         title="Copy"
                                                     >
@@ -445,7 +445,7 @@ function EmailTemplateTab() {
                                     <p className="font-semibold">How it works</p>
                                     <p className="mt-1 opacity-80">
                                         Map data sources to slugs. When the email sends,
-                                        <code className="mx-1 rounded bg-blue-100 px-1 font-bold">{`{slug}`}</code>
+                                        <code className="mx-1 rounded bg-blue-100 px-1 font-bold">{`{{ slug }}`}</code>
                                         is replaced by the actual value.
                                     </p>
                                 </div>
@@ -549,9 +549,16 @@ function EmailTemplateTab() {
                                 {/* Code/Preview Block */}
                                 <div className="mb-4 rounded-md bg-gray-50 p-3">
                                     <span className="mb-1 block text-[10px] uppercase text-gray-400">Preview</span>
-                                    <p className="whitespace-pre-wrap font-mono text-xs text-gray-600 line-clamp-3">
-                                        {template.body}
-                                    </p>
+                                    {template.body_type === 'html' ? (
+                                        <div
+                                            className="max-h-[150px] w-full overflow-hidden text-xs text-gray-600"
+                                            dangerouslySetInnerHTML={{ __html: template.body }}
+                                        />
+                                    ) : (
+                                        <p className="whitespace-pre-wrap font-mono text-xs text-gray-600 line-clamp-3">
+                                            {template.body}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
