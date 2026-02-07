@@ -7,14 +7,15 @@ import RawClockIcon from "@/public/image/admin/Discount/clockIcon.svg";
 import RawCrossIcon from "@/public/image/admin/Discount/crossIcon.svg";
 import RawRightIcon from "@/public/image/admin/Discount/rightIcon.svg";
 
-import ManualDiscount from "./ManualDiscount";
+import ManualDiscount from "../ManualDiscount";
 import CsvDiscount from "./CsvDiscount";
 import DiscountEmailSend from "./DiscountEmailSend";
-import DiscountAutomation from "./DiscountAutomation";
-import CreateDiscountCard from "./CreateDiscountCard";
-import DiscountAnalysis from "./DiscountAnalysis";
-import AnalysisBodyTable from "./AnalysisBodyTable";
+import DiscountAutomation from "../DiscountAutomation";
+import CreateDiscountCard from "../CreateDiscountCard";
+import DiscountAnalysis from "../DiscountAnalysis";
+import AnalysisBodyTable from "../AnalysisBodyTable";
 import { useGetAdminDiscountUsageStatsQuery } from "@/app/store/slices/services/adminService/adminStats/adminStatsApi";
+import EmailTemplateTab from "./EmailTemplateTab";
 
 /* -----------------------------------------
     SAFE SVG TYPE (supports both component & image)
@@ -60,7 +61,7 @@ interface CreateDiscountCodePageProps {
 /* -----------------------------------------
     Tabs
 ------------------------------------------ */
-const tabs = ["Manage Codes", "Email Sending", "Automation", "Analytics"];
+const tabs = ["Manage Codes", "Email Sending", "Automation", "Analytics", "Email Template"];
 
 /* -----------------------------------------
     DashboardCard Component
@@ -180,7 +181,7 @@ const CreateDiscountCodePage: React.FC<CreateDiscountCodePageProps> = ({
             key={tab}
             onClick={() => setActiveSubTab(tab)}
             className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeSubTab === tab
-              ? "bg-[#FFFFFF] text-[#000000]"
+              ? "bg-[#8B6F47] text-white"
               : "text-gray-600 hover:bg-gray-50"
               }`}
           >
@@ -211,6 +212,8 @@ const DiscountPage: React.FC = () => {
         return <DiscountAutomation />;
       case "Analytics":
         return <DiscountAnalysis />;
+      case "Email Template":
+        return <EmailTemplateTab />;
       default:
         return null;
     }
@@ -231,7 +234,7 @@ const DiscountPage: React.FC = () => {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${activeTab === tab
-                ? "bg-gray-100 text-gray-900 shadow-sm"
+                ? "bg-[#8B6F47] text-white shadow-sm"
                 : "text-gray-600 hover:bg-gray-50"
                 }`}
             >
