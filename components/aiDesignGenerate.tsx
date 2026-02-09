@@ -4,7 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { motion, Variant } from "framer-motion";
 
-import specialColorIcon from "../public/image/livePreview/specialIconColor.svg";
+// import specialColorIcon from "../public/image/livePreview/specialIconColor.svg";
 import whiteSpecialIcon from "../public/image/livePreview/whitSpecileIcon.svg";
 import blueSpecialIcom from "../public/image/livePreview/blueSpecialIcon.svg";
 
@@ -18,10 +18,12 @@ const jostFont = Jost({
 
 interface AiDesignGenerateProps {
   onPreviewClick: () => void;
+  onGenerate: (payload: any) => void;
 }
 
 const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
   onPreviewClick,
+  onGenerate,
 }) => {
   const fadeInVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -41,9 +43,38 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
     transition: { type: "spring", stiffness: 400, damping: 10 },
   };
 
+  const [selectedOptions, setSelectedOptions] = React.useState<Record<string, string | null>>({});
+  const [prompt, setPrompt] = React.useState("");
+
+  const handleOptionSelect = (categoryId: string, option: string) => {
+    setSelectedOptions((prev) => ({
+      ...prev,
+      [categoryId]: prev[categoryId] === option ? null : option,
+    }));
+  };
+
+  const handleGenerate = () => {
+    const payload = {
+      prompt,
+      style: selectedOptions.style || null,
+      lighting: selectedOptions.lighting || null,
+      weatherenv: selectedOptions.weatherenv || null,
+      cameraperspective: selectedOptions.cameraperspective || null,
+      colorscheme: selectedOptions.colorscheme || null,
+      subjecttype: selectedOptions.subjecttype || null,
+      emotionexpression: selectedOptions.emotionexpression || null,
+      backgroundtype: selectedOptions.backgroundtype || null,
+      clothingfashion: selectedOptions.clothingfashion || null,
+      compositiontype: selectedOptions.compositiontype || null,
+      imagequality: selectedOptions.imagequality || null,
+      modificationtype: selectedOptions.modificationtype || null,
+    };
+    onGenerate(payload);
+  };
+
   return (
     <div className="space-y-6">
-      <motion.div
+      {/* <motion.div
         className="border-l-4 border-yellow-400 pl-4 py-3 mb-6 bg-yellow-50 rounded-r-md"
         variants={fadeInVariants}
         initial="hidden"
@@ -71,10 +102,10 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
           and watch it come to life with professional-grade results optimized
           for printing.
         </p>
-      </motion.div>
+      </motion.div> */}
 
-      <motion.div
-        className="border-l-4 border-blue-500 pl-4 py-3 mb-6 bg-gradient-to-br from-[#EAF3FF] via-[#F5F9FF] to-[#E0EDFF] shadow-sm"
+      {/* <motion.div
+        className="border-l-4 border-blue-500 pl-4 py-3 mb-6 bg-linear-to-br from-[#EAF3FF] via-[#F5F9FF] to-[#E0EDFF] shadow-sm"
         variants={fadeInVariants}
         initial="hidden"
         animate="visible"
@@ -103,6 +134,61 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
           graphic optimized for printing. All images are generated at 300 DPI
           for professional quality.
         </p>
+      </motion.div> */}
+
+      {/* --- STRUCTURED PROMPT SYSTEM --- */}
+      <motion.div
+        className="mb-8 p-4 border border-gray-200 rounded-lg bg-white shadow-sm"
+        initial="hidden"
+        animate="visible"
+        variants={fadeInVariants}
+        transition={{ delay: 0.4 }}
+      >
+        <h3
+          className="text-sm font-semibold uppercase tracking-widest text-gray-700 mb-4"
+          style={{ fontFamily: "'Jost', sans-serif" }}
+        >
+          Structured Prompt System
+        </h3>
+        <div className="space-y-4">
+          {[
+            { id: 'style', label: 'Style', options: ["Comic", "Cartoon", "Minimalist"] },
+            { id: 'lighting', label: 'Lighting', options: ["Bright day light", "Soft light", "Golden hour"] },
+            { id: 'weatherenv', label: 'Weather', options: ["Sunny", "Rain", "Fog"] },
+            { id: 'cameraperspective', label: 'Camera Perspective', options: ["Close up", "Medium shot", "Wide shot"] },
+            { id: 'colorscheme', label: 'Color Scheme', options: ["Black White", "Monochrome", "Pastel"] },
+            { id: 'subjecttype', label: 'Subject Type', options: ["Person", "Animal", "Landscape"] },
+            { id: 'emotionexpression', label: 'Emotion', options: ["Happy", "Sad", "Excited"] },
+            { id: 'backgroundtype', label: 'Background', options: ["Transparent", "Solid color", "Natural"] },
+            { id: 'clothingfashion', label: 'Fashion', options: ["Casual", "Business", "Sports Wear"] },
+            { id: 'compositiontype', label: 'Composition', options: ["Centered", "Symmetrical", "Asymmetrical"] },
+            { id: 'imagequality', label: 'Quality', options: ["HD", "Low Resulation", "Sharp"] },
+            { id: 'modificationtype', label: 'Modification', options: ["Background Removal", "Style Transfer", "Face Enhancement"] },
+          ].map((category) => (
+            <div key={category.id} className="space-y-2">
+              <label className="text-[11px] font-medium text-gray-500 uppercase tracking-wider">
+                {category.label}
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {category.options.map((option) => (
+                  <motion.button
+                    key={option}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleOptionSelect(category.id, option)}
+                    className={`px-3 py-1.5 text-xs rounded-full border transition-all duration-200 ${selectedOptions[category.id] === option
+                      ? 'bg-red-800 text-white border-red-800 shadow-sm'
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-red-800 hover:text-red-800'
+                      }`}
+                    style={{ fontFamily: "'Jost', sans-serif" }}
+                  >
+                    {option}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </motion.div>
 
       {/* --- DESCRIBE YOUR DESIGN INPUT AREA --- */}
@@ -124,10 +210,12 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
           placeholder="Example: A majestic lion with golden mane, detailed portrait style,
           dramatic lighting..."
           style={{ fontFamily: "'Jost', sans-serif", letterSpacing: "0.5px" }}
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
         ></textarea>
-      
+
         <p
-          className="text-xs mt-10 text-gray-600"
+          className="text-xs mt-2 text-gray-600"
           style={{ fontFamily: "'Jost', sans-serif", letterSpacing: "0.5px" }}
         >
           Be specific about colors, style, mood, and elements you want to see
@@ -195,7 +283,8 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
         </motion.button>
 
         <motion.button
-          className="flex items-center space-x-2 px-6 py-3 shadow-lg bg-[#795548] text-white  text-sm font-medium w-full justify-center opacity-[0.5]"
+          onClick={handleGenerate}
+          className="flex items-center space-x-2 px-6 py-3 shadow-lg bg-[#795548] text-white text-sm font-medium w-full justify-center"
           // **Removed sm:w-auto from here**
           whileHover={{
             scale: 1.05,
@@ -214,7 +303,7 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
             className="w-4 h-4"
           />
           <span
-            className={`${jostFont.className} text-[#fff] tracking-[2.1px] text-[14px] font-medium`}
+            className={`${jostFont.className} text-white tracking-[2.1px] text-[14px] font-medium`}
           >
             GENERATE AI DESIGN
           </span>

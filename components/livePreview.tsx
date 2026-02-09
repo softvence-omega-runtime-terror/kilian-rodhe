@@ -1,15 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-// ➡️ Import useRouter for navigation
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
 // ✅ Framer Motion import: Variants TargetAndTransition
 import { motion, type Variants, type TargetAndTransition } from "framer-motion";
 
 // --- Imported Components (Assumed to exist in your project structure) ---
 import LivePreviewModal from "@/components/previewModel";
-import CustomTextDesign from "@/components/customTextDesign";
+// import CustomTextDesign from "@/components/customTextDesign";
 import AiDesignGenerate from "./aiDesignGenerate";
 
 // --- Image Imports (Assumed to exist in the specified paths) ---
@@ -20,7 +20,7 @@ import imageIcon from "../public/image/livePreview/imageIcon.svg";
 import layerIcon from "../public/image/livePreview/layerIcon.svg";
 import reloadIcon from "../public/image/livePreview/reloadIcon.svg";
 import scaleIcon from "../public/image/livePreview/scaleIcon.svg";
-import secondTIcon from "../public/image/livePreview/secondTicon.svg";
+// import secondTIcon from "../public/image/livePreview/secondTicon.svg";
 import specialIcon from "../public/image/livePreview/specialIcon.svg";
 import tIcon from "../public/image/livePreview/tIcon.svg";
 import tshirtImage from "../public/image/livePreview/tshirt.jpg";
@@ -42,11 +42,20 @@ const cormorantItalic = Cormorant_Garamond({
 
 // ---------------- CombinedDesignPageFixed Component ----------------
 const CombinedDesignPageFixed = () => {
-    // 1️⃣ Initialize the router
+    // 1️⃣ Initialize the router and search params
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const productId = searchParams.get("id");
 
-    // State to manage the active design mode: 'ai' or 'text'
-    const [designMode, setDesignMode] = useState("ai");
+    const { data: detailsData } = useGetProductDetailsQuery(productId ? parseInt(productId) : 0, {
+        skip: !productId,
+    });
+
+    const apiProduct = detailsData?.data;
+
+    // State to manage the active design mode: always 'ai' now
+    const [designMode] = useState("ai");
+    const [selectedAiImage, setSelectedAiImage] = useState<string | null>(null);
 
     // Lifted modal state so modal control is available at the top level
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,8 +64,33 @@ const CombinedDesignPageFixed = () => {
 
     // Function to handle navigation to the shipping page
     const handleContinueShopping = () => {
-    
         router.push("/pages/shipping");
+    };
+
+    const handleImageSelect = (imageSrc: string) => {
+        setSelectedAiImage(imageSrc);
+        console.log("Selected Image for AI (img_file):", imageSrc);
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                setSelectedAiImage(base64String);
+                console.log("Uploaded Image for AI (img_file):", base64String);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleAiGenerate = (payload: any) => {
+        const fullPayload = {
+            ...payload,
+            img_file: selectedAiImage,
+        };
+        console.log("🚀 GENERATE AI DESIGN PAYLOAD:", fullPayload);
     };
 
 
@@ -114,38 +148,91 @@ const CombinedDesignPageFixed = () => {
                                     className="text-xl md:text-2xl font-serif text-[#1A1A1A] font-normal mt-0.5 italic"
                                     style={{ fontFamily: "'Cormorant Garamond', sans-serif" }}
                                 >
-                                    Premium Cotton T-Shirt
+                                    {apiProduct?.name || "Custom Design"}
                                 </h1>
                             </div>
-                            <div className="text-right">
-                                <span
-                                    className={`${jostFont.className} text-[12px] uppercase text-[#6B6B6B] tracking-[2.4px]`}
-                                >
-                                    price
-                                </span>
-                                <br />
-                                <p
-                                    className="text-2xl md:text-3xl font-light text-gray-900"
-                                    style={{ fontFamily: "'Jost', sans-serif" }}
-                                >
-                                    €29.99
-                                </p>
-                            </div>
+                            {apiProduct && (
+                                <div className="text-right">
+                                    <span
+                                        className={`${jostFont.className} text-[12px] uppercase text-[#6B6B6B] tracking-[2.4px]`}
+                                    >
+                                        price
+                                    </span>
+                                    <br />
+                                    <p
+                                        className="text-2xl md:text-3xl font-light text-gray-900"
+                                        style={{ fontFamily: "'Jost', sans-serif" }}
+                                    >
+                                        €{apiProduct.discounted_price || apiProduct.price}
+                                    </p>
+                                </div>
+                            )}
                         </header>
                         <main>
-                            {/* T-Shirt Image */}
+                            {/* T-Shirt Image / Upload Section */}
                             <motion.div
-                                className="py-4 flex justify-center"
+                                className="py-4 flex flex-col items-center"
                                 whileHover={{ scale: 1.02 }}
                                 transition={{ type: "spring", stiffness: 400, damping: 10 }}
                             >
-                                <div className="border border-gray-200 p-1 sm:p-2 max-w-sm w-full mx-auto">
-                                    <Image
-                                        src={tshirtImage}
-                                        alt="Model wearing white Premium Cotton T-Shirt"
-                                        className="w-full h-auto object-cover rounded-sm"
-                                    />
+                                <div className="border-2 border-dashed border-gray-200 p-1 sm:p-2 max-w-sm w-full mx-auto relative h-[400px] flex items-center justify-center bg-gray-50 rounded-md overflow-hidden">
+                                    {selectedAiImage || apiProduct?.images?.[0]?.image ? (
+                                        <Image
+                                            src={selectedAiImage || (apiProduct?.images?.[0]?.image) || tshirtImage}
+                                            alt="Product preview"
+                                            fill
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="text-center p-6">
+                                            <div className="mb-4">
+                                                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                                    <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                </svg>
+                                            </div>
+                                            <p className={`${jostFont.className} text-sm text-gray-600 mb-2`}>No image selected</p>
+                                            <label className="cursor-pointer bg-red-800 text-white px-4 py-2 rounded-sm text-xs uppercase tracking-widest hover:bg-red-900 transition-colors">
+                                                Upload from device
+                                                <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
+                                            </label>
+                                        </div>
+                                    )}
+                                    {selectedAiImage && !apiProduct && (
+                                        <button
+                                            onClick={() => setSelectedAiImage(null)}
+                                            className="absolute top-2 right-2 bg-black/50 text-white p-1 rounded-full hover:bg-black/70 transition-colors"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    )}
                                 </div>
+
+                                {apiProduct?.images && apiProduct.images.length > 0 && (
+                                    <div className="mt-4 flex gap-2 overflow-x-auto pb-2 w-full max-w-sm">
+                                        <div className="shrink-0">
+                                            <label className="w-20 h-20 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-red-800 transition-colors rounded-sm bg-white">
+                                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                                                <span className="text-[10px] text-gray-400 mt-1 uppercase">Upload</span>
+                                                <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
+                                            </label>
+                                        </div>
+                                        {apiProduct.images.map((img: any, idx: number) => (
+                                            <div
+                                                key={idx}
+                                                onClick={() => handleImageSelect(img.image)}
+                                                className={`w-20 h-20 shrink-0 border-2 cursor-pointer relative rounded-sm overflow-hidden ${selectedAiImage === img.image ? 'border-red-800' : 'border-gray-200'
+                                                    }`}
+                                            >
+                                                <Image
+                                                    src={img.image}
+                                                    alt={`Thumbnail ${idx}`}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </motion.div>
 
                             {/* High-Resolution Guarantee */}
@@ -219,13 +306,14 @@ const CombinedDesignPageFixed = () => {
                     animate="visible"
                     variants={fadeInVariants}
                 >
+                    {/* --- Right Column (Design Tools) --- COMMENTED OUT AS PER REQUEST */}
+                    {/* 
                     <h2
                         className="text-xl font-semibold text-[#0a0a0a] mb-6"
                         style={{ fontFamily: "'Cormorant Garamond', sans-serif" }}
                     >
                         Design Tools
                     </h2>
-                    {/* Design Tools Grid */}
                     <motion.div
                         className="grid grid-cols-4 gap-4 mb-8"
                         variants={toolsStagger}
@@ -259,7 +347,6 @@ const CombinedDesignPageFixed = () => {
                         ))}
                     </motion.div>
 
-                    {/* AI Generator / Text Creator Toggle */}
                     <motion.div
                         className="flex flex-col sm:flex-row bg-gray-100 rounded-md p-1 mb-6 shadow-inner"
                         variants={fadeInVariants}
@@ -309,12 +396,15 @@ const CombinedDesignPageFixed = () => {
                             </span>
                         </motion.button>
                     </motion.div>
-                    {/* Dynamic Content: AI Generator or Custom Text Design */}
-                    {designMode === "ai" ? (
-                        <AiDesignGenerate onPreviewClick={openPreviewModal} />
-                    ) : (
-                        <CustomTextDesign />
-                    )}
+                    */}
+
+                    {/* Dynamic Content: AI Generator always shown now */}
+                    <div className="">
+                        <AiDesignGenerate
+                            onPreviewClick={openPreviewModal}
+                            onGenerate={handleAiGenerate}
+                        />
+                    </div>
                     <motion.div
                         variants={fadeInVariants}
                         initial="hidden"

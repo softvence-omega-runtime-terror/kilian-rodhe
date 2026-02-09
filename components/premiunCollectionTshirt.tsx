@@ -7,6 +7,7 @@ import { Jost, Cormorant_Garamond } from "next/font/google";
 
 // Import types from framer-motion if you want even stricter type checking
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import ToastMessage from "./ToastMessage";
 
 // --- Image Imports ---
@@ -187,8 +188,16 @@ export default function ProductPage({ productId }: { productId?: number }) {
     useState<ColorData>(initialSelectedColor);
   const [quantity, setQuantity] = useState<number>(1);
   const [addToCart] = useAddToCartMutation();
-  // const router = useRouter();
+  const router = useRouter();
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+
+  const handleCustomizeWithAi = () => {
+    if (productId) {
+      router.push(`/pages/my-creation/create-your-design?id=${productId}`);
+    } else {
+      router.push("/pages/my-creation/create-your-design");
+    }
+  };
 
   // --- Handlers ---
   const handleThumbnailClick = (image: Thumbnail, index: number) => {
@@ -603,7 +612,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
 
             {/* CUSTOMIZE NOW WITH AI Button */}
             <button
-              type="submit"
+              onClick={handleCustomizeWithAi}
               className={`flex items-center justify-center space-x-2 w-full py-3 mt-6 text-white shadow-lg transition-transform transform hover:scale-[1.01] hover:bg-opacity-90 duration-300`}
               style={{ backgroundColor: CUSTOM_BROWN }}
             >

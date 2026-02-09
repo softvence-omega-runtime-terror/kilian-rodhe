@@ -22,7 +22,7 @@ export interface ICartItem {
 
 export interface ICartResponse {
   id: number;
-  items: ICartItem[];
+  cards: ICartItem[];
   total_price: number;
 }
 
