@@ -19,11 +19,13 @@ const jostFont = Jost({
 interface AiDesignGenerateProps {
   onPreviewClick: () => void;
   onGenerate: (payload: any) => void;
+  isGenerating?: boolean;
 }
 
 const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
   onPreviewClick,
   onGenerate,
+  isGenerating = false,
 }) => {
   const fadeInVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -242,7 +244,7 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
             "Cute astronaut cat floating in space",
             "Abstract geometric pattern in gold and black",
             "Vintage floral bouquet illustration",
-          ].map((prompt, index) => (
+          ].map((quickText, index) => (
             <motion.button
               key={index}
               className="p-3 bg-gray-100 text-[#1a1a1a] rounded-md text-xs text-left cursor-pointer shadow-sm hover:bg-gray-200 transition duration-150"
@@ -253,8 +255,9 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
               whileHover={buttonHover}
               whileTap={{ scale: 0.95 }}
               variants={fadeInVariants}
+              onClick={() => setPrompt(quickText)}
             >
-              {prompt}
+              {quickText}
             </motion.button>
           ))}
         </div>
@@ -268,7 +271,7 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
         variants={fadeInVariants}
         transition={{ delay: 1 }}
       >
-        <motion.button
+        {/* <motion.button
           // 🚀 onPreviewClick is correctly typed!
           onClick={onPreviewClick}
           className="flex items-center space-x-2 px-6 py-3 bg-white text-gray-700 text-sm font-medium shadow-sm w-full justify-center"
@@ -280,45 +283,46 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
           <span className={`${jostFont.className} text-[#9810fa]`}>
             Preview
           </span>
-        </motion.button>
+        </motion.button> */}
 
         <motion.button
           onClick={handleGenerate}
-          className="flex items-center space-x-2 px-6 py-3 shadow-lg bg-[#795548] text-white text-sm font-medium w-full justify-center"
+          disabled={isGenerating}
+          className={`flex items-center space-x-2 px-6 py-3 shadow-lg bg-[#795548] text-white text-sm font-medium w-full justify-center ${isGenerating ? 'opacity-70 cursor-not-allowed' : ''}`}
           // **Removed sm:w-auto from here**
-          whileHover={{
+          whileHover={!isGenerating ? {
             scale: 1.05,
             boxShadow:
               "0 10px 15px -3px rgba(121, 85, 72, 0.4), 0 4px 6px -2px rgba(121, 85, 72, 0.2)",
-          }}
-          whileTap={{ scale: 0.95 }}
-          animate={{
+          } : {}}
+          whileTap={!isGenerating ? { scale: 0.95 } : {}}
+          animate={!isGenerating ? {
             scale: [1, 1.02, 1],
             transition: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
-          }}
+          } : {}}
         >
           <Image
             src={whiteSpecialIcon}
             alt="Generate Icon"
-            className="w-4 h-4"
+            className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`}
           />
           <span
             className={`${jostFont.className} text-white tracking-[2.1px] text-[14px] font-medium`}
           >
-            GENERATE AI DESIGN
+            {isGenerating ? 'GENERATING...' : 'GENERATE AI DESIGN'}
           </span>
         </motion.button>
       </motion.div>
 
-      <p
+      {/* <p
         className="text-xs mb-3 text-gray-500 text-center mt-6"
         style={{ fontFamily: "'Jost', sans-serif", letterSpacing: "0.5px" }}
       >
         Powered by Adobe Firefly · Professional 300 DPI Quality
-      </p>
+      </p> */}
 
       {/* --- PRO TIPS --- */}
-      <motion.div>
+      {/* <motion.div>
         <div className="border border-gray-200 p-4 mb-8 rounded-md">
           <h3 className="text-sm font-semibold uppercase tracking-wider mb-3 text-gray-700">
             PRO TIPS FOR BEST RESULTS:
@@ -338,7 +342,7 @@ const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
             <li>Keep descriptions clear and detailed for precise results</li>
           </ul>
         </div>
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 };

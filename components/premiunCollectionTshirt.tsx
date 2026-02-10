@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { StaticImageData } from "next/image";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import { Jost, Cormorant_Garamond } from "next/font/google";
 
@@ -23,6 +23,7 @@ import colorStart from "../public/image/myCreationIcon/colorStartIcon.svg";
 import drowIcon from "../public/image/myCreationIcon/deowIcon.svg";
 import thanderIcon from "../public/image/myCreationIcon/thanderIcon.svg";
 import rightIcon from "../public/image/myCreationIcon/rightIcon.svg";
+import nonColorIcon from "../public/image/myCreationIcon/noncolorStar.svg";
 
 import tracIcon from "../public/image/myCreationIcon/truckIcon.svg";
 import batchIcon from "../public/image/myCreationIcon/batchIcon.svg";
@@ -47,7 +48,7 @@ const cormorantNormal = Cormorant_Garamond({
   style: ["normal"],
 });
 
-import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
+import { useGetProductDetailsQuery, useGetProductReviewsQuery } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 
 // --- Interface Definitions ---
@@ -67,6 +68,7 @@ interface ProductData {
   price: number;
   originalPrice: number;
   reviews: number;
+  averageRating?: string | number;
   description: string;
   sizes: string[];
   colors: ColorData[];
@@ -100,8 +102,28 @@ export default function ProductPage({ productId }: { productId?: number }) {
     skip: !productId,
   });
 
+  const { data: reviewsData } = useGetProductReviewsQuery({ product_id: productId }, {
+    skip: !productId
+  });
+
   const apiProduct = detailsData?.data;
-  console.log(apiProduct);
+
+  // Helper to calculate average rating
+  const averageRating = React.useMemo(() => {
+    if (!reviewsData?.star_reveiw_count) return 0;
+
+    let totalStars = 0;
+    let totalCount = 0;
+
+    Object.entries(reviewsData.star_reveiw_count).forEach(([star, count]) => {
+      totalStars += parseInt(star) * (count as number);
+      totalCount += (count as number);
+    });
+
+    return totalCount > 0 ? (totalStars / totalCount).toFixed(1) : 0;
+  }, [reviewsData]);
+
+  const totalReviewCount = reviewsData?.total_review || 0;
 
   // Fallback / Static product for when no ID is provided or API fails
   const staticProduct: ProductData = {
@@ -109,6 +131,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
     price: 29.99,
     originalPrice: 38.99,
     reviews: 127,
+    averageRating: 4.8,
     description: "Luxurious 100% premium cotton with superior comfort",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
     colors: [
@@ -132,7 +155,8 @@ export default function ProductPage({ productId }: { productId?: number }) {
     title: apiProduct?.name || "Product Name",
     price: apiProduct?.discounted_price || 0,
     originalPrice: parseFloat(apiProduct?.price || "0"),
-    reviews: 127, // Mocked
+    reviews: totalReviewCount, // Dynamic value from reviews API
+    averageRating: averageRating, // Dynamic average rating
     description: apiProduct?.description || "No description available",
     sizes: (apiProduct?.cloth_size && apiProduct.cloth_size.length > 0)
       ? apiProduct.cloth_size
@@ -345,10 +369,10 @@ export default function ProductPage({ productId }: { productId?: number }) {
           {/* Reviews */}
           <div className="flex items-center mt-2">
             <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
+              {[1, 2, 3, 4, 5].map((star) => (
                 <CustomIcon
-                  key={i}
-                  src={colorStart}
+                  key={star}
+                  src={(star <= Math.round(Number(averageRating))) ? colorStart : nonColorIcon}
                   alt="Rating Star"
                   className="h-4 w-4 mr-0.5"
                 />
@@ -357,7 +381,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
             <p
               className={`${jostFont.className} tracking-[0.5px] ml-2 text-sm text-[#6d6d6d] `}
             >
-              ({displayProduct.reviews} reviews)
+              ({totalReviewCount} reviews)
             </p>
           </div>
 
@@ -613,7 +637,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
             {/* CUSTOMIZE NOW WITH AI Button */}
             <button
               onClick={handleCustomizeWithAi}
-              className={`flex items-center justify-center space-x-2 w-full py-3 mt-6 text-white shadow-lg transition-transform transform hover:scale-[1.01] hover:bg-opacity-90 duration-300`}
+              className={`flex items-center justify-center space-x-2 w-full py-3 mt-6 text-white shadow-lg transition-transform transform hover:scale-[1.01] hover:bg-opacity-90 duration-300 cursor-pointer`}
               style={{ backgroundColor: CUSTOM_BROWN }}
             >
               <CustomIcon
@@ -642,9 +666,9 @@ export default function ProductPage({ productId }: { productId?: number }) {
                   setToast({ message: "Failed to add to cart", type: "error" });
                 }
               }}
+              // style={{ borderColor: "#000000", color: "#1a1a1a" }}
               disabled={!productId}
-              className={`${jostFont.className} tracking-[2.1px] w-full py-3 mt-4 bg-white border font-medium text-sm transition duration-150 hover:text-white hover:shadow-lg hover:bg-black`}
-              style={{ borderColor: "#000000", color: "#1a1a1a" }}
+              className={`${jostFont.className} tracking-[2.1px] w-full py-3 mt-4 bg-white border font-medium text-sm transition duration-150 hover:shadow-lg hover:bg-black hover:text-white cursor-pointer`}
             >
               ADD TO CART
             </button>
