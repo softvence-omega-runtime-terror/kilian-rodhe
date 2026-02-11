@@ -1,8 +1,12 @@
-// components/SendDiscountCodes.jsx
+// components/admin/emailsComponent/DiscountEmailSend.tsx
 import { Send, UploadIcon, Users2Icon } from "lucide-react";
-import DiscountEmailPReview from "@/components/admin/DiscountEmailPreview";
-import React, { useState } from "react";
-import DiscountSendButton from "../DiscountSendButton";
+import DiscountEmailPreview from "@/components/admin/DiscountEmailPreview";
+import React, { useState, useEffect } from "react";
+import { useGetAllDiscountCodesQuery } from "@/app/store/slices/services/adminService/adminPromos/adminPromoApi";
+import { useGetAllTemplatesQuery } from "@/app/store/slices/services/adminService/smtp/createTemplateApi";
+import { useGetAllPlaceholdersQuery } from "@/app/store/slices/services/adminService/smtp/emailPlaceHolderApi";
+import { useSendDiscountEmailMutation } from "@/app/store/slices/services/adminService/smtp/emailSendingApi";
+import toast, { Toaster } from "react-hot-toast";
 
 // Define recipient types for easy state management
 const RECIPIENT_TYPES = {
@@ -17,10 +21,138 @@ const SendDiscountCodes = () => {
     RECIPIENT_TYPES.INDIVIDUAL
   );
 
+  // Form State
+  const [recipientEmail, setRecipientEmail] = useState("");
+  const [selectedSeriesName, setSelectedSeriesName] = useState<string>("");
+  const [emailSubject, setEmailSubject] = useState("Your Exclusive Discount Code is Here! 🎉");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
+  const [emailBody, setEmailBody] = useState("");
+
+  // API Hooks
+  // Using getAllDiscountCodes because getAllDiscountSeries is failing (500 error)
+  const { data: discountCodes, isLoading: isLoadingCodes } = useGetAllDiscountCodesQuery();
+  const { data: templatesData, isLoading: isLoadingTemplates } = useGetAllTemplatesQuery();
+  const { data: placeholdersData, isLoading: isLoadingPlaceholders } = useGetAllPlaceholdersQuery();
+  const [sendDiscountEmail, { isLoading: isSending }] = useSendDiscountEmailMutation();
+
+  const templates = templatesData?.data?.email_templates || [];
+  const placeholders = placeholdersData?.data?.placeholders || [];
+
+  // Derive unique series from discount codes
+  const uniqueSeries = React.useMemo(() => {
+    if (!discountCodes) return [];
+    const seriesMap = new Map();
+    discountCodes.forEach(code => {
+      if (!seriesMap.has(code.series_name)) {
+        seriesMap.set(code.series_name, code);
+      }
+    });
+    return Array.from(seriesMap.values());
+  }, [discountCodes]);
+
+  // Initialize selected series when data loads
+  useEffect(() => {
+    if (uniqueSeries && uniqueSeries.length > 0 && !selectedSeriesName) {
+      setSelectedSeriesName(uniqueSeries[0].series_name);
+    }
+  }, [uniqueSeries, selectedSeriesName]);
+
+  // Handle template selection
+  useEffect(() => {
+    if (templates.length > 0 && !selectedTemplateId) {
+      // Set the first template as default if none is selected
+      setSelectedTemplateId(templates[0].id);
+      setEmailBody(templates[0].body);
+      setEmailSubject(templates[0].subject);
+    }
+  }, [templates, selectedTemplateId]);
+
+  const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const templateId = Number(e.target.value);
+    setSelectedTemplateId(templateId);
+    const template = templates.find((t) => t.id === templateId);
+    if (template) {
+      setEmailBody(template.body);
+      setEmailSubject(template.subject);
+    }
+  };
+
+  // Ref for textarea
+  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  // Handle adding placeholder
+  const addPlaceholder = (placeholderSlack: string) => {
+    const textArea = textAreaRef.current;
+    if (!textArea) {
+      // Fallback if ref not attached for some reason
+      setEmailBody((prev) => prev + ` ${placeholderSlack} `);
+      return;
+    }
+
+    const start = textArea.selectionStart;
+    const end = textArea.selectionEnd;
+    const text = emailBody;
+    const before = text.substring(0, start);
+    const after = text.substring(end, text.length);
+    const newText = `${before} ${placeholderSlack} ${after}`;
+
+    setEmailBody(newText);
+
+    // Restore cursor position after state update
+    // We need to wait for the render cycle to update the value
+    setTimeout(() => {
+      if (textArea) {
+        textArea.focus();
+        const newCursorPos = start + placeholderSlack.length + 2; // 2 for spaces
+        textArea.setSelectionRange(newCursorPos, newCursorPos);
+      }
+    }, 0);
+  };
+
+  // Handle Send
+  const handleSend = async () => {
+    if (activeRecipientType === RECIPIENT_TYPES.INDIVIDUAL && !recipientEmail) {
+      toast.error("Please enter a recipient email.");
+      return;
+    }
+    if (!selectedSeriesName) {
+      toast.error("Please select a discount code series.");
+      return;
+    }
+    if (!selectedTemplateId) {
+      toast.error("Please select an email template.");
+      return;
+    }
+
+    try {
+      const payload: any = {
+        series_name: selectedSeriesName,
+        email_template_id: selectedTemplateId,
+        subject: emailSubject,
+        email_body: emailBody, // sending the current body state
+      };
+
+      if (activeRecipientType === RECIPIENT_TYPES.INDIVIDUAL) {
+        // API expects array of emails
+        payload.to_emails = [recipientEmail];
+      } else {
+        // Implement other types if needed, for now restrict to Individual as requested
+        toast.error("Only Individual sending is currently implemented.");
+        return;
+      }
+
+      await sendDiscountEmail(payload).unwrap();
+      toast.success("Discount email sent successfully!");
+    } catch (error: any) {
+      console.error("Failed to send email:", error);
+      toast.error(error?.data?.message || "Failed to send email.");
+    }
+  };
+
+
   // Helper function to determine the card's styling
   const getCardClasses = (type: string) => {
     const isSelected = activeRecipientType === type;
-    // Removed flex-1 here as grid controls the width
     return `p-6 rounded-xl cursor-pointer transition duration-150 ease-in-out ${isSelected
       ? "border-2 border-purple-500 bg-purple-50"
       : "border border-gray-200 hover:border-gray-300"
@@ -30,7 +162,6 @@ const SendDiscountCodes = () => {
   // Helper function to determine the icon's styling
   const getIconClasses = (type: string) => {
     const isSelected = activeRecipientType === type;
-    // We remove mr-2 because the icon is now on its own line above the text
     return `w-6 h-6 mb-3 ${isSelected ? "text-purple-700" : "text-[#9810FA]"}`;
   };
 
@@ -52,6 +183,8 @@ const SendDiscountCodes = () => {
             </h3>
             <input
               type="email"
+              value={recipientEmail}
+              onChange={(e) => setRecipientEmail(e.target.value)}
               placeholder="customer@example.com"
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
             />
@@ -123,6 +256,9 @@ const SendDiscountCodes = () => {
     }
   };
 
+  // Find the selected series representative (any code from that series to get details)
+  const selectedSeriesRepresentative = uniqueSeries.find(s => s.series_name === selectedSeriesName);
+
   return (
     <div className=" bg-gray-50 ">
       <div className=" bg-white border border-black/10 rounded-xl p-8 ">
@@ -143,7 +279,6 @@ const SendDiscountCodes = () => {
               className={getCardClasses(RECIPIENT_TYPES.INDIVIDUAL)}
               onClick={() => setActiveRecipientType(RECIPIENT_TYPES.INDIVIDUAL)}
             >
-              {/* CHANGED to flex-col for vertical stacking */}
               <div className="flex flex-col items-start">
                 <Users2Icon
                   className={getIconClasses(RECIPIENT_TYPES.INDIVIDUAL)}
@@ -160,7 +295,6 @@ const SendDiscountCodes = () => {
               className={getCardClasses(RECIPIENT_TYPES.EMAIL_LIST)}
               onClick={() => setActiveRecipientType(RECIPIENT_TYPES.EMAIL_LIST)}
             >
-              {/* CHANGED to flex-col for vertical stacking */}
               <div className="flex flex-col items-start">
                 <UploadIcon
                   className={getIconClasses(RECIPIENT_TYPES.EMAIL_LIST)}
@@ -179,7 +313,6 @@ const SendDiscountCodes = () => {
                 setActiveRecipientType(RECIPIENT_TYPES.USER_SEGMENT)
               }
             >
-              {/* CHANGED to flex-col for vertical stacking */}
               <div className="flex flex-col items-start">
                 <Users2Icon
                   className={getIconClasses(RECIPIENT_TYPES.USER_SEGMENT)}
@@ -199,21 +332,28 @@ const SendDiscountCodes = () => {
         {/* Conditional Recipient Input/Selection */}
         {renderRecipientContent()}
 
-        {/* Discount Code Series - REMAINS CONSTANT */}
+        {/* Discount Code Series */}
         <section className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">
             Discount Code Series
           </h3>
           <div className="relative">
-            <select
-              defaultValue="SUMMER-A1B2C3D4"
-              className="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-purple-500 focus:border-purple-500"
-            >
-              <option value="SUMMER-A1B2C3D4">SUMMER-A1B2C3D4 (10% OFF)</option>
-              <option value="FALL-A5Z9C0D3">FALL-A5Z9C0D3 ($5 OFF)</option>
-              <option value="SPRIMG-B1B2C0D7">SPRING-B1B2C0D7 (BOGO)</option>
-              {/* Add actual options here if needed */}
-            </select>
+            {isLoadingCodes ? (
+              <p className="text-sm text-gray-500">Loading series...</p>
+            ) : (
+              <select
+                value={selectedSeriesName || ""}
+                onChange={(e) => setSelectedSeriesName(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="" disabled>Select a series...</option>
+                {uniqueSeries.map((series) => (
+                  <option key={series.id} value={series.series_name}>
+                    {series.series_name} ({series.discount})
+                  </option>
+                ))}
+              </select>
+            )}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400"
@@ -232,48 +372,103 @@ const SendDiscountCodes = () => {
           </p>
         </section>
 
-        {/* Email Subject - REMAINS CONSTANT */}
+
+        {/* Email Template Selection */}
         <section className="space-y-2 py-6">
+          <h3 className="text-sm font-medium text-gray-700">Select Template</h3>
+          <div className="relative">
+            {isLoadingTemplates ? (
+              <p className="text-sm text-gray-500">Loading templates...</p>
+            ) : (
+              <select
+                onChange={handleTemplateChange}
+                value={selectedTemplateId || ""}
+                className="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-purple-500 focus:border-purple-500"
+              >
+                <option value="" disabled>Select a template...</option>
+                {templates.map(t => (
+                  <option key={t.id} value={t.id}>{t.name} ({t.body_type})</option>
+                ))}
+              </select>
+            )}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none text-gray-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        </section>
+
+
+        {/* Email Subject */}
+        <section className="space-y-2 pb-6">
           <h3 className="text-sm font-medium text-gray-700">Email Subject</h3>
           <input
             type="text"
-            defaultValue="Your Exclusive Discount Code is Here! 🎉"
+            value={emailSubject}
+            onChange={(e) => setEmailSubject(e.target.value)}
             className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100 font-medium focus:ring-purple-500 focus:border-purple-500"
           />
         </section>
 
-        {/* Email Message - REMAINS CONSTANT */}
+        {/* Email Message */}
         <section className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">Email Message</h3>
           <textarea
+            ref={textAreaRef}
             rows={10}
+            value={emailBody}
+            onChange={(e) => setEmailBody(e.target.value)}
             className="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 font-mono text-sm focus:ring-purple-500 focus:border-purple-500"
-            defaultValue={`Hi {name},
-
-Thank you for being a valued customer! Here's your exclusive discount code:
-
-{discount_code}
-
-Use this code at checkout to get {discount_value} off your next purchase.
-
-Happy shopping!
-The Tundra Team`}
           />
         </section>
 
-        {/* Variable Buttons - REMAINS CONSTANT */}
+        {/* Placeholder Buttons */}
         <div className="flex flex-wrap gap-3 pt-2">
-          <VariableButton label="{name}" />
-          <VariableButton label="{discount_code}" />
-          <VariableButton label="{discount_value}" />
-          <VariableButton label="{expiry_date}" />
+          {isLoadingPlaceholders ? (
+            <p className="text-xs text-gray-500">Loading placeholders...</p>
+          ) : (
+            placeholders.map((ph) => (
+              <VariableButton
+                key={ph.id}
+                label={ph.slug_name}
+                onClick={() => addPlaceholder(ph.slug_name)}
+              />
+            ))
+          )}
         </div>
 
         <div className="mt-6">
-          <DiscountEmailPReview />
+          <DiscountEmailPreview
+            name="Recipient Name"
+            discountCode={selectedSeriesRepresentative?.code_prefix ? `${selectedSeriesRepresentative.code_prefix}****` : (selectedSeriesRepresentative?.series_name || "CODE")}
+            discountValue={selectedSeriesRepresentative?.discount || "Discount"}
+          />
         </div>
-        <DiscountSendButton />
+
+        <div className="mt-8">
+          <button
+            onClick={handleSend}
+            disabled={isSending}
+            className="w-full py-2 px-6 bg-purple-700 text-white font-semibold text-lg rounded-lg
+                            transition duration-200 ease-in-out 
+                           hover:bg-purple-800 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="flex items-center justify-center space-x-2">
+              <Send className="w-6 h-6 transform rotate-45 -mt-1 text-[#ffffff]" />
+              <span>{isSending ? "Sending..." : "Send Now"}</span>
+            </span>
+          </button>
+        </div>
       </div>
+      <Toaster position="bottom-center" />
     </div>
   );
 };
@@ -281,11 +476,15 @@ The Tundra Team`}
 // Helper component for the variable buttons
 type VariableButtonProps = {
   label: string;
+  onClick: () => void;
 };
 
-const VariableButton = ({ label }: VariableButtonProps) => (
-  <button className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-300 transition duration-150">
-    {label}
+const VariableButton = ({ label, onClick }: VariableButtonProps) => (
+  <button
+    onClick={onClick}
+    className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-300 transition duration-150"
+  >
+    {`${label}`}
   </button>
 );
 
