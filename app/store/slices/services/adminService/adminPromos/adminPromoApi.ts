@@ -66,6 +66,25 @@ export interface CreatedDiscountSeriesData {
     codes: string[];
 }
 
+export interface DiscountSeriesItem {
+    id: number;
+    series_name: string;
+    code_prefix: string;
+    discount_type: string;
+    amount: string;
+    total_codes: number;
+    redeemed_count: number;
+    created_at: string;
+    is_active: boolean;
+}
+
+export interface GetAllDiscountSeriesResponse {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: DiscountSeriesItem[];
+}
+
 export interface CreateDiscountCodeResponse {
     success: boolean;
     message: string;
@@ -138,6 +157,17 @@ export const adminPromApi = baseBackendApi.injectEndpoints({
             providesTags: ["DiscountCodes"],
         }),
 
+        // get all discount series
+        getAllDiscountSeries: builder.query<DiscountSeriesItem[], void>({
+            query: () => ({
+                url: "/discount/discount-codes/",
+                method: "GET",
+            }),
+            transformResponse: (response: GetAllDiscountSeriesResponse) =>
+                response.results,
+            providesTags: ["DiscountCodes"],
+        }),
+
         // delete as bulk
         bulkDeleteDiscount: builder.mutation<
             BulkDeleteDiscountResponse,
@@ -160,5 +190,6 @@ export const adminPromApi = baseBackendApi.injectEndpoints({
 export const {
     useCreateDiscountCodesMutation,
     useGetAllDiscountCodesQuery,
+    useGetAllDiscountSeriesQuery,
     useBulkDeleteDiscountMutation,
 } = adminPromApi;
