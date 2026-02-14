@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     Search,
     Calendar,
@@ -12,7 +12,6 @@ import {
     Info,
     Check
 } from 'lucide-react';
-import { Placeholder } from '@/app/utils/types/productTypes';
 import { useCreateEmailTemplateMutation, useGetAllTemplatesQuery, useUpdateEmailTemplateMutation, useDeleteEmailTemplateMutation, EmailTemplate } from '@/app/store/slices/services/adminService/smtp/createTemplateApi';
 import { useGetAllPlaceholdersQuery, useCreatePlaceholderMutation, useDeletePlaceholderMutation, CreatePlaceholderRequest } from '@/app/store/slices/services/adminService/smtp/emailPlaceHolderApi';
 import { toast } from 'sonner';
@@ -36,6 +35,20 @@ function EmailTemplateTab() {
     const [bodyType, setBodyType] = useState<'text' | 'html'>('text');
     const [isDefault, setIsDefault] = useState(false);
     const [editingTemplateId, setEditingTemplateId] = useState<number | null>(null);
+
+    // Ref for textarea to track cursor position
+    const bodyTextAreaRef = useRef<HTMLTextAreaElement>(null);
+    // State to track cursor position for restoration after insert
+    const [cursorPosition, setCursorPosition] = useState<number | null>(null);
+
+    // Effect to restore cursor position after body state update
+    React.useEffect(() => {
+        if (cursorPosition !== null && bodyTextAreaRef.current) {
+            bodyTextAreaRef.current.focus();
+            bodyTextAreaRef.current.setSelectionRange(cursorPosition, cursorPosition);
+            setCursorPosition(null); // Reset after restoration
+        }
+    }, [body, cursorPosition]);
 
     const { data: templateData, isLoading: isLoadingList } = useGetAllTemplatesQuery();
     const [createTemplate, { isLoading: isCreatingTemplate }] = useCreateEmailTemplateMutation();
@@ -151,6 +164,37 @@ function EmailTemplateTab() {
                 toast.error(errorMessage);
             }
         }
+    };
+
+    // Insert placeholder at cursor position
+    const insertPlaceholder = (slugName: string) => {
+        console.log('insertPlaceholder called with:', slugName);
+        const textArea = bodyTextAreaRef.current;
+        console.log('textArea ref:', textArea);
+
+        if (!textArea) {
+            // Fallback: append to end
+            console.log('No textarea ref, appending to end');
+            setBody((prev) => prev + `{{ ${slugName} }}`);
+            return;
+        }
+
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+        console.log('Cursor position:', start, end);
+
+        const before = body.substring(0, start);
+        const after = body.substring(end);
+        const placeholder = `{{ ${slugName} }}`;
+        const newText = before + placeholder + after;
+        const newCursorPos = start + placeholder.length;
+
+        console.log('New text:', newText);
+        console.log('New cursor position:', newCursorPos);
+
+        // Update body and set cursor position for restoration
+        setBody(newText);
+        setCursorPosition(newCursorPos);
     };
 
     // --- RENDER: CREATE NEW TEMPLATE FORM ---
@@ -292,6 +336,7 @@ function EmailTemplateTab() {
                                     </div>
                                     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 transition-colors focus-within:border-purple-500 focus-within:ring-1 focus-within:ring-purple-500">
                                         <textarea
+                                            ref={bodyTextAreaRef}
                                             value={body}
                                             onChange={(e) => setBody(e.target.value)}
                                             placeholder="Hi {{ customer_name }}, here is your discount..."
@@ -335,6 +380,19 @@ function EmailTemplateTab() {
                                                     {`{{ ${ph.slug_name} }}`}
                                                 </code>
                                                 <div className="flex items-center gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            console.log('Plus button clicked for:', ph.slug_name);
+                                                            insertPlaceholder(ph.slug_name);
+                                                        }}
+                                                        className="text-gray-400 hover:text-purple-600 cursor-pointer"
+                                                        title="Insert into template"
+                                                    >
+                                                        <Plus className="h-3.5 w-3.5" />
+                                                    </button>
                                                     <button
                                                         onClick={() => navigator.clipboard.writeText(`{{ ${ph.slug_name} }}`)}
                                                         className="text-gray-400 hover:text-purple-600 cursor-pointer"

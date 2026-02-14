@@ -7,7 +7,7 @@ export interface SendDiscountEmailRequest {
         limit?: number;
     };
     email_template_id: number;
-    series_name: string;
+    discount_code_series_id: number;
     subject: string;
     email_body?: string; // In case we want to send custom body.
 }

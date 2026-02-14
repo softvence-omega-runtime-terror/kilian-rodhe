@@ -3,8 +3,8 @@ import { Send, UploadIcon, Users2Icon } from "lucide-react";
 import DiscountEmailPreview from "@/components/admin/DiscountEmailPreview";
 import React, { useState, useEffect } from "react";
 import { useGetAllDiscountCodesQuery } from "@/app/store/slices/services/adminService/adminPromos/adminPromoApi";
+import { useGetAdminDiscountUsageStatsQuery } from "@/app/store/slices/services/adminService/adminStats/adminStatsApi";
 import { useGetAllTemplatesQuery } from "@/app/store/slices/services/adminService/smtp/createTemplateApi";
-import { useGetAllPlaceholdersQuery } from "@/app/store/slices/services/adminService/smtp/emailPlaceHolderApi";
 import { useSendDiscountEmailMutation } from "@/app/store/slices/services/adminService/smtp/emailSendingApi";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -23,39 +23,61 @@ const SendDiscountCodes = () => {
 
   // Form State
   const [recipientEmail, setRecipientEmail] = useState("");
-  const [selectedSeriesName, setSelectedSeriesName] = useState<string>("");
+  const [selectedSeriesId, setSelectedSeriesId] = useState<number | null>(null);
   const [emailSubject, setEmailSubject] = useState("Your Exclusive Discount Code is Here! 🎉");
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [emailBody, setEmailBody] = useState("");
 
   // API Hooks
-  // Using getAllDiscountCodes because getAllDiscountSeries is failing (500 error)
+  // Using getAllDiscountCodes to get details (amount, prefix)
   const { data: discountCodes, isLoading: isLoadingCodes } = useGetAllDiscountCodesQuery();
+  // Using getAdminDiscountUsageStats to get Series IDs and Names (since getAllDiscountSeries is broken)
+  const { data: usageStats, isLoading: isLoadingUsage } = useGetAdminDiscountUsageStatsQuery();
+
+
+
   const { data: templatesData, isLoading: isLoadingTemplates } = useGetAllTemplatesQuery();
-  const { data: placeholdersData, isLoading: isLoadingPlaceholders } = useGetAllPlaceholdersQuery();
   const [sendDiscountEmail, { isLoading: isSending }] = useSendDiscountEmailMutation();
 
   const templates = templatesData?.data?.email_templates || [];
-  const placeholders = placeholdersData?.data?.placeholders || [];
 
-  // Derive unique series from discount codes
-  const uniqueSeries = React.useMemo(() => {
-    if (!discountCodes) return [];
-    const seriesMap = new Map();
-    discountCodes.forEach(code => {
-      if (!seriesMap.has(code.series_name)) {
-        seriesMap.set(code.series_name, code);
-      }
+  // Merge Data: Usage Stats (IDs) + Discount Codes (Metadata)
+  const availableSeries = React.useMemo(() => {
+    if (!usageStats?.discount_series_usage) return [];
+
+    // Create a lookup for metadata from codes
+    // We map series_name -> { amount, prefix }
+    const metadataMap = new Map();
+    if (discountCodes) {
+      discountCodes.forEach(code => {
+        if (!metadataMap.has(code.series_name)) {
+          metadataMap.set(code.series_name, {
+            amount: code.discount,
+            prefix: code.code_prefix
+          });
+        }
+      });
+    }
+
+    return usageStats.discount_series_usage.map(series => {
+      const metadata = metadataMap.get(series.name) || {};
+      return {
+        id: series.id,
+        name: series.name,
+        amount: metadata.amount || "Discount", // Fallback if no matching code found (e.g. no codes active)
+        prefix: metadata.prefix || ""
+      };
     });
-    return Array.from(seriesMap.values());
-  }, [discountCodes]);
+  }, [usageStats, discountCodes]);
+
+  const seriesList = availableSeries;
 
   // Initialize selected series when data loads
   useEffect(() => {
-    if (uniqueSeries && uniqueSeries.length > 0 && !selectedSeriesName) {
-      setSelectedSeriesName(uniqueSeries[0].series_name);
+    if (seriesList && seriesList.length > 0 && !selectedSeriesId) {
+      setSelectedSeriesId(seriesList[0].id);
     }
-  }, [uniqueSeries, selectedSeriesName]);
+  }, [seriesList, selectedSeriesId]);
 
   // Handle template selection
   useEffect(() => {
@@ -77,37 +99,8 @@ const SendDiscountCodes = () => {
     }
   };
 
-  // Ref for textarea
-  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
-
-  // Handle adding placeholder
-  const addPlaceholder = (placeholderSlack: string) => {
-    const textArea = textAreaRef.current;
-    if (!textArea) {
-      // Fallback if ref not attached for some reason
-      setEmailBody((prev) => prev + ` ${placeholderSlack} `);
-      return;
-    }
-
-    const start = textArea.selectionStart;
-    const end = textArea.selectionEnd;
-    const text = emailBody;
-    const before = text.substring(0, start);
-    const after = text.substring(end, text.length);
-    const newText = `${before} ${placeholderSlack} ${after}`;
-
-    setEmailBody(newText);
-
-    // Restore cursor position after state update
-    // We need to wait for the render cycle to update the value
-    setTimeout(() => {
-      if (textArea) {
-        textArea.focus();
-        const newCursorPos = start + placeholderSlack.length + 2; // 2 for spaces
-        textArea.setSelectionRange(newCursorPos, newCursorPos);
-      }
-    }, 0);
-  };
+  // Find the selected template object
+  const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
 
   // Handle Send
   const handleSend = async () => {
@@ -115,7 +108,7 @@ const SendDiscountCodes = () => {
       toast.error("Please enter a recipient email.");
       return;
     }
-    if (!selectedSeriesName) {
+    if (!selectedSeriesId) {
       toast.error("Please select a discount code series.");
       return;
     }
@@ -126,7 +119,7 @@ const SendDiscountCodes = () => {
 
     try {
       const payload: any = {
-        series_name: selectedSeriesName,
+        discount_code_series_id: selectedSeriesId,
         email_template_id: selectedTemplateId,
         subject: emailSubject,
         email_body: emailBody, // sending the current body state
@@ -257,7 +250,7 @@ const SendDiscountCodes = () => {
   };
 
   // Find the selected series representative (any code from that series to get details)
-  const selectedSeriesRepresentative = uniqueSeries.find(s => s.series_name === selectedSeriesName);
+  const selectedSeries = seriesList.find(s => s.id === selectedSeriesId);
 
   return (
     <div className=" bg-gray-50 ">
@@ -338,18 +331,18 @@ const SendDiscountCodes = () => {
             Discount Code Series
           </h3>
           <div className="relative">
-            {isLoadingCodes ? (
+            {isLoadingUsage ? (
               <p className="text-sm text-gray-500">Loading series...</p>
             ) : (
               <select
-                value={selectedSeriesName || ""}
-                onChange={(e) => setSelectedSeriesName(e.target.value)}
+                value={selectedSeriesId || ""}
+                onChange={(e) => setSelectedSeriesId(Number(e.target.value))}
                 className="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="" disabled>Select a series...</option>
-                {uniqueSeries.map((series) => (
-                  <option key={series.id} value={series.series_name}>
-                    {series.series_name} ({series.discount})
+                {seriesList.map((series) => (
+                  <option key={series.id} value={series.id}>
+                    {series.name} ({series.amount})
                   </option>
                 ))}
               </select>
@@ -422,7 +415,6 @@ const SendDiscountCodes = () => {
         <section className="space-y-2">
           <h3 className="text-sm font-medium text-gray-700">Email Message</h3>
           <textarea
-            ref={textAreaRef}
             rows={10}
             value={emailBody}
             onChange={(e) => setEmailBody(e.target.value)}
@@ -430,26 +422,13 @@ const SendDiscountCodes = () => {
           />
         </section>
 
-        {/* Placeholder Buttons */}
-        <div className="flex flex-wrap gap-3 pt-2">
-          {isLoadingPlaceholders ? (
-            <p className="text-xs text-gray-500">Loading placeholders...</p>
-          ) : (
-            placeholders.map((ph) => (
-              <VariableButton
-                key={ph.id}
-                label={ph.slug_name}
-                onClick={() => addPlaceholder(ph.slug_name)}
-              />
-            ))
-          )}
-        </div>
-
         <div className="mt-6">
           <DiscountEmailPreview
-            name="Recipient Name"
-            discountCode={selectedSeriesRepresentative?.code_prefix ? `${selectedSeriesRepresentative.code_prefix}****` : (selectedSeriesRepresentative?.series_name || "CODE")}
-            discountValue={selectedSeriesRepresentative?.discount || "Discount"}
+            subject={emailSubject}
+            body={emailBody}
+            contentType={selectedTemplate?.body_type || "text"}
+            discountCode={selectedSeries?.prefix ? `${selectedSeries.prefix}****` : (selectedSeries?.name || "CODE")}
+            discountValue={selectedSeries?.amount || "Discount"}
           />
         </div>
 
@@ -473,19 +452,6 @@ const SendDiscountCodes = () => {
   );
 };
 
-// Helper component for the variable buttons
-type VariableButtonProps = {
-  label: string;
-  onClick: () => void;
-};
 
-const VariableButton = ({ label, onClick }: VariableButtonProps) => (
-  <button
-    onClick={onClick}
-    className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full font-medium hover:bg-gray-300 transition duration-150"
-  >
-    {`${label}`}
-  </button>
-);
 
 export default SendDiscountCodes;
