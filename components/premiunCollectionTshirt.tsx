@@ -12,10 +12,10 @@ import ToastMessage from "./ToastMessage";
 
 // --- Image Imports ---
 import mainTshirt from "../public/image/myCreationIcon/source_image.jpg";
-import tshirt1 from "../public/image/myCreationIcon/tshirt-1.jpg";
-import tshirt2 from "../public/image/myCreationIcon/tshirt2.jpg";
-import tshirt3 from "../public/image/myCreationIcon/tshirt3.jpg";
-import tshirt4 from "../public/image/myCreationIcon/Button.png";
+// import tshirt1 from "../public/image/myCreationIcon/tshirt-1.jpg";
+// import tshirt2 from "../public/image/myCreationIcon/tshirt2.jpg";
+// import tshirt3 from "../public/image/myCreationIcon/tshirt3.jpg";
+// import tshirt4 from "../public/image/myCreationIcon/Button.png";
 
 import specialStar from "../public/image/myCreationIcon/specialStartIcon.svg";
 import specialStarBlackIcon from "../public/image/myCreationIcon/specialStartIconBlack.svg";
@@ -126,55 +126,59 @@ export default function ProductPage({ productId }: { productId?: number }) {
   const totalReviewCount = reviewsData?.total_review || 0;
 
   // Fallback / Static product for when no ID is provided or API fails
-  const staticProduct: ProductData = {
-    title: "Premium Cotton T-Shirt",
-    price: 29.99,
-    originalPrice: 38.99,
-    reviews: 127,
-    averageRating: 4.8,
-    description: "Luxurious 100% premium cotton with superior comfort",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { name: "White", hex: "#FFFFFF", selected: true },
-      { name: "Black", hex: "#000000" },
-      { name: "Dark Blue", hex: "#1F4E79" },
-      { name: "Grey", hex: "#A9A9A9" },
-    ],
-    mainImageSrc: mainTshirt,
-    thumbnails: [
-      { src: tshirt1, alt: "White T-Shirt Front" },
-      { src: tshirt2, alt: "Black T-Shirt View" },
-      { src: tshirt3, alt: "Red T-Shirt Style" },
-      { src: tshirt4, alt: "Outdoor T-Shirt Shot" },
-    ],
-  };
+  // const staticProduct: ProductData = {
+  //   title: "Premium Cotton T-Shirt",
+  //   price: 29.99,
+  //   originalPrice: 38.99,
+  //   reviews: 127,
+  //   averageRating: 4.8,
+  //   description: "Luxurious 100% premium cotton with superior comfort",
+  //   sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+  //   colors: [
+  //     { name: "White", hex: "#FFFFFF", selected: true },
+  //     { name: "Black", hex: "#000000" },
+  //     { name: "Dark Blue", hex: "#1F4E79" },
+  //     { name: "Grey", hex: "#A9A9A9" },
+  //   ],
+  //   mainImageSrc: mainTshirt,
+  //   thumbnails: [
+  //     { src: tshirt1, alt: "White T-Shirt Front" },
+  //     { src: tshirt2, alt: "Black T-Shirt View" },
+  //     { src: tshirt3, alt: "Red T-Shirt Style" },
+  //     { src: tshirt4, alt: "Outdoor T-Shirt Shot" },
+  //   ],
+  // };
 
   // Map API data if available
   // Map API data if available - with robust null checks
-  const displayProduct: ProductData = apiProduct ? {
-    title: apiProduct?.name || "Product Name",
+  const displayProduct: ProductData = {
+    title: apiProduct?.name || "",
     price: apiProduct?.discounted_price || 0,
     originalPrice: parseFloat(apiProduct?.price || "0"),
     reviews: totalReviewCount, // Dynamic value from reviews API
     averageRating: averageRating, // Dynamic average rating
-    description: apiProduct?.description || "No description available",
+    description: apiProduct?.description || "",
     sizes: (apiProduct?.cloth_size && apiProduct.cloth_size.length > 0)
       ? apiProduct.cloth_size
-      : ["S", "M", "L"],
-    colors: [
-      {
-        name: apiProduct?.color_code || "Standard",
-        hex: (apiProduct?.color_code || "#000000").toLowerCase(),
-        selected: true
-      },
-      { name: "Black", hex: "#000000" },
-      { name: "Grey", hex: "#A9A9A9" },
-    ],
+      : [],
+    colors: (apiProduct?.colors && apiProduct.colors.length > 0)
+      ? apiProduct.colors.map((colorHex, index) => ({
+        name: colorHex,
+        hex: colorHex.toLowerCase(),
+        selected: index === 0
+      }))
+      : [
+        {
+          name: apiProduct?.color_code || "Standard",
+          hex: (apiProduct?.color_code || "#000000").toLowerCase(),
+          selected: true
+        }
+      ],
     mainImageSrc: apiProduct?.images?.[0]?.image || mainTshirt,
     thumbnails: (apiProduct?.images && apiProduct.images.length > 0)
       ? apiProduct.images.map(img => ({ src: img.image, alt: apiProduct?.name || "Product Image" }))
-      : staticProduct.thumbnails,
-  } : staticProduct;
+      : [],
+  };
 
   const CustomIcon: React.FC<CustomIconProps> = ({
     src,
@@ -209,7 +213,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
   const initialSelectedColor =
     displayProduct.colors.find((c) => c.selected) || displayProduct.colors[0];
   const [selectedColor, setSelectedColor] =
-    useState<ColorData>(initialSelectedColor);
+    useState<ColorData | undefined>(initialSelectedColor);
   const [quantity, setQuantity] = useState<number>(1);
   const [addToCart] = useAddToCartMutation();
   const router = useRouter();
@@ -262,13 +266,20 @@ export default function ProductPage({ productId }: { productId?: number }) {
         src: apiProduct?.images?.[0]?.image || mainTshirt,
         alt: apiProduct?.name || "Product Image"
       });
-      setSelectedSize(apiProduct?.cloth_size?.[0] || "S");
-      const col = {
-        name: apiProduct?.color_code || "Standard",
-        hex: (apiProduct?.color_code || "#FFFFFF").toLowerCase(),
-        selected: true
-      };
-      setSelectedColor(col);
+      setSelectedSize(apiProduct?.cloth_size?.[0] || "");
+      
+      const firstColor = (apiProduct.colors && apiProduct.colors.length > 0)
+        ? { 
+            name: apiProduct.colors[0], 
+            hex: apiProduct.colors[0].toLowerCase(), 
+            selected: true 
+          }
+        : {
+            name: apiProduct?.color_code || "Standard",
+            hex: (apiProduct?.color_code || "#FFFFFF").toLowerCase(),
+            selected: true
+          };
+      setSelectedColor(firstColor);
     }
   }, [apiProduct]);
 
@@ -536,7 +547,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
               SELECT COLOR:
               <span className="font-normal text-[#795548]">
                 {" "}
-                {selectedColor.name}
+                {selectedColor?.name}
               </span>
             </h3>
             <div className="mt-3 flex items-center space-x-3">
@@ -545,7 +556,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
                   key={color.name}
                   onClick={() => handleColorClick(color)}
                   className={`w-12 h-12 border focus:outline-none flex items-center justify-center transition duration-150 ease-in-out
-										${color.name === selectedColor.name
+										${color.name === selectedColor?.name
                       ? `border-[1.2px] ring-2`
                       : `border-gray-200 hover:ring-2 hover:ring-offset-1 hover:ring-gray-300`
                     }`}
@@ -553,13 +564,13 @@ export default function ProductPage({ productId }: { productId?: number }) {
                     backgroundColor: color.hex,
                     borderColor:
                       color.hex === "#FFFFFF" ? "#e5e5e5" : color.hex,
-                    ...(color.name === selectedColor.name && {
+                    ...(color.name === selectedColor?.name && {
                       borderColor: "#e5e5e5",
                       boxShadow: `0 0 0 2px ${CUSTOM_GOLD}`,
                     }),
                   }}
                 >
-                  {color.name === selectedColor.name && (
+                  {color.name === selectedColor?.name && (
                     <CustomIcon
                       src={rightIcon}
                       alt="Checkmark"
