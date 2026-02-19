@@ -12,6 +12,7 @@ import {
   useUpdateCartItemMutation,
   useDeleteCartItemMutation,
   useCheckoutMutation,
+  useGetShipmentsTypeQuery,
   ICartItem,
 } from "@/app/store/slices/services/order/orderApi";
 
@@ -106,22 +107,24 @@ const CheckoutReview: React.FC = () => {
   const [updateCartItem] = useUpdateCartItemMutation();
   const [deleteCartItem] = useDeleteCartItemMutation();
   const [checkout, { isLoading: isCheckingOut }] = useCheckoutMutation();
+  const { data: shipmentsData, isLoading: shipmentsLoading } = useGetShipmentsTypeQuery();
 
   const cartItems: ICartItem[] = cartData?.cards || [];
+  const shippingOptions = shipmentsData?.data || [];
 
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [selectedShipping, setSelectedShipping] = useState<number>(1); // Default to Standard (id: 1)
+  const [selectedShipping, setSelectedShipping] = useState<number | null>(null);
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
 
   // Track specific overrides locally for size/color if not persistently saved in cart
   // In a real app, these should probably be synced with the cart API
   const [itemOverrides, setItemOverrides] = useState<Record<number, { size?: string, color?: string }>>({});
 
-  const shippingOptions = [
-    { id: 1, title: "Standard Shipping", desc: "5–7 business days", price: "€5.99", value: 5.99 },
-    { id: 2, title: "Express Shipping", desc: "2–3 business days", price: "€15.99", value: 15.99 },
-    { id: 3, title: "Overnight Delivery", desc: "Next business day", price: "€29.99", value: 29.99 },
-  ];
+  // const shippingOptions = [
+  //   { id: 1, title: "Standard Shipping", desc: "5–7 business days", price: "€5.99", value: 5.99 },
+  //   { id: 2, title: "Express Shipping", desc: "2–3 business days", price: "€15.99", value: 15.99 },
+  //   { id: 3, title: "Overnight Delivery", desc: "Next business day", price: "€29.99", value: 29.99 },
+  // ];
 
   // Initialize selected items when cart loads
   React.useEffect(() => {
@@ -129,6 +132,13 @@ const CheckoutReview: React.FC = () => {
       setSelectedItems(cartItems.map(item => item.id));
     }
   }, [cartItems]);
+
+  // Set default shipping method once data is loaded
+  React.useEffect(() => {
+    if (shippingOptions.length > 0 && selectedShipping === null) {
+      setSelectedShipping(shippingOptions[0].id);
+    }
+  }, [shippingOptions, selectedShipping]);
 
   const toggleItemSelection = (id: number) => {
     setSelectedItems(prev =>
@@ -180,7 +190,7 @@ const CheckoutReview: React.FC = () => {
   }, [cartItems, selectedItems]);
 
   const selectedShippingOption = shippingOptions.find(o => o.id === selectedShipping);
-  const shippingCost = selectedShippingOption?.value || 0;
+  const shippingCost = selectedShippingOption?.cost || 0;
   const total = subtotal + shippingCost;
 
   const handleCheckout = async () => {
@@ -212,7 +222,7 @@ const CheckoutReview: React.FC = () => {
     try {
       await checkout({
         card_products: checkoutProducts,
-        shipping_id: selectedShipping
+        shipping_id: selectedShipping || 0
       }).unwrap();
 
       // Navigate to the next step
@@ -428,27 +438,35 @@ const CheckoutReview: React.FC = () => {
               Select Shipping Method
             </h2>
             <div className="space-y-3">
-              {shippingOptions.map((option) => (
-                <div
-                  key={option.id}
-                  onClick={() => setSelectedShipping(option.id)}
-                  className={`flex items-center justify-between border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${selectedShipping === option.id
-                    ? "border-[#a07d48] bg-[#fdfbf9] ring-1 ring-[#a07d48]"
-                    : "border-gray-100 hover:border-gray-200"
-                    }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedShipping === option.id ? 'border-[#a07d48]' : 'border-gray-300'}`}>
-                      {selectedShipping === option.id && <div className="w-2.5 h-2.5 rounded-full bg-[#a07d48]" />}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-800 text-sm">{option.title}</p>
-                      <p className="text-xs text-gray-500">{option.desc}</p>
-                    </div>
-                  </div>
-                  <p className="font-bold text-gray-900 text-sm">{option.price}</p>
+              {shipmentsLoading ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#a07d48] mx-auto"></div>
                 </div>
-              ))}
+              ) : shippingOptions.length === 0 ? (
+                <p className="text-sm text-gray-500 italic">No shipping methods available.</p>
+              ) : (
+                shippingOptions.map((option) => (
+                  <div
+                    key={option.id}
+                    onClick={() => setSelectedShipping(option.id)}
+                    className={`flex items-center justify-between border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${selectedShipping === option.id
+                      ? "border-[#a07d48] bg-[#fdfbf9] ring-1 ring-[#a07d48]"
+                      : "border-gray-100 hover:border-gray-200"
+                      }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedShipping === option.id ? 'border-[#a07d48]' : 'border-gray-300'}`}>
+                        {selectedShipping === option.id && <div className="w-2.5 h-2.5 rounded-full bg-[#a07d48]" />}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800 text-sm">{option.title}</p>
+                        <p className="text-xs text-gray-500">{option.description}</p>
+                      </div>
+                    </div>
+                    <p className="font-bold text-gray-900 text-sm">€{option.cost.toFixed(2)}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

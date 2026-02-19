@@ -237,16 +237,30 @@ const CombinedDesignPageFixed = () => {
                 aiGeneratedImages.mockup_url,
             ].filter(Boolean);
 
+            let imagesAdded = 0;
+
             for (const url of imageUrls) {
                 try {
+                    console.log(`Attempting to fetch image: ${url}`);
                     const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+                    }
                     const blob = await response.blob();
                     // Extract filename from URL or use a default
                     const filename = url.split('/').pop()?.split('?')[0] || `generated-${Date.now()}.png`;
                     formData.append("images", blob, filename);
+                    imagesAdded++;
+                    console.log(`Successfully added image: ${filename}`);
                 } catch (err) {
                     console.error("Error converting URL to blob:", url, err);
                 }
+            }
+
+            if (imagesAdded === 0) {
+                console.warn("No images could be processed. Aborting save.");
+                toast.error("Failed to process generated images. Possible CORS issue or network error. Check console for details.");
+                return; 
             }
 
             const response = await saveCustomProductVersion(formData).unwrap();
@@ -255,7 +269,17 @@ const CombinedDesignPageFixed = () => {
             refetchCustomProducts(); // Refresh list to get new IDs if needed
         } catch (error) {
             console.error("Error saving design:", error);
-            toast.error("Failed to save design.");
+            // safe check for error object having data property
+            if (typeof error === 'object' && error !== null && 'data' in error) {
+                 const errData = (error as any).data;
+                 if (errData?.images) {
+                     toast.error(`Image Error: ${errData.images.join(', ')}`);
+                 } else {
+                     toast.error("Failed to save design. Check console.");
+                 }
+            } else {
+                toast.error("Failed to save design.");
+            }
         }
     };
 
