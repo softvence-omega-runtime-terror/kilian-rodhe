@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
-import { useGetCustomProductsQuery, useSaveCustomProductVersionMutation } from "@/app/store/slices/services/ai/aiApi";
+import { useGetCustomProductsQuery, useSaveCustomProductVersionMutation, ISaveCustomProductVersionRequest } from "@/app/store/slices/services/ai/aiApi";
 // ✅ Framer Motion import: Variants TargetAndTransition
 import { motion, type Variants, type TargetAndTransition } from "framer-motion";
 import { toast } from "sonner";
@@ -93,21 +93,12 @@ const CombinedDesignPageFixed = () => {
         router.push("/pages/shipping");
     };
 
-    const handleImageSelect = async (imageSrc: string, imageId?: number) => {
+    const handleImageSelect = (imageSrc: string, imageId?: number) => {
         setSelectedAiImage(imageSrc);
         if (imageId) {
             setSelectedProductImageId(imageId);
         }
         console.log("Selected Image for AI:", imageSrc, "ID:", imageId);
-
-        try {
-            const response = await fetch(imageSrc);
-            const blob = await response.blob();
-            setSelectedAiFile(blob);
-        } catch (error) {
-            console.error("Error fetching image for AI upload:", error);
-            setSelectedAiFile(null);
-        }
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -213,57 +204,27 @@ const CombinedDesignPageFixed = () => {
         }
 
         try {
-            const formData = new FormData();
             const existingCustomProduct = customProductsData?.results.find(
                 (cp) => cp.product === parseInt(productId)
             );
 
+            const payload: ISaveCustomProductVersionRequest = {
+                product_image: selectedProductImageId,
+                images: [
+                    aiGeneratedImages.generated_design_url,
+                    aiGeneratedImages.mockup_url,
+                ].filter(Boolean),
+            };
 
             if (existingCustomProduct) {
-                formData.append("custom_product_id", existingCustomProduct.id.toString());
+                payload.custom_product_id = existingCustomProduct.id;
             } else {
-                const customProductData = {
+                payload.custom_product_data = {
                     product: parseInt(productId),
-                    ai_season_id: aiGeneratedImages.ai_season_id || "",
                 };
-                formData.append("custom_product_data", JSON.stringify(customProductData));
             }
 
-            formData.append("product_image", selectedProductImageId.toString());
-
-            // Convert generated images to blobs and append
-            const imageUrls = [
-                aiGeneratedImages.generated_design_url,
-                aiGeneratedImages.mockup_url,
-            ].filter(Boolean);
-
-            let imagesAdded = 0;
-
-            for (const url of imageUrls) {
-                try {
-                    console.log(`Attempting to fetch image: ${url}`);
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
-                    }
-                    const blob = await response.blob();
-                    // Extract filename from URL or use a default
-                    const filename = url.split('/').pop()?.split('?')[0] || `generated-${Date.now()}.png`;
-                    formData.append("images", blob, filename);
-                    imagesAdded++;
-                    console.log(`Successfully added image: ${filename}`);
-                } catch (err) {
-                    console.error("Error converting URL to blob:", url, err);
-                }
-            }
-
-            if (imagesAdded === 0) {
-                console.warn("No images could be processed. Aborting save.");
-                toast.error("Failed to process generated images. Possible CORS issue or network error. Check console for details.");
-                return; 
-            }
-
-            const response = await saveCustomProductVersion(formData).unwrap();
+            const response = await saveCustomProductVersion(payload).unwrap();
             console.log("Save Response:", response);
             toast.success("Design saved successfully!");
             refetchCustomProducts(); // Refresh list to get new IDs if needed
@@ -271,12 +232,12 @@ const CombinedDesignPageFixed = () => {
             console.error("Error saving design:", error);
             // safe check for error object having data property
             if (typeof error === 'object' && error !== null && 'data' in error) {
-                 const errData = (error as any).data;
-                 if (errData?.images) {
-                     toast.error(`Image Error: ${errData.images.join(', ')}`);
-                 } else {
-                     toast.error("Failed to save design. Check console.");
-                 }
+                const errData = (error as any).data;
+                if (errData?.images) {
+                    toast.error(`Image Error: ${errData.images.join(', ')}`);
+                } else {
+                    toast.error("Failed to save design. Check console.");
+                }
             } else {
                 toast.error("Failed to save design.");
             }
@@ -508,7 +469,7 @@ const CombinedDesignPageFixed = () => {
                                 </motion.div>
                             )}
 
-                             {/* --- Save Design Button --- */}
+                            {/* --- Save Design Button --- */}
                             {aiGeneratedImages && (
                                 <motion.div
                                     initial={{ opacity: 0 }}

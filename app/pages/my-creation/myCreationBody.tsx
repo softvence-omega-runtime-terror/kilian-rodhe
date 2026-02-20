@@ -2,8 +2,7 @@
 import React, { useState } from "react";
 import { Cormorant_Garamond } from "next/font/google";
 import { useRouter } from "next/navigation";
-import { useGetCustomProductsQuery, ICustomProductVersion } from "@/app/store/slices/services/ai/aiApi";
-import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
+import { useGetCustomProductsQuery, ICustomProductVersion, useDeleteCustomProductVersionMutation } from "@/app/store/slices/services/ai/aiApi";
 import { useGetOrdersQuery, IOrder } from "@/app/store/slices/services/order/orderApi";
 
 // Placeholder image for standalone environment
@@ -38,6 +37,7 @@ type DeleteConfirmationModalProps = {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
+  version: number;
 };
 
 type ProductCardProps = {
@@ -165,6 +165,7 @@ const DeleteConfirmationModal = ({
   onClose,
   onConfirm,
   title,
+  version,
 }: DeleteConfirmationModalProps) => {
   if (!isOpen) return null;
 
@@ -193,7 +194,7 @@ const DeleteConfirmationModal = ({
           </h3>
 
           <p className="mt-2 text-sm text-gray-500">
-            Are you sure you want to delete <strong>&quot;{title}&quot;</strong>?
+            Are you sure you want to delete <strong>&quot;{title}&quot;</strong> (Version {version})?
           </p>
         </div>
 
@@ -288,18 +289,17 @@ const ProductCard = ({ product, tabType, onDelete }: ProductCardProps) => {
 // 4.5 CUSTOM DESIGN CARD (FOR AI DESIGNS)
 // ----------------------------------------------------
 
-const CustomDesignCard = ({ 
-  version, 
-  productId 
-}: { 
-  version: ICustomProductVersion, 
-  productId: number 
+const CustomDesignCard = ({
+  version,
+  productId,
+  onDelete
+}: {
+  version: ICustomProductVersion,
+  productId: number,
+  onDelete?: (id: number, title: string, version: number) => void;
 }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
   const images = version.image_urls || [];
-
-  const { data: productDetails } = useGetProductDetailsQuery(productId);
-  const productName = productDetails?.data?.name || `Product #${productId}`;
 
   // Auto-slide effect
   React.useEffect(() => {
@@ -374,7 +374,7 @@ const CustomDesignCard = ({
       {/* Details */}
       <div className="p-5">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="text-xl font-semibold truncate flex-1">{productName}</h3>
+          <h3 className="text-xl font-semibold truncate flex-1">{version.product.name}</h3>
           <span className="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-sm">
             V{version.version}
           </span>
@@ -386,28 +386,29 @@ const CustomDesignCard = ({
           <span className="text-gray-500">Created Date:</span>
           <span className="font-medium text-right">{formattedDate}</span>
 
-          <span className="text-gray-500">Season ID:</span>
+          {/* <span className="text-gray-500">Season ID:</span>
           <span className="font-medium text-right truncate ml-2" title={version.custom_ai_product.toString()}>
             {version.custom_ai_product}
-          </span>
+          </span> */}
         </div>
 
         <div className="mt-4 pt-3 border-t border-[#E8E3DC] flex justify-between items-center">
           <p className="text-lg font-bold text-gray-500">Design Cost:</p>
-          <p className="text-2xl text-indigo-600">€{parseFloat(version.design_cost).toFixed(2)}</p>
+          <p className="text-2xl text-indigo-600">€{(version.product.price)}</p>
+          {/* <p className="text-2xl text-indigo-600">€{parseFloat(version.design_cost).toFixed(2)}</p> */}
         </div>
 
-        {/* Delete Button Placeholder */}
-        <button
-          className="mt-4 w-full text-red-600 py-2 border border-red-300 hover:bg-red-50 transition cursor-not-allowed opacity-70"
-          title="Delete API will be implemented later"
-          onClick={(e) => {
-            e.preventDefault();
-            // Placeholder: functionality to be added later
-          }}
-        >
-          Delete
-        </button>
+        {onDelete && (
+          <button
+            className="mt-4 w-full text-red-600 py-2 border border-red-300 hover:bg-red-50 transition"
+            onClick={(e) => {
+              e.preventDefault();
+              onDelete(version.id, version.product.name, version.version);
+            }}
+          >
+            Delete
+          </button>
+        )}
       </div>
     </div>
   );
@@ -457,23 +458,23 @@ const OrderCard = ({ order }: { order: IOrder }) => {
               <h4 className="text-sm font-semibold text-gray-900 truncate">{item.order_product_name}</h4>
               <div className="flex justify-between items-center mt-2">
                 <p className="text-[11px] text-gray-500 mt-0.5">{item.order_product_classification} · {item.order_product_size.join(', ')}</p>
-              
-              {/* Color Display */}
-              {item.order_product_color_code && item.order_product_color_code.length > 0 && (
-                <div className="flex justify-between items-center mt-2 gap-2">
-                  <span className="text-[11px] text-gray-600">Color: </span>
-                  <div className="flex gap-1">
-                  {item.order_product_color_code.map((color, idx) => (
-                    <div 
-                      key={idx} 
-                      className="w-3 h-3 rounded-full border border-gray-200" 
-                      style={{ backgroundColor: color }}
-                      title={color}
-                    />
-                  ))}
-                </div>
-                </div>
-              )}
+
+                {/* Color Display */}
+                {item.order_product_color_code && item.order_product_color_code.length > 0 && (
+                  <div className="flex justify-between items-center mt-2 gap-2">
+                    <span className="text-[11px] text-gray-600">Color: </span>
+                    <div className="flex gap-1">
+                      {item.order_product_color_code.map((color, idx) => (
+                        <div
+                          key={idx}
+                          className="w-3 h-3 rounded-full border border-gray-200"
+                          style={{ backgroundColor: color }}
+                          title={color}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between items-center mt-2">
@@ -589,13 +590,17 @@ export default function App() {
     isOpen: boolean;
     id: string | null;
     title: string;
+    version: number;
     tab: "saved" | "my" | null;
   }>({
     isOpen: false,
     id: null,
     title: "",
+    version: 0,
     tab: null,
   });
+
+  const [deleteDesignVersion] = useDeleteCustomProductVersionMutation();
 
   // Function now uses router.push for navigation
   const handleFindProduct = () => {
@@ -609,15 +614,16 @@ export default function App() {
   };
 
   const openDeleteModal = (
-    id: string,
+    id: string | number,
     title: string,
-    tab: "saved" | "my"
+    tab: "saved" | "my",
+    version?: number
   ) => {
-    setModalState({ isOpen: true, id, title, tab });
+    setModalState({ isOpen: true, id: id.toString(), title, tab, version: version || 0 });
   };
 
   const closeDeleteModal = () => {
-    setModalState({ isOpen: false, id: null, title: "", tab: null });
+    setModalState({ isOpen: false, id: null, title: "", version: 0, tab: null });
   };
 
   const confirmDeletion = () => {
@@ -626,9 +632,13 @@ export default function App() {
         prev.filter((p: Product) => p.id !== modalState.id)
       );
     } else if (modalState.tab === "my") {
-      setMyDesigns((prev: Product[]) =>
-        prev.filter((p: Product) => p.id !== modalState.id)
-      );
+      if (modalState.id && !isNaN(Number(modalState.id))) {
+        deleteDesignVersion(Number(modalState.id));
+      } else {
+        setMyDesigns((prev: Product[]) =>
+          prev.filter((p: Product) => p.id !== modalState.id)
+        );
+      }
     }
 
     closeDeleteModal();
@@ -693,15 +703,15 @@ export default function App() {
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               className={`w-full md:w-auto flex justify-center items-center space-x-2 py-3 px-4 transition-all ${activeTab === t.id
-                  ? "text-white bg-indigo-600"
-                  : "text-gray-600 bg-white"
+                ? "text-white bg-indigo-600"
+                : "text-gray-600 bg-white"
                 }`}
             >
               <span className="uppercase">{t.label}</span>
               <span
                 className={`rounded-full px-2 text-xs font-bold ${activeTab === t.id
-                    ? "bg-white text-indigo-600"
-                    : "bg-gray-200"
+                  ? "bg-white text-indigo-600"
+                  : "bg-gray-200"
                   }`}
               >
                 {t.count}
@@ -718,26 +728,26 @@ export default function App() {
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
               </div>
             ) : (
-                (!ordersData || ordersData.results.length === 0) ? (
-                  <EmptyCreationsState
-                    onFindProduct={handleFindProduct}
-                    isLoading={isLoading}
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
-                    {ordersData.results.map((order) => (
-                      <OrderCard key={order.id} order={order} />
-                    ))}
-                  </div>
-                )
+              (!ordersData || ordersData.results.length === 0) ? (
+                <EmptyCreationsState
+                  onFindProduct={handleFindProduct}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+                  {ordersData.results.map((order) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+              )
             )
           )}
           {activeTab === "saved" && renderContent(savedProducts, "saved")}
           {activeTab === "my" && (
             isAiProductsLoading ? (
-               <div className="flex justify-center items-center py-20">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-               </div>
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+              </div>
             ) : (
               (!customProductsData || customProductsData.results.length === 0) ? (
                 <EmptyCreationsState
@@ -746,14 +756,15 @@ export default function App() {
                 />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {customProductsData.results.map((product) => 
-                     product.versions.map((version) => (
-                        <CustomDesignCard 
-                          key={version.id} 
-                          version={version} 
-                          productId={product.product}
-                        />
-                     ))
+                  {customProductsData.results.map((product) =>
+                    product.versions.map((version) => (
+                      <CustomDesignCard
+                        key={version.id}
+                        version={version}
+                        productId={product.product}
+                        onDelete={(id, title, version) => openDeleteModal(id, title, "my", version)}
+                      />
+                    ))
                   )}
                 </div>
               )
@@ -767,6 +778,7 @@ export default function App() {
         onClose={closeDeleteModal}
         onConfirm={confirmDeletion}
         title={modalState.title}
+        version={modalState.version}
       />
     </div>
   );

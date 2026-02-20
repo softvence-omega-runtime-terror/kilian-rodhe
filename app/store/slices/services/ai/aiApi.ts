@@ -9,6 +9,14 @@ export interface ICustomProduct {
     versions: ICustomProductVersion[];
 }
 
+export interface ICustomProductInVersion {
+    id: number;
+    name: string;
+    category_name: string;
+    sub_category_name: string;
+    price: number;
+}
+
 export interface ICustomProductVersion {
     id: number;
     custom_ai_product: number;
@@ -18,6 +26,7 @@ export interface ICustomProductVersion {
     design_cost: string;
     refunded: string;
     created_at: string;
+    product: ICustomProductInVersion;
 }
 
 export interface ICustomProductResponse {
@@ -25,6 +34,15 @@ export interface ICustomProductResponse {
     next: string | null;
     previous: string | null;
     results: ICustomProduct[];
+}
+
+export interface ISaveCustomProductVersionRequest {
+    custom_product_id?: number;
+    custom_product_data?: {
+        product: number;
+    };
+    product_image: number;
+    images: string[];
 }
 
 export const aiApi = baseBackendApi.injectEndpoints({
@@ -36,11 +54,18 @@ export const aiApi = baseBackendApi.injectEndpoints({
             }),
             providesTags: ["CustomProducts"],
         }),
-        saveCustomProductVersion: builder.mutation<any, FormData>({
+        saveCustomProductVersion: builder.mutation<void, ISaveCustomProductVersionRequest>({
             query: (body) => ({
                 url: "/ai/custom-product-versions/",
                 method: "POST",
                 body,
+            }),
+            invalidatesTags: ["CustomProducts"],
+        }),
+        deleteCustomProductVersion: builder.mutation<void, number>({
+            query: (id) => ({
+                url: `/ai/custom-product-versions/${id}/`,
+                method: "DELETE",
             }),
             invalidatesTags: ["CustomProducts"],
         }),
@@ -50,4 +75,5 @@ export const aiApi = baseBackendApi.injectEndpoints({
 export const {
     useGetCustomProductsQuery,
     useSaveCustomProductVersionMutation,
+    useDeleteCustomProductVersionMutation,
 } = aiApi;
