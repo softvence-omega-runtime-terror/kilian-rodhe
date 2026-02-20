@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { StaticImageData } from "next/image";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import { Jost, Cormorant_Garamond } from "next/font/google";
 
@@ -12,10 +12,10 @@ import ToastMessage from "./ToastMessage";
 
 // --- Image Imports ---
 import mainTshirt from "../public/image/myCreationIcon/source_image.jpg";
-import tshirt1 from "../public/image/myCreationIcon/tshirt-1.jpg";
-import tshirt2 from "../public/image/myCreationIcon/tshirt2.jpg";
-import tshirt3 from "../public/image/myCreationIcon/tshirt3.jpg";
-import tshirt4 from "../public/image/myCreationIcon/Button.png";
+// import tshirt1 from "../public/image/myCreationIcon/tshirt-1.jpg";
+// import tshirt2 from "../public/image/myCreationIcon/tshirt2.jpg";
+// import tshirt3 from "../public/image/myCreationIcon/tshirt3.jpg";
+// import tshirt4 from "../public/image/myCreationIcon/Button.png";
 
 import specialStar from "../public/image/myCreationIcon/specialStartIcon.svg";
 import specialStarBlackIcon from "../public/image/myCreationIcon/specialStartIconBlack.svg";
@@ -23,6 +23,7 @@ import colorStart from "../public/image/myCreationIcon/colorStartIcon.svg";
 import drowIcon from "../public/image/myCreationIcon/deowIcon.svg";
 import thanderIcon from "../public/image/myCreationIcon/thanderIcon.svg";
 import rightIcon from "../public/image/myCreationIcon/rightIcon.svg";
+import nonColorIcon from "../public/image/myCreationIcon/noncolorStar.svg";
 
 import tracIcon from "../public/image/myCreationIcon/truckIcon.svg";
 import batchIcon from "../public/image/myCreationIcon/batchIcon.svg";
@@ -47,7 +48,7 @@ const cormorantNormal = Cormorant_Garamond({
   style: ["normal"],
 });
 
-import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
+import { useGetProductDetailsQuery, useGetProductReviewsQuery } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 
 // --- Interface Definitions ---
@@ -67,6 +68,7 @@ interface ProductData {
   price: number;
   originalPrice: number;
   reviews: number;
+  averageRating?: string | number;
   description: string;
   sizes: string[];
   colors: ColorData[];
@@ -100,57 +102,83 @@ export default function ProductPage({ productId }: { productId?: number }) {
     skip: !productId,
   });
 
+  const { data: reviewsData } = useGetProductReviewsQuery({ product_id: productId }, {
+    skip: !productId
+  });
+
   const apiProduct = detailsData?.data;
-  console.log(apiProduct);
+
+  // Helper to calculate average rating
+  const averageRating = React.useMemo(() => {
+    if (!reviewsData?.star_reveiw_count) return 0;
+
+    let totalStars = 0;
+    let totalCount = 0;
+
+    Object.entries(reviewsData.star_reveiw_count).forEach(([star, count]) => {
+      totalStars += parseInt(star) * (count as number);
+      totalCount += (count as number);
+    });
+
+    return totalCount > 0 ? (totalStars / totalCount).toFixed(1) : 0;
+  }, [reviewsData]);
+
+  const totalReviewCount = reviewsData?.total_review || 0;
 
   // Fallback / Static product for when no ID is provided or API fails
-  const staticProduct: ProductData = {
-    title: "Premium Cotton T-Shirt",
-    price: 29.99,
-    originalPrice: 38.99,
-    reviews: 127,
-    description: "Luxurious 100% premium cotton with superior comfort",
-    sizes: ["XS", "S", "M", "L", "XL", "XXL"],
-    colors: [
-      { name: "White", hex: "#FFFFFF", selected: true },
-      { name: "Black", hex: "#000000" },
-      { name: "Dark Blue", hex: "#1F4E79" },
-      { name: "Grey", hex: "#A9A9A9" },
-    ],
-    mainImageSrc: mainTshirt,
-    thumbnails: [
-      { src: tshirt1, alt: "White T-Shirt Front" },
-      { src: tshirt2, alt: "Black T-Shirt View" },
-      { src: tshirt3, alt: "Red T-Shirt Style" },
-      { src: tshirt4, alt: "Outdoor T-Shirt Shot" },
-    ],
-  };
+  // const staticProduct: ProductData = {
+  //   title: "Premium Cotton T-Shirt",
+  //   price: 29.99,
+  //   originalPrice: 38.99,
+  //   reviews: 127,
+  //   averageRating: 4.8,
+  //   description: "Luxurious 100% premium cotton with superior comfort",
+  //   sizes: ["XS", "S", "M", "L", "XL", "XXL"],
+  //   colors: [
+  //     { name: "White", hex: "#FFFFFF", selected: true },
+  //     { name: "Black", hex: "#000000" },
+  //     { name: "Dark Blue", hex: "#1F4E79" },
+  //     { name: "Grey", hex: "#A9A9A9" },
+  //   ],
+  //   mainImageSrc: mainTshirt,
+  //   thumbnails: [
+  //     { src: tshirt1, alt: "White T-Shirt Front" },
+  //     { src: tshirt2, alt: "Black T-Shirt View" },
+  //     { src: tshirt3, alt: "Red T-Shirt Style" },
+  //     { src: tshirt4, alt: "Outdoor T-Shirt Shot" },
+  //   ],
+  // };
 
   // Map API data if available
   // Map API data if available - with robust null checks
-  const displayProduct: ProductData = apiProduct ? {
-    title: apiProduct?.name || "Product Name",
+  const displayProduct: ProductData = {
+    title: apiProduct?.name || "",
     price: apiProduct?.discounted_price || 0,
     originalPrice: parseFloat(apiProduct?.price || "0"),
-    reviews: 127, // Mocked
-    description: apiProduct?.description || "No description available",
+    reviews: totalReviewCount, // Dynamic value from reviews API
+    averageRating: averageRating, // Dynamic average rating
+    description: apiProduct?.description || "",
     sizes: (apiProduct?.cloth_size && apiProduct.cloth_size.length > 0)
       ? apiProduct.cloth_size
-      : ["S", "M", "L"],
-    colors: [
-      {
-        name: apiProduct?.color_code || "Standard",
-        hex: (apiProduct?.color_code || "#000000").toLowerCase(),
-        selected: true
-      },
-      { name: "Black", hex: "#000000" },
-      { name: "Grey", hex: "#A9A9A9" },
-    ],
+      : [],
+    colors: (apiProduct?.colors && apiProduct.colors.length > 0)
+      ? apiProduct.colors.map((colorHex, index) => ({
+        name: colorHex,
+        hex: colorHex.toLowerCase(),
+        selected: index === 0
+      }))
+      : [
+        {
+          name: apiProduct?.color_code || "Standard",
+          hex: (apiProduct?.color_code || "#000000").toLowerCase(),
+          selected: true
+        }
+      ],
     mainImageSrc: apiProduct?.images?.[0]?.image || mainTshirt,
     thumbnails: (apiProduct?.images && apiProduct.images.length > 0)
       ? apiProduct.images.map(img => ({ src: img.image, alt: apiProduct?.name || "Product Image" }))
-      : staticProduct.thumbnails,
-  } : staticProduct;
+      : [],
+  };
 
   const CustomIcon: React.FC<CustomIconProps> = ({
     src,
@@ -185,7 +213,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
   const initialSelectedColor =
     displayProduct.colors.find((c) => c.selected) || displayProduct.colors[0];
   const [selectedColor, setSelectedColor] =
-    useState<ColorData>(initialSelectedColor);
+    useState<ColorData | undefined>(initialSelectedColor);
   const [quantity, setQuantity] = useState<number>(1);
   const [addToCart] = useAddToCartMutation();
   const router = useRouter();
@@ -238,13 +266,20 @@ export default function ProductPage({ productId }: { productId?: number }) {
         src: apiProduct?.images?.[0]?.image || mainTshirt,
         alt: apiProduct?.name || "Product Image"
       });
-      setSelectedSize(apiProduct?.cloth_size?.[0] || "S");
-      const col = {
-        name: apiProduct?.color_code || "Standard",
-        hex: (apiProduct?.color_code || "#FFFFFF").toLowerCase(),
-        selected: true
-      };
-      setSelectedColor(col);
+      setSelectedSize(apiProduct?.cloth_size?.[0] || "");
+      
+      const firstColor = (apiProduct.colors && apiProduct.colors.length > 0)
+        ? { 
+            name: apiProduct.colors[0], 
+            hex: apiProduct.colors[0].toLowerCase(), 
+            selected: true 
+          }
+        : {
+            name: apiProduct?.color_code || "Standard",
+            hex: (apiProduct?.color_code || "#FFFFFF").toLowerCase(),
+            selected: true
+          };
+      setSelectedColor(firstColor);
     }
   }, [apiProduct]);
 
@@ -345,10 +380,10 @@ export default function ProductPage({ productId }: { productId?: number }) {
           {/* Reviews */}
           <div className="flex items-center mt-2">
             <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
+              {[1, 2, 3, 4, 5].map((star) => (
                 <CustomIcon
-                  key={i}
-                  src={colorStart}
+                  key={star}
+                  src={(star <= Math.round(Number(averageRating))) ? colorStart : nonColorIcon}
                   alt="Rating Star"
                   className="h-4 w-4 mr-0.5"
                 />
@@ -357,7 +392,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
             <p
               className={`${jostFont.className} tracking-[0.5px] ml-2 text-sm text-[#6d6d6d] `}
             >
-              ({displayProduct.reviews} reviews)
+              ({totalReviewCount} reviews)
             </p>
           </div>
 
@@ -512,7 +547,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
               SELECT COLOR:
               <span className="font-normal text-[#795548]">
                 {" "}
-                {selectedColor.name}
+                {selectedColor?.name}
               </span>
             </h3>
             <div className="mt-3 flex items-center space-x-3">
@@ -521,7 +556,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
                   key={color.name}
                   onClick={() => handleColorClick(color)}
                   className={`w-12 h-12 border focus:outline-none flex items-center justify-center transition duration-150 ease-in-out
-										${color.name === selectedColor.name
+										${color.name === selectedColor?.name
                       ? `border-[1.2px] ring-2`
                       : `border-gray-200 hover:ring-2 hover:ring-offset-1 hover:ring-gray-300`
                     }`}
@@ -529,13 +564,13 @@ export default function ProductPage({ productId }: { productId?: number }) {
                     backgroundColor: color.hex,
                     borderColor:
                       color.hex === "#FFFFFF" ? "#e5e5e5" : color.hex,
-                    ...(color.name === selectedColor.name && {
+                    ...(color.name === selectedColor?.name && {
                       borderColor: "#e5e5e5",
                       boxShadow: `0 0 0 2px ${CUSTOM_GOLD}`,
                     }),
                   }}
                 >
-                  {color.name === selectedColor.name && (
+                  {color.name === selectedColor?.name && (
                     <CustomIcon
                       src={rightIcon}
                       alt="Checkmark"
@@ -613,7 +648,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
             {/* CUSTOMIZE NOW WITH AI Button */}
             <button
               onClick={handleCustomizeWithAi}
-              className={`flex items-center justify-center space-x-2 w-full py-3 mt-6 text-white shadow-lg transition-transform transform hover:scale-[1.01] hover:bg-opacity-90 duration-300`}
+              className={`flex items-center justify-center space-x-2 w-full py-3 mt-6 text-white shadow-lg transition-transform transform hover:scale-[1.01] hover:bg-opacity-90 duration-300 cursor-pointer`}
               style={{ backgroundColor: CUSTOM_BROWN }}
             >
               <CustomIcon
@@ -642,9 +677,9 @@ export default function ProductPage({ productId }: { productId?: number }) {
                   setToast({ message: "Failed to add to cart", type: "error" });
                 }
               }}
+              // style={{ borderColor: "#000000", color: "#1a1a1a" }}
               disabled={!productId}
-              className={`${jostFont.className} tracking-[2.1px] w-full py-3 mt-4 bg-white border font-medium text-sm transition duration-150 hover:text-white hover:shadow-lg hover:bg-black`}
-              style={{ borderColor: "#000000", color: "#1a1a1a" }}
+              className={`${jostFont.className} tracking-[2.1px] w-full py-3 mt-4 bg-white border font-medium text-sm transition duration-150 hover:shadow-lg hover:bg-black hover:text-white cursor-pointer`}
             >
               ADD TO CART
             </button>

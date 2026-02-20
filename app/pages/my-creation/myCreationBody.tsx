@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Cormorant_Garamond } from "next/font/google";
-// 1. IMPORT ROUTER FOR REAL NAVIGATION
 import { useRouter } from "next/navigation";
+import { useGetCustomProductsQuery, ICustomProductVersion, useDeleteCustomProductVersionMutation } from "@/app/store/slices/services/ai/aiApi";
+import { useGetOrdersQuery, IOrder } from "@/app/store/slices/services/order/orderApi";
 
 // Placeholder image for standalone environment
 // const ICON_PLACEHOLDER_URL =
@@ -36,6 +37,7 @@ type DeleteConfirmationModalProps = {
   onClose: () => void;
   onConfirm: () => void;
   title: string;
+  version: number;
 };
 
 type ProductCardProps = {
@@ -163,6 +165,7 @@ const DeleteConfirmationModal = ({
   onClose,
   onConfirm,
   title,
+  version,
 }: DeleteConfirmationModalProps) => {
   if (!isOpen) return null;
 
@@ -191,7 +194,7 @@ const DeleteConfirmationModal = ({
           </h3>
 
           <p className="mt-2 text-sm text-gray-500">
-            Are you sure you want to delete <strong>&quot;{title}&quot;</strong>?
+            Are you sure you want to delete <strong>&quot;{title}&quot;</strong> (Version {version})?
           </p>
         </div>
 
@@ -232,7 +235,7 @@ const ProductCard = ({ product, tabType, onDelete }: ProductCardProps) => {
   return (
     <div className=" border-2 border-[#E8E3DC] bg-white hover:shadow-xl">
       {/* Image */}
-      <div className="relative aspect-[3/2] overflow-hidden ">
+      <div className="relative aspect-3/2 overflow-hidden ">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={product.image}
@@ -277,6 +280,227 @@ const ProductCard = ({ product, tabType, onDelete }: ProductCardProps) => {
             Delete
           </button>
         )}
+      </div>
+    </div>
+  );
+};
+
+// ----------------------------------------------------
+// 4.5 CUSTOM DESIGN CARD (FOR AI DESIGNS)
+// ----------------------------------------------------
+
+const CustomDesignCard = ({
+  version,
+  productId,
+  onDelete
+}: {
+  version: ICustomProductVersion,
+  productId: number,
+  onDelete?: (id: number, title: string, version: number) => void;
+}) => {
+  const [currentIdx, setCurrentIdx] = useState(0);
+  const images = version.image_urls || [];
+
+  // Auto-slide effect
+  React.useEffect(() => {
+    if (images.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIdx((prev: number) => (prev + 1) % images.length);
+    }, 3000); // Slide every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  const handleNext = () => {
+    setCurrentIdx((prev: number) => (prev + 1) % images.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentIdx((prev: number) => (prev - 1 + images.length) % images.length);
+  };
+
+  const formattedDate = new Date(version.created_at).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
+  return (
+    <div className="border-2 border-[#E8E3DC] bg-white hover:shadow-xl transition-shadow duration-300">
+      {/* Image Slider */}
+      <div className="relative aspect-3/2 overflow-hidden group">
+        {images.length > 0 ? (
+          <>
+            <img
+              src={images[currentIdx]}
+              className="w-full h-full object-cover transition-opacity duration-500"
+              alt={`Version ${version.version} image ${currentIdx + 1}`}
+            />
+
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handlePrev(); }}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 px-2 py-1 rounded-full backdrop-blur-sm">
+                  {images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={(e) => { e.stopPropagation(); setCurrentIdx(i); }}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${i === currentIdx ? 'bg-[#D4AF37] scale-125' : 'bg-gray-400'}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+            No Image
+          </div>
+        )}
+      </div>
+
+      {/* Details */}
+      <div className="p-5">
+        <div className="flex justify-between items-start mb-1">
+          <h3 className="text-xl font-semibold truncate flex-1">{version.product.name}</h3>
+          <span className="text-xs bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-sm">
+            V{version.version}
+          </span>
+        </div>
+
+        <p className="text-sm text-gray-500 mb-4">AI Generated Design</p>
+
+        <div className="grid grid-cols-2 text-sm gap-y-2">
+          <span className="text-gray-500">Created Date:</span>
+          <span className="font-medium text-right">{formattedDate}</span>
+
+          {/* <span className="text-gray-500">Season ID:</span>
+          <span className="font-medium text-right truncate ml-2" title={version.custom_ai_product.toString()}>
+            {version.custom_ai_product}
+          </span> */}
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-[#E8E3DC] flex justify-between items-center">
+          <p className="text-lg font-bold text-gray-500">Design Cost:</p>
+          <p className="text-2xl text-indigo-600">€{(version.product.price)}</p>
+          {/* <p className="text-2xl text-indigo-600">€{parseFloat(version.design_cost).toFixed(2)}</p> */}
+        </div>
+
+        {onDelete && (
+          <button
+            className="mt-4 w-full text-red-600 py-2 border border-red-300 hover:bg-red-50 transition"
+            onClick={(e) => {
+              e.preventDefault();
+              onDelete(version.id, version.product.name, version.version);
+            }}
+          >
+            Delete
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ----------------------------------------------------
+// 4.6 ORDER CARD
+// ----------------------------------------------------
+
+const OrderCard = ({ order }: { order: IOrder }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const formattedDate = new Date(order.created_at).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending': return 'bg-yellow-500';
+      case 'shipped': return 'bg-blue-500';
+      case 'delivered': return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  return (
+    <div className="border-2 border-[#E8E3DC] bg-white hover:shadow-md transition-shadow">
+      <div className="p-5 border-b border-[#E8E3DC] flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-bold text-gray-900">Order #{order.order_uid}</h3>
+          <p className="text-xs text-gray-500 mt-1">{formattedDate}</p>
+        </div>
+        <span className={`text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full ${getStatusColor(order.status)}`}>
+          {order.status}
+        </span>
+      </div>
+
+      <div className="p-5 space-y-4">
+        {order.items.slice(0, isExpanded ? undefined : 2).map((item) => (
+          <div key={item.id} className="flex gap-4">
+            <div className="w-16 h-20 bg-gray-100 rounded shrink-0 flex items-center justify-center text-[10px] text-gray-400">
+              Img
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-sm font-semibold text-gray-900 truncate">{item.order_product_name}</h4>
+              <div className="flex justify-between items-center mt-2">
+                <p className="text-[11px] text-gray-500 mt-0.5">{item.order_product_classification} · {item.order_product_size.join(', ')}</p>
+
+                {/* Color Display */}
+                {item.order_product_color_code && item.order_product_color_code.length > 0 && (
+                  <div className="flex justify-between items-center mt-2 gap-2">
+                    <span className="text-[11px] text-gray-600">Color: </span>
+                    <div className="flex gap-1">
+                      {item.order_product_color_code.map((color, idx) => (
+                        <div
+                          key={idx}
+                          className="w-3 h-3 rounded-full border border-gray-200"
+                          style={{ backgroundColor: color }}
+                          title={color}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-[11px] text-gray-600">Qty: {item.quantity}</span>
+                <span className="text-sm font-bold text-indigo-600">€{parseFloat(item.subtotal).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {order.items.length > 2 && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-[10px] text-indigo-600 font-bold hover:underline"
+          >
+            {isExpanded ? 'Show less' : `+ ${order.items.length - 2} more items`}
+          </button>
+        )}
+      </div>
+
+      <div className="p-5 bg-gray-50 border-t border-[#E8E3DC] flex justify-between items-center">
+        <div>
+          <p className="text-[10px] text-gray-500">Shipping: €{order.shipping_cost.toFixed(2)}</p>
+          <p className="text-xs font-bold text-gray-900 mt-1">Total Due</p>
+        </div>
+        <p className="text-2xl font-bold text-[#a07d48]">€{order.total_cost.toFixed(2)}</p>
       </div>
     </div>
   );
@@ -366,13 +590,17 @@ export default function App() {
     isOpen: boolean;
     id: string | null;
     title: string;
+    version: number;
     tab: "saved" | "my" | null;
   }>({
     isOpen: false,
     id: null,
     title: "",
+    version: 0,
     tab: null,
   });
+
+  const [deleteDesignVersion] = useDeleteCustomProductVersionMutation();
 
   // Function now uses router.push for navigation
   const handleFindProduct = () => {
@@ -386,26 +614,31 @@ export default function App() {
   };
 
   const openDeleteModal = (
-    id: string,
+    id: string | number,
     title: string,
-    tab: "saved" | "my"
+    tab: "saved" | "my",
+    version?: number
   ) => {
-    setModalState({ isOpen: true, id, title, tab });
+    setModalState({ isOpen: true, id: id.toString(), title, tab, version: version || 0 });
   };
 
   const closeDeleteModal = () => {
-    setModalState({ isOpen: false, id: null, title: "", tab: null });
+    setModalState({ isOpen: false, id: null, title: "", version: 0, tab: null });
   };
 
   const confirmDeletion = () => {
     if (modalState.tab === "saved") {
-      setSavedProducts((prev) =>
-        prev.filter((p) => p.id !== modalState.id)
+      setSavedProducts((prev: Product[]) =>
+        prev.filter((p: Product) => p.id !== modalState.id)
       );
     } else if (modalState.tab === "my") {
-      setMyDesigns((prev) =>
-        prev.filter((p) => p.id !== modalState.id)
-      );
+      if (modalState.id && !isNaN(Number(modalState.id))) {
+        deleteDesignVersion(Number(modalState.id));
+      } else {
+        setMyDesigns((prev: Product[]) =>
+          prev.filter((p: Product) => p.id !== modalState.id)
+        );
+      }
     }
 
     closeDeleteModal();
@@ -443,10 +676,13 @@ export default function App() {
     );
   };
 
+  const { data: customProductsData, isLoading: isAiProductsLoading } = useGetCustomProductsQuery();
+  const { data: ordersData, isLoading: isOrdersLoading } = useGetOrdersQuery();
+
   const tabs = [
-    { id: "ordered", label: "ORDERED PRODUCTS", count: orderedProducts.length },
-    { id: "saved", label: "SAVED DESIGNS", count: savedProducts.length },
-    { id: "my", label: "MY DESIGNS", count: myDesigns.length },
+    { id: "ordered", label: "ORDERED PRODUCTS", count: ordersData?.count || 0 },
+    // { id: "saved", label: "SAVED DESIGNS", count: savedProducts.length },
+    { id: "my", label: "MY DESIGNS", count: customProductsData?.results.reduce((acc: number, p: any) => acc + p.versions.length, 0) || 0 },
   ] as const;
 
   return (
@@ -467,15 +703,15 @@ export default function App() {
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               className={`w-full md:w-auto flex justify-center items-center space-x-2 py-3 px-4 transition-all ${activeTab === t.id
-                  ? "text-white bg-indigo-600"
-                  : "text-gray-600 bg-white"
+                ? "text-white bg-indigo-600"
+                : "text-gray-600 bg-white"
                 }`}
             >
               <span className="uppercase">{t.label}</span>
               <span
                 className={`rounded-full px-2 text-xs font-bold ${activeTab === t.id
-                    ? "bg-white text-indigo-600"
-                    : "bg-gray-200"
+                  ? "bg-white text-indigo-600"
+                  : "bg-gray-200"
                   }`}
               >
                 {t.count}
@@ -486,9 +722,54 @@ export default function App() {
 
         {/* Content */}
         <div className="pb-16">
-          {activeTab === "ordered" && renderContent(orderedProducts, "ordered")}
+          {activeTab === "ordered" && (
+            isOrdersLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+              </div>
+            ) : (
+              (!ordersData || ordersData.results.length === 0) ? (
+                <EmptyCreationsState
+                  onFindProduct={handleFindProduct}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
+                  {ordersData.results.map((order) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+              )
+            )
+          )}
           {activeTab === "saved" && renderContent(savedProducts, "saved")}
-          {activeTab === "my" && renderContent(myDesigns, "my")}
+          {activeTab === "my" && (
+            isAiProductsLoading ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+              </div>
+            ) : (
+              (!customProductsData || customProductsData.results.length === 0) ? (
+                <EmptyCreationsState
+                  onFindProduct={handleFindProduct}
+                  isLoading={isLoading}
+                />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {customProductsData.results.map((product) =>
+                    product.versions.map((version) => (
+                      <CustomDesignCard
+                        key={version.id}
+                        version={version}
+                        productId={product.product}
+                        onDelete={(id, title, version) => openDeleteModal(id, title, "my", version)}
+                      />
+                    ))
+                  )}
+                </div>
+              )
+            )
+          )}
         </div>
       </div>
 
@@ -497,6 +778,7 @@ export default function App() {
         onClose={closeDeleteModal}
         onConfirm={confirmDeletion}
         title={modalState.title}
+        version={modalState.version}
       />
     </div>
   );

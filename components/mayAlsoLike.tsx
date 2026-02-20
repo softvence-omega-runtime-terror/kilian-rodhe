@@ -85,7 +85,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   isVisible,
   index,
 }) => {
-  console.log("product : ", product);
   const router = useRouter(); // Hook to navigate
 
   const formattedPrice = new Intl.NumberFormat("en-US", {

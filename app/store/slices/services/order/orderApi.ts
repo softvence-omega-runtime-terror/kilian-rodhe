@@ -26,6 +26,52 @@ export interface ICartResponse {
   total_price: number;
 }
 
+export interface IShipmentType {
+  id: number;
+  title: string;
+  description: string;
+  cost: number;
+}
+
+export interface IShipmentTypeResponse {
+  success: boolean;
+  message: string;
+  data: IShipmentType[];
+}
+
+export interface IOrderItem {
+  id: number;
+  order_product_id: number;
+  order_product_name: string;
+  order_product_category: string;
+  order_product_sub_category: string;
+  order_product_classification: string;
+  order_product_price: string;
+  order_product_size: string[];
+  order_product_color_code: string[];
+  quantity: number;
+  subtotal: string;
+}
+
+export interface IOrder {
+  id: number;
+  order_uid: string;
+  status: string;
+  items: IOrderItem[];
+  product_total_amount: number;
+  shipping_cost: number;
+  tax: number;
+  total_cost: number;
+  created_at: string;
+}
+
+export interface IOrderResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: IOrder[];
+}
+
 export const orderApi = baseBackendApi.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query<ICartResponse, void>({
@@ -66,6 +112,19 @@ export const orderApi = baseBackendApi.injectEndpoints({
       }),
       invalidatesTags: ["Cart", "Orders"],
     }),
+    getShipmentsType: builder.query<IShipmentTypeResponse, void>({
+      query: () => ({
+        url: "/order/shipments_type/",
+        method: "GET",
+      }),
+    }),
+    getOrders: builder.query<IOrderResponse, void>({
+      query: () => ({
+        url: "/order/orders/",
+        method: "GET",
+      }),
+      providesTags: ["Orders"],
+    }),
   }),
 });
 
@@ -74,5 +133,7 @@ export const {
   useAddToCartMutation,
   useUpdateCartItemMutation,
   useDeleteCartItemMutation,
-  useCheckoutMutation
+  useCheckoutMutation,
+  useGetShipmentsTypeQuery,
+  useGetOrdersQuery
 } = orderApi;

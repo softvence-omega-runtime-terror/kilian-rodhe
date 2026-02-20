@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
+import { useGetCustomProductsQuery, useSaveCustomProductVersionMutation, ISaveCustomProductVersionRequest } from "@/app/store/slices/services/ai/aiApi";
 // ✅ Framer Motion import: Variants TargetAndTransition
 import { motion, type Variants, type TargetAndTransition } from "framer-motion";
+import { toast } from "sonner";
 
 // --- Imported Components (Assumed to exist in your project structure) ---
 import LivePreviewModal from "@/components/previewModel";
@@ -56,6 +58,30 @@ const CombinedDesignPageFixed = () => {
     // State to manage the active design mode: always 'ai' now
     const [designMode] = useState("ai");
     const [selectedAiImage, setSelectedAiImage] = useState<string | null>(null);
+    const [selectedAiFile, setSelectedAiFile] = useState<File | Blob | null>(null);
+    const [aiGeneratedImages, setAiGeneratedImages] = useState<{
+        generated_design_url: string;
+        mockup_url: string;
+        ai_season_id?: string;
+    } | null>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [selectedProductImageId, setSelectedProductImageId] = useState<number | null>(null);
+
+    // Initialize selectedProductImageId when product data loads
+    useEffect(() => {
+        if (apiProduct?.images && apiProduct.images.length > 0 && selectedProductImageId === null) {
+            setSelectedProductImageId(apiProduct.images[0].id);
+        }
+    }, [apiProduct, selectedProductImageId]);
+
+    // API Hooks
+    const { data: customProductsData, refetch: refetchCustomProducts } = useGetCustomProductsQuery();
+    const [saveCustomProductVersion, { isLoading: isSaving }] = useSaveCustomProductVersionMutation();
+
+
+    // Logo Upload State
+    const [logoImage, setLogoImage] = useState<string | null>(null);
+    const [logoFile, setLogoFile] = useState<File | null>(null);
 
     // Lifted modal state so modal control is available at the top level
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -67,30 +93,155 @@ const CombinedDesignPageFixed = () => {
         router.push("/pages/shipping");
     };
 
-    const handleImageSelect = (imageSrc: string) => {
+    const handleImageSelect = (imageSrc: string, imageId?: number) => {
         setSelectedAiImage(imageSrc);
-        console.log("Selected Image for AI (img_file):", imageSrc);
+        if (imageId) {
+            setSelectedProductImageId(imageId);
+        }
+        console.log("Selected Image for AI:", imageSrc, "ID:", imageId);
     };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
+            setSelectedAiFile(file);
             const reader = new FileReader();
             reader.onloadend = () => {
                 const base64String = reader.result as string;
                 setSelectedAiImage(base64String);
-                console.log("Uploaded Image for AI (img_file):", base64String);
+                console.log("Uploaded Image for preview:", base64String);
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const handleAiGenerate = (payload: any) => {
-        const fullPayload = {
-            ...payload,
-            img_file: selectedAiImage,
-        };
-        console.log("🚀 GENERATE AI DESIGN PAYLOAD:", fullPayload);
+    const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setLogoFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                setLogoImage(base64String);
+                console.log("Uploaded Logo for preview:", base64String);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveLogo = () => {
+        setLogoFile(null);
+        setLogoImage(null);
+    };
+
+    const handleAiGenerate = async (payload: any) => {
+        setIsGenerating(true);
+        try {
+            const formData = new FormData();
+
+            // Append all fields from payload
+            formData.append('prompt', payload.prompt || '');
+            formData.append('imagequality', payload.imagequality || '');
+            formData.append('compositiontype', payload.compositiontype || '');
+            formData.append('subjecttype', payload.subjecttype || '');
+            formData.append('backgroundtype', payload.backgroundtype || '');
+            formData.append('colorscheme', payload.colorscheme || '');
+            formData.append('lighting', payload.lighting || '');
+            formData.append('clothingfashion', payload.clothingfashion || '');
+            formData.append('style', payload.style || '');
+            formData.append('emotionexpression', payload.emotionexpression || '');
+            formData.append('modificationtype', payload.modificationtype || '');
+            formData.append('cameraperspective', payload.cameraperspective || '');
+            formData.append('weatherenv', payload.weatherenv || '');
+
+            if (selectedAiFile) {
+                // If it's a blob from handleImageSelect, we give it a filename
+                if (!(selectedAiFile instanceof File)) {
+                    formData.append('product_image', selectedAiFile, 'selected-image.png');
+                } else {
+                    formData.append('product_image', selectedAiFile);
+                }
+            }
+
+            if (logoFile) {
+                formData.append('logo_image', logoFile);
+            }
+
+            const response = await fetch('http://23.20.201.40:8010/generate_merchandise', {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+            if (data.generated_design_url || data.mockup_url) {
+                setAiGeneratedImages(data);
+                toast.success("Design generated successfully!");
+            } else {
+                toast.error("Format error in AI response.");
+                console.error("API response missing URLs:", data);
+            }
+            console.log("🚀 AI GENERATED DATA:", data);
+        } catch (error) {
+            console.error("AI Generation Error:", error);
+            toast.error("Failed to generate AI design. Please try again.");
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
+    const handleSaveDesign = async () => {
+        if (!aiGeneratedImages || !productId) {
+            toast.error("No generated design to save.");
+            return;
+        }
+
+        if (!selectedProductImageId) {
+            toast.error("Please select a base product image first.");
+            return;
+        }
+
+        try {
+            const existingCustomProduct = customProductsData?.results.find(
+                (cp) => cp.product === parseInt(productId)
+            );
+
+            const payload: ISaveCustomProductVersionRequest = {
+                product_image: selectedProductImageId,
+                images: [
+                    aiGeneratedImages.generated_design_url,
+                    aiGeneratedImages.mockup_url,
+                ].filter(Boolean),
+            };
+
+            if (existingCustomProduct) {
+                payload.custom_product_id = existingCustomProduct.id;
+            } else {
+                payload.custom_product_data = {
+                    product: parseInt(productId),
+                };
+            }
+
+            const response = await saveCustomProductVersion(payload).unwrap();
+            console.log("Save Response:", response);
+            toast.success("Design saved successfully!");
+            refetchCustomProducts(); // Refresh list to get new IDs if needed
+        } catch (error) {
+            console.error("Error saving design:", error);
+            // safe check for error object having data property
+            if (typeof error === 'object' && error !== null && 'data' in error) {
+                const errData = (error as any).data;
+                if (errData?.images) {
+                    toast.error(`Image Error: ${errData.images.join(', ')}`);
+                } else {
+                    toast.error("Failed to save design. Check console.");
+                }
+            } else {
+                toast.error("Failed to save design.");
+            }
+        }
     };
 
 
@@ -219,7 +370,7 @@ const CombinedDesignPageFixed = () => {
                                         {apiProduct.images.map((img: any, idx: number) => (
                                             <div
                                                 key={idx}
-                                                onClick={() => handleImageSelect(img.image)}
+                                                onClick={() => handleImageSelect(img.image, img.id)}
                                                 className={`w-20 h-20 shrink-0 border-2 cursor-pointer relative rounded-sm overflow-hidden ${selectedAiImage === img.image ? 'border-red-800' : 'border-gray-200'
                                                     }`}
                                             >
@@ -234,6 +385,107 @@ const CombinedDesignPageFixed = () => {
                                     </div>
                                 )}
                             </motion.div>
+
+                            {/* --- Logo Upload Section --- */}
+                            <div className="flex flex-col items-center justify-center mt-2 mb-4">
+                                <h3 className={`${jostFont.className} text-xs uppercase tracking-[1.5px] text-[#6B6B6B] mb-2`}>
+                                    Upload Logo (Optional)
+                                </h3>
+                                <div className="relative">
+                                    {logoImage ? (
+                                        <div className="relative w-24 h-24 border-2 border-dashed border-gray-300 rounded-sm overflow-hidden flex items-center justify-center group">
+                                            <Image
+                                                src={logoImage}
+                                                alt="Logo preview"
+                                                fill
+                                                className="object-contain p-1"
+                                            />
+                                            <button
+                                                onClick={handleRemoveLogo}
+                                                className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-0.5 hover:bg-red-600 transition-colors"
+                                            >
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label className="w-24 h-24 border-2 border-dashed border-gray-300 rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-red-800 transition-colors bg-white">
+                                            <svg className="w-6 h-6 text-gray-400 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
+                                            <span className="text-[10px] text-gray-400 uppercase">Logo</span>
+                                            <input type="file" className="hidden" onChange={handleLogoUpload} accept="image/*" />
+                                        </label>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* --- AI Generated Images Result --- */}
+                            {aiGeneratedImages && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: "auto" }}
+                                    className="mt-6 space-y-4"
+                                >
+                                    <h3 className={`${jostFont.className} text-xs uppercase tracking-[2.4px] text-[#6B6B6B]`}>
+                                        Generated Designs
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {aiGeneratedImages.generated_design_url && (
+                                            <motion.div
+                                                whileHover={{ scale: 1.05 }}
+                                                className={`relative h-40 border-2 rounded-md overflow-hidden cursor-pointer transition-colors ${selectedAiImage === aiGeneratedImages.generated_design_url ? 'border-red-800' : 'border-gray-200'}`}
+                                                onClick={() => handleImageSelect(aiGeneratedImages.generated_design_url)}
+                                            >
+                                                <Image
+                                                    src={aiGeneratedImages.generated_design_url}
+                                                    alt="Generated Design"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                                <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-[10px] py-1 text-center backdrop-blur-sm">
+                                                    Design Only
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                        {aiGeneratedImages.mockup_url && (
+                                            <motion.div
+                                                whileHover={{ scale: 1.05 }}
+                                                className={`relative h-40 border-2 rounded-md overflow-hidden cursor-pointer transition-colors ${selectedAiImage === aiGeneratedImages.mockup_url ? 'border-red-800' : 'border-gray-200'}`}
+                                                onClick={() => handleImageSelect(aiGeneratedImages.mockup_url)}
+                                            >
+                                                <Image
+                                                    src={aiGeneratedImages.mockup_url}
+                                                    alt="Mockup"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                                <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-white text-[10px] py-1 text-center backdrop-blur-sm">
+                                                    Mockup View
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                    <p className="text-[10px] text-gray-500 italic mt-1 font-light">
+                                        * Select an image above to apply it to your product preview.
+                                    </p>
+                                </motion.div>
+                            )}
+
+                            {/* --- Save Design Button --- */}
+                            {aiGeneratedImages && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="mt-4"
+                                >
+                                    <button
+                                        onClick={handleSaveDesign}
+                                        disabled={isSaving}
+                                        className={`w-full py-3 ${isSaving ? 'bg-gray-400' : 'bg-black'} text-white uppercase tracking-widest text-sm font-medium hover:bg-gray-800 transition-colors`}
+                                        style={{ fontFamily: "'Jost', sans-serif" }}
+                                    >
+                                        {isSaving ? "Saving..." : "Save Design"}
+                                    </button>
+                                </motion.div>
+                            )}
 
                             {/* High-Resolution Guarantee */}
                             <motion.div
@@ -403,6 +655,7 @@ const CombinedDesignPageFixed = () => {
                         <AiDesignGenerate
                             onPreviewClick={openPreviewModal}
                             onGenerate={handleAiGenerate}
+                            isGenerating={isGenerating}
                         />
                     </div>
                     <motion.div

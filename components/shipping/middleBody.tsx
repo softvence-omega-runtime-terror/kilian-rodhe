@@ -280,7 +280,7 @@ const ShippingPage: React.FC = () => {
             </div>
 
             {/* Shipping Method */}
-            <div>
+            {/* <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">
                 Shipping Method
               </label>
@@ -295,7 +295,7 @@ const ShippingPage: React.FC = () => {
                   />
                 ))}
               </div>
-            </div>
+            </div> */}
 
             {/* Buttons */}
             <div className="flex items-center justify-between pt-4">
