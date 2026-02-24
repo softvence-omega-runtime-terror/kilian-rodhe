@@ -198,14 +198,14 @@ const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler
   // MAP UI DATA TO BACKEND FORMAT
   // -------------------------
   const mapUIToRequest = (): ProductRequest => {
-    const clothSizes: Record<string, number> = {};
-    const kidsSizes: Record<string, number> = {};
-    const mugSizes: Record<string, number> = {};
+    const clothSizes: string[] = [];
+    const kidsSizes: string[] = [];
+    const mugSizes: string[] = [];
 
     productData.sizes.forEach((size) => {
-      if (size.includes("kid")) kidsSizes[size] = 1;
-      else if (size.includes("mug")) mugSizes[size] = 1;
-      else clothSizes[size] = 1;
+      if (size.includes("Y") || size.includes("kid")) kidsSizes.push(size);
+      else if (size.includes("oz") || size.includes("mug")) mugSizes.push(size);
+      else clothSizes.push(size);
     });
 
     // Build the payload with all required fields
@@ -216,19 +216,19 @@ const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler
       sub_category: Number(productData.sub_category),
       classification: Number(productData.classification),
       age_range: productData.ageGroup && productData.ageGroup !== ""
-        ? Number(productData.ageGroup)
-        : undefined,
+        ? [Number(productData.ageGroup)]
+        : [],
       description: productData.description,
       price: Number(productData.price),
       discount_percentage: Number(productData.discount_percentage || 0),
       stock_quantity: Number(productData.stock),
       sku: productData.sku,
-      colors: productData.colors.join(","),
+      colors: productData.colors,
 
       is_universal_size: productData.is_universal_size === "true",
-      cloth_size: Object.keys(clothSizes).length > 0 ? clothSizes : undefined,
-      kids_size: Object.keys(kidsSizes).length > 0 ? kidsSizes : undefined,
-      mug_size: Object.keys(mugSizes).length > 0 ? mugSizes : undefined,
+      cloth_size: clothSizes.length > 0 ? clothSizes : undefined,
+      kids_size: kidsSizes.length > 0 ? kidsSizes : undefined,
+      mug_size: mugSizes.length > 0 ? mugSizes : undefined,
 
       ai_gen: productData.designs.includes("ai") || productData.ai_gen === "true",
       ai_letter: productData.designs.includes("letter") || productData.ai_letter === "true",
