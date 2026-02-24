@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useGetProductsQuery } from "@/app/store/slices/services/product/productApi";
 import stdioImage from "../public/image/stdioImage.png";
 
 const animationStyles = (
@@ -45,9 +46,15 @@ export default function CustomDesignStudio() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const router = useRouter();
+  const { data: productsData } = useGetProductsQuery({});
 
   const handleStartDesigning = () => {
-    router.push("/pages/my-creation/create-your-design");
+    const defaultProduct = productsData?.data?.categories?.[0];
+    if (defaultProduct) {
+      router.push(`/pages/my-creation/create-your-design?id=${defaultProduct.id}`);
+    } else {
+      router.push("/pages/my-creation/create-your-design");
+    }
   };
 
   useEffect(() => {
