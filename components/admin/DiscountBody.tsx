@@ -9,6 +9,9 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
+import ManualDiscountForm from "./ManualDiscount";
+import CsvDiscountForm from "./emailsComponent/CsvDiscount";
+
 // --- Tab Navigation Data (Primary Tabs) ---
 const tabs = ["Manage Codes", "Email Sending", "Automation", "Analytics"];
 
@@ -44,10 +47,9 @@ const CreateDiscountCodePage: React.FC<CreateDiscountCodePageProps> = ({
               onClick={() => setActiveSubTab(tab)}
               className={`
                 px-4 py-2 text-sm font-medium rounded-lg transition-all
-                ${
-                  activeSubTab === tab
-                    ? "bg-gray-900 text-white shadow-md" // Active sub-tab style
-                    : "text-gray-600 hover:bg-gray-50" // Inactive sub-tab style
+                ${activeSubTab === tab
+                  ? "bg-gray-900 text-white shadow-md" // Active sub-tab style
+                  : "text-gray-600 hover:bg-gray-50" // Inactive sub-tab style
                 }
               `}
             >
@@ -58,7 +60,7 @@ const CreateDiscountCodePage: React.FC<CreateDiscountCodePageProps> = ({
 
         {/* Content based on Sub-Tab */}
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Create Discount Codes ({activeSubTab})
+          {activeSubTab === "Manual" ? "Create Discount Codes" : "Import Discount Codes"}
         </h1>
         <p className="text-gray-600 mb-8">
           {activeSubTab === "Manual"
@@ -66,13 +68,9 @@ const CreateDiscountCodePage: React.FC<CreateDiscountCodePageProps> = ({
             : "Upload a CSV file to import existing codes."}
         </p>
 
-        {/* Placeholder for Manual/CSV Form */}
-        <div className="p-10 bg-white border border-gray-200 rounded-xl shadow-sm">
-          <p className="text-gray-500">
-            {activeSubTab === "Manual"
-              ? "Manual code creation form goes here..."
-              : "CSV upload widget goes here..."}
-          </p>
+        {/* Content based on Sub-Tab */}
+        <div className="mt-12">
+          {activeSubTab === "Manual" ? <ManualDiscountForm /> : <CsvDiscountForm />}
         </div>
       </div>
     </div>
@@ -86,7 +84,7 @@ const CreateDiscountCard: React.FC<{ onCreateClick: () => void }> = ({
   onCreateClick,
 }) => {
   return (
-    <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-[#e9d4ff]">
+    <div className="p-6 md:p-8 rounded-2xl bg-linear-to-br from-indigo-50 to-purple-50 border-2 border-[#e9d4ff]">
       <div className="flex items-start">
         {/* Sparkle Icon with Background */}
         <div className="bg-white p-2.5 rounded-xl mr-4 shadow-md">
@@ -125,7 +123,7 @@ const CreateDiscountCard: React.FC<{ onCreateClick: () => void }> = ({
           {/* "Try It Now" Button (calls the function to switch view) */}
           <button
             onClick={onCreateClick}
-            className="flex items-center justify-center px-6 py-3 rounded-xl text-white font-medium shadow-lg transition-all transform hover:scale-[1.02] bg-gradient-to-r from-indigo-600 to-purple-600"
+            className="flex items-center justify-center px-6 py-3 rounded-xl text-white font-medium shadow-lg transition-all transform hover:scale-[1.02] bg-linear-to-r from-indigo-600 to-purple-600"
           >
             Try It Now →
           </button>
@@ -196,10 +194,9 @@ const DiscountPage: React.FC = () => {
                 onClick={() => setActiveTab(tab)}
                 className={`
                   px-4 py-2 text-sm font-medium rounded-lg transition-all
-                  ${
-                    activeTab === tab
-                      ? "bg-gray-100 text-gray-900 shadow-sm"
-                      : "text-gray-600 hover:bg-gray-50"
+                  ${activeTab === tab
+                    ? "bg-gray-100 text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-50"
                   }
                 `}
               >
@@ -212,7 +209,7 @@ const DiscountPage: React.FC = () => {
           {/* This button also sets isCreating to true */}
           <button
             onClick={() => setIsCreating(true)}
-            className="flex items-center px-4 py-2.5 rounded-xl text-white font-semibold transition-all shadow-lg transform hover:scale-[1.01] bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+            className="flex items-center px-4 py-2.5 rounded-xl text-white font-semibold transition-all shadow-lg transform hover:scale-[1.01] bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
           >
             <Plus className="w-5 h-5 mr-2" />
             Create Custom Discount Code

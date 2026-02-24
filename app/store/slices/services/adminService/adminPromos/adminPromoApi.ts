@@ -128,6 +128,39 @@ export interface BulkDeleteDiscountResponse {
 }
 
 
+// types for bulk create and send
+
+export interface DiscountCodeEntry {
+    code: string;
+    to_email: string;
+}
+
+export interface CodeSeriesData {
+    series_name: string;
+    code_prefix: string;
+    discount_type: DiscountType;
+    amount: number;
+    min_purchase_amount: number;
+    max_discount_amount: number;
+    is_one_time: boolean;
+    expiry_date: string;
+    is_active: boolean;
+    notes: string;
+    codes: DiscountCodeEntry[];
+}
+
+export interface BulkCreateSendDiscountRequest {
+    email_template_id: number;
+    code_series_data: CodeSeriesData[];
+}
+
+export interface BulkCreateSendDiscountResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
+
 // Injection to the base url
 
 export const adminPromApi = baseBackendApi.injectEndpoints({
@@ -180,6 +213,19 @@ export const adminPromApi = baseBackendApi.injectEndpoints({
             }),
             invalidatesTags: ["DiscountCodes"],
         }),
+
+        // bulk create and send discount codes
+        bulkCreateSendDiscount: builder.mutation<
+            BulkCreateSendDiscountResponse,
+            BulkCreateSendDiscountRequest
+        >({
+            query: (body) => ({
+                url: "/discount/bulk-create-send/",
+                method: "POST",
+                body,
+            }),
+            invalidatesTags: ["DiscountCodes"],
+        }),
     }),
     overrideExisting: true,
 });
@@ -192,4 +238,5 @@ export const {
     useGetAllDiscountCodesQuery,
     useGetAllDiscountSeriesQuery,
     useBulkDeleteDiscountMutation,
+    useBulkCreateSendDiscountMutation,
 } = adminPromApi;

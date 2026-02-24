@@ -15,6 +15,7 @@ import {
   useGetShipmentsTypeQuery,
   ICartItem,
 } from "@/app/store/slices/services/order/orderApi";
+import { getColorValue, isLightColor } from "@/app/utils/colorUtils";
 
 // Assets (Reusing from shipping)
 import whiteRightIcon from "@/public/image/shipping/Icon.svg";
@@ -374,19 +375,23 @@ const CheckoutReview: React.FC = () => {
 
                               return (
                                 <div className="flex flex-wrap gap-2">
-                                  {colors.map(color => (
-                                    <button
-                                      key={color}
-                                      onClick={() => handleOverrideChange(item.id, 'color', color)}
-                                      className={`w-8 h-8 rounded-full border-2 transition-all duration-200 ${selectedColor === color ? 'border-[#a07d48] scale-110 shadow-md' : 'border-transparent hover:border-gray-300'}`}
-                                      style={{ backgroundColor: color }}
-                                      title={color}
-                                    >
-                                      {selectedColor === color && (
-                                        <Check size={14} className={color.toLowerCase() === '#ffffff' ? 'text-black mx-auto' : 'text-white mx-auto'} />
-                                      )}
-                                    </button>
-                                  ))}
+                                  {colors.map(color => {
+                                    const colorHex = getColorValue(color);
+                                    const isLight = isLightColor(color);
+                                    return (
+                                      <button
+                                        key={color}
+                                        onClick={() => handleOverrideChange(item.id, 'color', color)}
+                                        className={`w-8 h-8 rounded-full border-2 transition-all duration-200 ${selectedColor === color ? 'border-[#a07d48] scale-110 shadow-md' : 'border-transparent hover:border-gray-300'}`}
+                                        style={{ backgroundColor: colorHex }}
+                                        title={color}
+                                      >
+                                        {selectedColor === color && (
+                                          <Check size={14} className={isLight ? 'text-black mx-auto' : 'text-white mx-auto'} />
+                                        )}
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               );
                             })()}

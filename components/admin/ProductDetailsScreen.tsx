@@ -16,6 +16,7 @@ import {
   useGetAllClassificationsQuery,
   useGetAllAgeRangesQuery,
 } from "@/app/store/slices/services/adminService/products/productMetadata";
+import { getColorValue, isLightColor } from "@/app/utils/colorUtils";
 
 const StatusBadge = ({ active }: { active: boolean }) => (
   <span
@@ -69,25 +70,6 @@ const SalesStat = ({ label, value, change }: { label: string; value: string; cha
     </span>
   </div>
 );
-
-const getColorSwatchClass = (color: string) => {
-  switch (color.toLowerCase()) {
-    case "black":
-      return "bg-black";
-    case "white":
-      return "bg-white border border-gray-300";
-    case "navy":
-      return "bg-blue-900";
-    case "grey":
-      return "bg-gray-500";
-    case "blue":
-      return "bg-blue-500";
-    case "red":
-      return "bg-red-500";
-    default:
-      return "bg-transparent border border-dashed border-gray-400";
-  }
-};
 
 /* ================= Main Component ================= */
 
@@ -165,14 +147,18 @@ const ProductDetailScreen = ({
   const allSizes = [...resolvedClothSizes, ...resolvedKidsSizes, ...resolvedMugSizes];
 
   // --- Normalize Colors ---
-  // "colors": ["black,white"] or ["black", "white"]
+  // "colors": ["black,white"] or ["black", "white"] or "black,white"
   let resolvedColors: string[] = [];
   if (Array.isArray(rawApiProduct.colors)) {
     rawApiProduct.colors.forEach(c => {
-      if (c.includes(",")) resolvedColors.push(...c.split(","));
-      else resolvedColors.push(c);
+      if (typeof c === "string") {
+        if (c.includes(",")) {
+          resolvedColors.push(...c.split(","));
+        } else {
+          resolvedColors.push(c);
+        }
+      }
     });
-  } else if (typeof rawApiProduct.colors === "string") {
   } else if (typeof rawApiProduct.colors === "string") {
     resolvedColors = (rawApiProduct.colors as string).split(",");
   }
@@ -188,9 +174,6 @@ const ProductDetailScreen = ({
   };
 
   const selectedImage = images[selectedImageIndex] || { id: 0, image: productImage };
-
-
-
 
   return (
     <div className="p-4 sm:p-8 bg-gray-50 w-full">
@@ -333,12 +316,19 @@ const ProductDetailScreen = ({
             <h2 className="text-lg font-semibold mt-4">Available Colors</h2>
             <div className="flex flex-wrap gap-3">
               {p.colors && p.colors.length > 0 ? (
-                p.colors.map((color, idx) => (
-                  <div key={idx} className="flex items-center gap-2 px-4 py-2 border rounded-xl">
-                    <div className={`w-5 h-5 rounded-full ${getColorSwatchClass(color.trim())}`} />
-                    <span className="capitalize">{color}</span>
-                  </div>
-                ))
+                p.colors.map((color, idx) => {
+                  const colorValue = getColorValue(color);
+                  const lightColor = isLightColor(color);
+                  return (
+                    <div key={idx} className="flex items-center gap-2 px-4 py-2 border rounded-xl bg-white shadow-sm">
+                      <div
+                        className={`w-5 h-5 rounded-full border ${lightColor ? "border-gray-300" : "border-transparent"}`}
+                        style={{ backgroundColor: colorValue }}
+                      />
+                      <span className="capitalize text-sm font-medium text-gray-700">{color}</span>
+                    </div>
+                  );
+                })
               ) : (
                 <p>Not available</p>
               )}
@@ -403,6 +393,3 @@ const ProductDetailScreen = ({
 };
 
 export default ProductDetailScreen;
-
-
-
