@@ -8,23 +8,29 @@ export const baseBackendApi = createApi({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
 
     prepareHeaders: (headers, { getState }) => {
-      // Correctly access state - it might be RootState or any if type-safe RootState is not imported here
       const state = getState() as { auth: AuthState };
       const token = state.auth?.access;
 
       if (token) {
-        // Ensure no quotes remain (already handled in slice, but defensive)
         const cleanToken = token.replace(/^"(.*)"$/, '$1');
         headers.set("Authorization", `Bearer ${cleanToken}`);
       }
-      //  return the headers with token access and refresh
+
+      // These headers help with Django CSRF/Origin checks when using JWT
+      headers.set("X-Requested-With", "XMLHttpRequest");
+      headers.set("Accept", "application/json");
+
       return headers;
     },
 
-    credentials: "include",
+    credentials: "omit",
   }),
 
-  tagTypes: ["Products", "Users", "Orders", "SavedProducts", "Cart", "ProductMetadata", "DiscountCodes", "EmailPlaceholders", "EmailTemplates", "CustomProducts"],
+  tagTypes: [
+    "Products", "Users", "Orders", "SavedProducts", "Cart",
+    "ProductMetadata", "DiscountCodes", "EmailPlaceholders",
+    "EmailTemplates", "CustomProducts", "AboutContent"
+  ],
 
   endpoints: () => ({}),
 });

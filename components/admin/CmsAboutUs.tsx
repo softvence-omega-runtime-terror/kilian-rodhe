@@ -1,20 +1,18 @@
-import React, { useState } from "react";
-// Lucide icons used for UI elements (Lucide ikon byabohar kora hoyechhe)
-import  { Toaster } from "react-hot-toast";
+"use client";
 
+import React, { useState, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import CmsAboutUsBeginning from "@/components/admin/CmsAboutUsBeginnig";
-import CmsAboutUsFeatureCallout from "@/components/admin/CmsAboutUsFeatureCallout";
-import CmsAboutUsOurJourny from "@/components/admin/CmsAboutUsOurJourny";
-import CmsAboutDeviceUs from "@/components/admin/CmsAboutDeviceUs";
-import CmsAboutStrip from "./CmsAboutStrip";
-import CmsAboutMusic from "./CmsAboutMusic";
-import CmsHomeSaveAllPage from "./CmsHomeSaveAllPage";
+import {
+  useGetAboutContentSectionQuery,
+  useUpdateAboutContentSectionMutation,
+  useCreateAboutContentSectionMutation
+} from "@/app/store/slices/services/adminService/cmsAboutApi";
 
-// Mock CmsHomePageTitle component for self-containment
+// Static Page Title component
 type CmsHomePageTitleProps = {
   title: string;
   text?: string;
-  tothyo?: boolean;
 };
 
 const CmsHomePageTitle: React.FC<CmsHomePageTitleProps> = ({ title, text }) => (
@@ -24,72 +22,129 @@ const CmsHomePageTitle: React.FC<CmsHomePageTitleProps> = ({ title, text }) => (
   </header>
 );
 
-const App = () => {
-  // State for managing the editable text fields
-  const [pageTitle, setPageTitle] = useState(
-    "Our Story of Innovation and Creativity"
-  );
-  const [pageSubtitle, setPageSubtitle] = useState(
-    "We're on a mission to empower everyone to bring their creative visions to life through the perfect blend of cutting-edge AI technology and premium quality products."
-  );
+const CmsAboutUs = () => {
+  const { data: aboutData, isLoading } = useGetAboutContentSectionQuery();
+  const [updateAbout] = useUpdateAboutContentSectionMutation();
+  const [createAbout] = useCreateAboutContentSectionMutation();
 
-  // Custom class for consistent input styling (Shothik input styling-er jonno custom class)
+  const [id, setId] = useState<number | null>(null);
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [beginningBanner, setBeginningBanner] = useState<string | File | null>(null);
+  const [beginningTitle, setBeginningTitle] = useState("");
+  const [beginningDescription, setBeginningDescription] = useState("");
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (aboutData?.success && aboutData.data.length > 0) {
+      const firstSection = aboutData.data[0];
+      setId(firstSection.id);
+      setTitle(firstSection.title);
+      setSubtitle(firstSection.subtitle);
+      setBeginningBanner(firstSection.beginning_banner);
+      setBeginningTitle(firstSection.beginning_title);
+      setBeginningDescription(firstSection.beginning_description);
+    }
+  }, [aboutData]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("subtitle", subtitle);
+    formData.append("beginning_title", beginningTitle);
+    formData.append("beginning_description", beginningDescription);
+
+    if (beginningBanner instanceof File) {
+      formData.append("beginning_banner", beginningBanner);
+    }
+
+    try {
+      if (id) {
+        await updateAbout({ id, data: formData }).unwrap();
+        toast.success("About section updated successfully!");
+      } else {
+        await createAbout(formData).unwrap();
+        toast.success("About section created successfully!");
+      }
+    } catch (error) {
+      console.error("Failed to save about section:", error);
+      toast.error("Failed to save changes. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const inputClass =
     "w-full p-3 text-base text-gray-700 bg-[#f3f3f5] rounded-lg focus:outline-none placeholder-gray-400";
   const labelClass = "block text-base font-medium text-gray-800 mb-2";
 
-
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B6F47]"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className=" bg-gray-50  ">
+    <div className="bg-gray-50">
       <div>
-        {/* Main Form Container - Matching the image's overall look  */}
-        <div className="p-6 bg-white rounded-xl border-2 border-[#e8e3dc] ">
-          {/* Header Section: About Us Page Content  */}
+        <div className="p-6 bg-white rounded-xl border-2 border-[#e8e3dc]">
           <CmsHomePageTitle
             title="About Us Page Content"
             text="Information about your company and values"
-            tothyo
           />
 
-          {/* Page Title Input (Page Title Input) */}
           <div className="mb-2">
             <label className={labelClass}>Page Title</label>
             <input
               type="text"
-              placeholder="e.g., Our Story of Innovation" // Udahoron: Amader Uddhaboner Golpo
-              value={pageTitle}
-              onChange={(e) => setPageTitle(e.target.value)}
+              placeholder="e.g., Our Story of Innovation"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               className={inputClass}
             />
           </div>
 
-          {/* Page Subtitle Input (Page Subtitle Input) */}
           <div className="mb-6">
             <label className={labelClass}>Page Subtitle</label>
             <textarea
-              rows={1} // Use rows for height consistency (Uchchota thik rakhte rows byabohar kora holo)
-              placeholder="Describe your company's mission and values" // Apnar company-r lokkho o mullyobodh bishodhhareon korun
-              value={pageSubtitle}
-              onChange={(e) => setPageSubtitle(e.target.value)}
-              className={`${inputClass} resize-none `}
+              rows={2}
+              placeholder="Describe your company's mission and values"
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+              className={`${inputClass} resize-none`}
             />
           </div>
-
-          {/* Note: Save button has been removed as per the latest image (Latest chobi onujayi Save button remove kora hoyeche) */}
         </div>
 
-        <CmsAboutUsBeginning />
-        <CmsAboutUsFeatureCallout />
-        <CmsAboutUsOurJourny />
-        <CmsAboutDeviceUs />
-        <CmsAboutStrip />
-        <CmsAboutMusic />
-        <CmsHomeSaveAllPage title="Save All Changes" />
+        <CmsAboutUsBeginning
+          beginning_banner={beginningBanner}
+          beginning_title={beginningTitle}
+          beginning_description={beginningDescription}
+          setBeginningBanner={setBeginningBanner}
+          setBeginningTitle={setBeginningTitle}
+          setBeginningDescription={setBeginningDescription}
+        />
+
+        <div className="mt-8 flex justify-end">
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className={`px-8 py-3 rounded-xl text-white font-semibold transition-all duration-200 ${isSaving
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-linear-to-t from-[#7a5f3a] to-[#8b6f47] hover:shadow-lg active:scale-95"
+              }`}
+          >
+            {isSaving ? "Saving..." : "Save All Changes"}
+          </button>
+        </div>
       </div>
       <Toaster />
     </div>
   );
 };
 
-export default App;
+export default CmsAboutUs;
