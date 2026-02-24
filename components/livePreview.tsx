@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { useGetProductDetailsQuery } from "@/app/store/slices/services/product/productApi";
+import { useGetProductDetailsQuery, useGetProductsQuery } from "@/app/store/slices/services/product/productApi";
 import { useGetCustomProductsQuery, useSaveCustomProductVersionMutation, ISaveCustomProductVersionRequest } from "@/app/store/slices/services/ai/aiApi";
 // ✅ Framer Motion import: Variants TargetAndTransition
 import { motion, type Variants, type TargetAndTransition } from "framer-motion";
@@ -48,9 +48,15 @@ const CombinedDesignPageFixed = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const productId = searchParams.get("id");
+    const { data: allProductsData } = useGetProductsQuery({}, {
+        skip: !!productId,
+    });
 
-    const { data: detailsData } = useGetProductDetailsQuery(productId ? parseInt(productId) : 0, {
-        skip: !productId,
+    // If no productId in URL, pick the first product from all products
+    const effectiveProductId = productId || allProductsData?.data?.categories?.[0]?.id?.toString();
+
+    const { data: detailsData } = useGetProductDetailsQuery(effectiveProductId ? parseInt(effectiveProductId) : 0, {
+        skip: !effectiveProductId,
     });
 
     const apiProduct = detailsData?.data;
@@ -69,10 +75,20 @@ const CombinedDesignPageFixed = () => {
 
     // Initialize selectedProductImageId when product data loads
     useEffect(() => {
-        if (apiProduct?.images && apiProduct.images.length > 0 && selectedProductImageId === null) {
-            setSelectedProductImageId(apiProduct.images[0].id);
+        if (apiProduct?.images && apiProduct.images.length > 0) {
+            if (selectedProductImageId === null) {
+                setSelectedProductImageId(apiProduct.images[0].id);
+            }
+            if (selectedAiImage === null) {
+                setSelectedAiImage(apiProduct.images[0].image);
+                // Fetch and set as blob for AI generation
+                fetch(apiProduct.images[0].image)
+                    .then(res => res.blob())
+                    .then(blob => setSelectedAiFile(blob))
+                    .catch(err => console.error("Error fetching default image blob:", err));
+            }
         }
-    }, [apiProduct, selectedProductImageId]);
+    }, [apiProduct, selectedProductImageId, selectedAiImage]);
 
     // API Hooks
     const { data: customProductsData, refetch: refetchCustomProducts } = useGetCustomProductsQuery();
@@ -93,27 +109,23 @@ const CombinedDesignPageFixed = () => {
         router.push("/pages/shipping");
     };
 
-    const handleImageSelect = (imageSrc: string, imageId?: number) => {
+    const handleImageSelect = async (imageSrc: string, imageId?: number) => {
         setSelectedAiImage(imageSrc);
         if (imageId) {
             setSelectedProductImageId(imageId);
         }
         console.log("Selected Image for AI:", imageSrc, "ID:", imageId);
-    };
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setSelectedAiFile(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
-                setSelectedAiImage(base64String);
-                console.log("Uploaded Image for preview:", base64String);
-            };
-            reader.readAsDataURL(file);
+        try {
+            const response = await fetch(imageSrc);
+            const blob = await response.blob();
+            setSelectedAiFile(blob);
+        } catch (error) {
+            console.error("Error converting image to blob:", error);
         }
     };
+
+
 
     const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -161,6 +173,10 @@ const CombinedDesignPageFixed = () => {
                 } else {
                     formData.append('product_image', selectedAiFile);
                 }
+            }
+            // Fallback for just in case if selectedAiFile is missing but selectedAiImage is present
+            else if (selectedAiImage) {
+                formData.append('product_image', selectedAiImage);
             }
 
             if (logoFile) {
@@ -342,10 +358,6 @@ const CombinedDesignPageFixed = () => {
                                                 </svg>
                                             </div>
                                             <p className={`${jostFont.className} text-sm text-gray-600 mb-2`}>No image selected</p>
-                                            <label className="cursor-pointer bg-red-800 text-white px-4 py-2 rounded-sm text-xs uppercase tracking-widest hover:bg-red-900 transition-colors">
-                                                Upload from device
-                                                <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
-                                            </label>
                                         </div>
                                     )}
                                     {selectedAiImage && !apiProduct && (
@@ -360,13 +372,7 @@ const CombinedDesignPageFixed = () => {
 
                                 {apiProduct?.images && apiProduct.images.length > 0 && (
                                     <div className="mt-4 flex gap-2 overflow-x-auto pb-2 w-full max-w-sm">
-                                        <div className="shrink-0">
-                                            <label className="w-20 h-20 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center cursor-pointer hover:border-red-800 transition-colors rounded-sm bg-white">
-                                                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
-                                                <span className="text-[10px] text-gray-400 mt-1 uppercase">Upload</span>
-                                                <input type="file" className="hidden" onChange={handleFileUpload} accept="image/*" />
-                                            </label>
-                                        </div>
+                                        {/* Removed device upload as per request */}
                                         {apiProduct.images.map((img: any, idx: number) => (
                                             <div
                                                 key={idx}
