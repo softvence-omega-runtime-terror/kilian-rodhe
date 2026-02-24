@@ -273,13 +273,21 @@ const EditProduct = ({
 
       // Parse Sizes
       let sizesList: string[] = [];
-      if (p.cloth_size && !Array.isArray(p.cloth_size)) {
+      if (Array.isArray(p.cloth_size)) {
+        sizesList = [...sizesList, ...p.cloth_size];
+      } else if (p.cloth_size && typeof p.cloth_size === 'object') {
         sizesList = [...sizesList, ...Object.keys(p.cloth_size)];
       }
-      if (p.kids_size && !Array.isArray(p.kids_size)) {
+
+      if (Array.isArray(p.kids_size)) {
+        sizesList = [...sizesList, ...p.kids_size];
+      } else if (p.kids_size && typeof p.kids_size === 'object') {
         sizesList = [...sizesList, ...Object.keys(p.kids_size)];
       }
-      if (p.mug_size && !Array.isArray(p.mug_size)) {
+
+      if (Array.isArray(p.mug_size)) {
+        sizesList = [...sizesList, ...p.mug_size];
+      } else if (p.mug_size && typeof p.mug_size === 'object') {
         sizesList = [...sizesList, ...Object.keys(p.mug_size)];
       }
 
@@ -359,14 +367,14 @@ const EditProduct = ({
 
     try {
       // Map back to request format
-      const clothSizes: Record<string, number> = {};
-      const kidsSizes: Record<string, number> = {};
-      const mugSizes: Record<string, number> = {};
+      const clothSizes: string[] = [];
+      const kidsSizes: string[] = [];
+      const mugSizes: string[] = [];
 
       productData.sizes.forEach((size) => {
-        if (size.includes("kid") || size.includes("Y")) kidsSizes[size] = 1;
-        else if (size.includes("mug") || size.includes("oz")) mugSizes[size] = 1;
-        else clothSizes[size] = 1;
+        if (size.includes("kid") || size.includes("Y")) kidsSizes.push(size);
+        else if (size.includes("mug") || size.includes("oz")) mugSizes.push(size);
+        else clothSizes.push(size);
       });
 
       const payload: UpdateProductRequest = {
@@ -374,13 +382,13 @@ const EditProduct = ({
         category: Number(productData.category),
         sub_category: Number(productData.sub_category),
         classification: Number(productData.classification),
-        age_range: Number(productData.ageGroup),
+        age_range: productData.ageGroup ? [Number(productData.ageGroup)] : [],
         description: productData.description,
         price: Number(productData.price),
         discount_percentage: Number(productData.discount_percentage),
         stock_quantity: Number(productData.stock),
         sku: productData.sku,
-        colors: productData.colors.join(","),
+        colors: productData.colors,
 
         is_universal_size: productData.is_universal_size === "true",
         ai_gen: productData.designs.includes('ai') || productData.ai_gen === 'true',
@@ -391,9 +399,9 @@ const EditProduct = ({
 
         images: productData.newImages, // Only new images are sent for upload
 
-        cloth_size: Object.keys(clothSizes).length ? clothSizes : undefined,
-        kids_size: Object.keys(kidsSizes).length ? kidsSizes : undefined,
-        mug_size: Object.keys(mugSizes).length ? mugSizes : undefined,
+        cloth_size: clothSizes.length ? clothSizes : undefined,
+        kids_size: kidsSizes.length ? kidsSizes : undefined,
+        mug_size: mugSizes.length ? mugSizes : undefined,
       };
 
       await updateProduct({ id: productId, data: payload }).unwrap();

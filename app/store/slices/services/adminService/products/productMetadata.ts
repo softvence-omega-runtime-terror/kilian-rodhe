@@ -44,7 +44,7 @@ export interface CategoryPayload {
     title: string;
     description: string;
     is_active: boolean;
-    age_range: number[]; // Array of AgeRange IDs
+    age_range: number[]; // Array of AgeRange ID
     image?: File;
     icon?: File;
     banner?: File;
@@ -143,7 +143,7 @@ export const productMetadataApi = baseBackendApi.injectEndpoints({
         // GET: /product/ages/
         getAllAgeRanges: builder.query<AgeRange[], void>({
             query: () => "/product/ages/",
-            transformResponse: (response: AgeRangeListResponse) => response.data,
+            transformResponse: (response: any) => response.data || response.results || response,
             providesTags: (result) =>
                 result
                     ? [
@@ -182,7 +182,7 @@ export const productMetadataApi = baseBackendApi.injectEndpoints({
         // GET: /product/categories/
         getAllCategories: builder.query<Category[], void>({
             query: () => "/product/categories/",
-            transformResponse: (response: CategoryListResponse) => response.data,
+            transformResponse: (response: any) => response.data || response.results || response.categories || response,
             providesTags: (result) =>
                 result
                     ? [
@@ -246,8 +246,8 @@ export const productMetadataApi = baseBackendApi.injectEndpoints({
         // GET: /product/classifications/
         getAllClassifications: builder.query<Classification[], void>({
             query: () => "/product/classifications/",
-            transformResponse: (response: ClassificationListResponse) =>
-                response.data,
+            transformResponse: (response: any) =>
+                response.data || response.results || response.classifications || response,
             providesTags: (result) =>
                 result
                     ? [
@@ -283,8 +283,8 @@ export const productMetadataApi = baseBackendApi.injectEndpoints({
         // GET: /product/sub-categories/
         getAllSubCategories: builder.query<SubCategory[], void>({
             query: () => "/product/sub-categories/",
-            transformResponse: (response: SubCategoryListResponse) =>
-                response.data,
+            transformResponse: (response: any) =>
+                response.data || response.results || response.sub_categories || response,
             providesTags: (result) =>
                 result
                     ? [

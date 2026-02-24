@@ -77,20 +77,20 @@ export interface UpdateProductRequest {
   category: number;
   sub_category: number;
   classification: number;
-  age_range: number;
+  age_range: number[];
 
   description: string;
   price: number;
   discount_percentage: number;
   stock_quantity: number;
   sku: string;
-  colors: string;
+  colors: string[];
 
   is_universal_size: boolean;
 
-  cloth_size?: Record<string, number>;
-  kids_size?: Record<string, number>;
-  mug_size?: Record<string, number>;
+  cloth_size?: string[];
+  kids_size?: string[];
+  mug_size?: string[];
 
   ai_gen: boolean;
   ai_letter: boolean;
@@ -141,7 +141,14 @@ export const productsApi = baseBackendApi.injectEndpoints({
         formData.append("category", String(data.category));
         formData.append("sub_category", String(data.sub_category));
         formData.append("classification", String(data.classification));
-        formData.append("age_range", String(data.age_range));
+
+        // Send age_range as array
+        if (data.age_range && data.age_range.length > 0) {
+          data.age_range.forEach((id) => {
+            formData.append("age_range", String(id));
+          });
+        }
+
         formData.append("description", data.description);
         formData.append("price", String(data.price));
         formData.append(
@@ -150,31 +157,41 @@ export const productsApi = baseBackendApi.injectEndpoints({
         );
         formData.append("stock_quantity", String(data.stock_quantity));
         formData.append("sku", data.sku);
-        formData.append("colors", data.colors);
+
+        // Send colors as array
+        data.colors.forEach((color) => {
+          formData.append("colors", color);
+        });
 
         formData.append(
           "is_universal_size",
-          String(data.is_universal_size)
+          data.is_universal_size ? "true" : "false"
         );
-        formData.append("ai_gen", String(data.ai_gen));
-        formData.append("ai_letter", String(data.ai_letter));
-        formData.append("ai_upload", String(data.ai_upload));
+        formData.append("ai_gen", data.ai_gen ? "true" : "false");
+        formData.append("ai_letter", data.ai_letter ? "true" : "false");
+        formData.append("ai_upload", data.ai_upload ? "true" : "false");
         formData.append(
           "is_customize",
-          String(data.is_customize ?? false)
+          (data.is_customize ?? false) ? "true" : "false"
         );
-        formData.append("is_active", String(data.is_active));
+        formData.append("is_active", data.is_active ? "true" : "false");
 
-        if (data.cloth_size) {
-          formData.append("cloth_size", JSON.stringify(data.cloth_size));
+        if (data.cloth_size && data.cloth_size.length > 0) {
+          data.cloth_size.forEach((size) => {
+            formData.append("cloth_size", size);
+          });
         }
 
-        if (data.kids_size) {
-          formData.append("kids_size", JSON.stringify(data.kids_size));
+        if (data.kids_size && data.kids_size.length > 0) {
+          data.kids_size.forEach((size) => {
+            formData.append("kids_size", size);
+          });
         }
 
-        if (data.mug_size) {
-          formData.append("mug_size", JSON.stringify(data.mug_size));
+        if (data.mug_size && data.mug_size.length > 0) {
+          data.mug_size.forEach((size) => {
+            formData.append("mug_size", size);
+          });
         }
 
         data.images?.forEach((file) => {

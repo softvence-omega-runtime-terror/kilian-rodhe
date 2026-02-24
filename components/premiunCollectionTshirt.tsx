@@ -50,6 +50,7 @@ const cormorantNormal = Cormorant_Garamond({
 
 import { useGetProductDetailsQuery, useGetProductReviewsQuery } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
+import { getColorValue, isLightColor } from "@/app/utils/colorUtils";
 
 // --- Interface Definitions ---
 interface Thumbnail {
@@ -162,9 +163,9 @@ export default function ProductPage({ productId }: { productId?: number }) {
       ? apiProduct.cloth_size
       : [],
     colors: (apiProduct?.colors && apiProduct.colors.length > 0)
-      ? apiProduct.colors.map((colorHex, index) => ({
-        name: colorHex,
-        hex: colorHex.toLowerCase(),
+      ? apiProduct.colors.map((colorName: string, index: number) => ({
+        name: colorName,
+        hex: getColorValue(colorName),
         selected: index === 0
       }))
       : [
@@ -267,18 +268,18 @@ export default function ProductPage({ productId }: { productId?: number }) {
         alt: apiProduct?.name || "Product Image"
       });
       setSelectedSize(apiProduct?.cloth_size?.[0] || "");
-      
+
       const firstColor = (apiProduct.colors && apiProduct.colors.length > 0)
-        ? { 
-            name: apiProduct.colors[0], 
-            hex: apiProduct.colors[0].toLowerCase(), 
-            selected: true 
-          }
+        ? {
+          name: apiProduct.colors[0],
+          hex: getColorValue(apiProduct.colors[0]),
+          selected: true
+        }
         : {
-            name: apiProduct?.color_code || "Standard",
-            hex: (apiProduct?.color_code || "#FFFFFF").toLowerCase(),
-            selected: true
-          };
+          name: apiProduct?.color_code || "Standard",
+          hex: getColorValue(apiProduct?.color_code || "#FFFFFF"),
+          selected: true
+        };
       setSelectedColor(firstColor);
     }
   }, [apiProduct]);
@@ -562,8 +563,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
                     }`}
                   style={{
                     backgroundColor: color.hex,
-                    borderColor:
-                      color.hex === "#FFFFFF" ? "#e5e5e5" : color.hex,
+                    borderColor: isLightColor(color.hex) ? "#e5e5e5" : color.hex,
                     ...(color.name === selectedColor?.name && {
                       borderColor: "#e5e5e5",
                       boxShadow: `0 0 0 2px ${CUSTOM_GOLD}`,
@@ -576,7 +576,7 @@ export default function ProductPage({ productId }: { productId?: number }) {
                       alt="Checkmark"
                       className="h-4 w-4"
                       style={
-                        color.hex === "#FFFFFF"
+                        isLightColor(color.hex)
                           ? { filter: "grayscale(100%) opacity(0.7)" }
                           : { filter: "invert(1)" }
                       }

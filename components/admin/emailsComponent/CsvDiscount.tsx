@@ -5,7 +5,7 @@ import React from "react";
 import DiscountTitle from "@/components/admin/DiscountTitle";
 import CsvBody from "../CsvBody";
 
-const ManualDiscountForm: React.FC = () => {
+const CsvDiscountForm: React.FC = () => {
   return (
     <>
       <DiscountTitle
@@ -17,4 +17,4 @@ const ManualDiscountForm: React.FC = () => {
   );
 };
 
-export default ManualDiscountForm;
+export default CsvDiscountForm;
