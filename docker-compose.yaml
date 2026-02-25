@@ -1,0 +1,21 @@
+services:
+  web:
+    container_name: kilian-rodhe-nextjs-app
+    image: softvence/kilian-rodhe-nextjs-app:latest
+    platform: linux/amd64
+    profiles:
+      - prod
+      - web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    env_file:
+      - .env
+    networks:
+      - kilian-rodhe-nextjs-app
+
+networks:
+  kilian-rodhe-nextjs-app:
+    driver: bridge
