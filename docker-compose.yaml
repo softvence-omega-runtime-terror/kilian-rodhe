@@ -13,9 +13,3 @@ services:
       - "3002:3002"
     env_file:
       - .env
-    networks:
-      - kilian-rodhe-nextjs-app
-
-networks:
-  kilian-rodhe-nextjs-app:
-    driver: bridge
