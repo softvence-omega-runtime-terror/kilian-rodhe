@@ -33,13 +33,29 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6
+      - name: Copy files with scp
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_PASSWORD }}
+          source: "docker-compose.yaml,Makefile"
+          target: "~/kilian-rodhe"
 
-      - name: Deploy to VPS via SSH
+
+       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_PASSWORD }}
           script: |
-            cd ~/backlystapp-frontend
+            cd ~/kilian-rodhe
             make action
+      - name: Restart caddy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_PASSWORD }}
+          script: sudo systemctl restart caddy
