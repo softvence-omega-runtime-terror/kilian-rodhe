@@ -21,6 +21,13 @@ import rightIcon from "@/public/image/shipping/Icon (7).svg";
 import clock from "@/public/image/shipping/Icon (8).svg";
 import whiteRightIcon from "@/public/image/shipping/Icon.svg";
 import leftArrow from "@/public/image/shipping/Icon (9).svg";
+import { toast } from "sonner";
+import {
+  useAddOrderAddressMutation,
+  useGetCartQuery,
+  IAddressBookItem
+} from "@/app/store/slices/services/order/orderApi";
+import AddressBook from "./addressBook";
 
 // Fonts
 const jostFont = Jost({
@@ -58,6 +65,9 @@ interface InputFieldProps {
   type?: string;
   required?: boolean;
   Icon?: StaticImageData;
+  name?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 // ---------------- Shipping Method Component ---------------- (No changes)
@@ -71,11 +81,10 @@ const ShippingMethod: React.FC<ShippingMethodProps> = ({
 }) => (
   <div
     onClick={onClick}
-    className={`flex items-center justify-between border-2 rounded-xl p-3 cursor-pointer transition duration-200 ease-in-out ${
-      isSelected
-        ? "border-2 border-transparent ring-2 ring-offset-1 ring-offset-[#fdfbf9] ring-[#a07d48] bg-[#fdfbf9]"
-        : "border-gray-200 hover:border-[#a07d48]/50"
-    }`}
+    className={`flex items-center justify-between border-2 rounded-xl p-3 cursor-pointer transition duration-200 ease-in-out ${isSelected
+      ? "border-2 border-transparent ring-2 ring-offset-1 ring-offset-[#fdfbf9] ring-[#a07d48] bg-[#fdfbf9]"
+      : "border-gray-200 hover:border-[#a07d48]/50"
+      }`}
   >
     <div>
       <p className="font-medium text-gray-800 text-sm">{title}</p>
@@ -116,9 +125,8 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 1 }) => {
     <div className="flex items-center">
       {index > 0 && (
         <div
-          className={`h-0.5 w-12 mx-2 ${
-            lineIsSolid && index === 1 ? "bg-[#a07d48]" : "bg-gray-300"
-          }`}
+          className={`h-0.5 w-12 mx-2 ${lineIsSolid && index === 1 ? "bg-[#a07d48]" : "bg-gray-300"
+            }`}
         ></div>
       )}
 
@@ -141,14 +149,15 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 1 }) => {
   );
 };
 
-// ---------------- Input Field Component ---------------- (No changes)
-
 const InputField: React.FC<InputFieldProps> = ({
   label,
   placeholder,
   type,
   required,
   Icon,
+  name,
+  value,
+  onChange,
 }) => (
   <div>
     <label className="text-sm font-medium text-gray-700 block mb-1">
@@ -164,10 +173,13 @@ const InputField: React.FC<InputFieldProps> = ({
 
       <input
         type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
         placeholder={placeholder}
-        className={`w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-inset focus:ring-gray-300 outline-none placeholder-gray-400 text-sm transition duration-150 ${
-          Icon ? "pl-10" : "pl-4"
-        }`}
+        required={required}
+        className={`w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-inset focus:ring-gray-300 outline-none placeholder-gray-400 text-sm transition duration-150 ${Icon ? "pl-10" : "pl-4"
+          }`}
       />
     </div>
   </div>
@@ -176,29 +188,90 @@ const InputField: React.FC<InputFieldProps> = ({
 // ---------------- Main Component (MODIFIED) ----------------
 
 const ShippingPage: React.FC = () => {
-  const [selectedShipping, setSelectedShipping] = useState<number>(0);
-  const [isLoading, setIsLoading] = useState(false); // 👈 NEW STATE FOR LOADER
   const router = useRouter();
+  const [addOrderAddress, { isLoading: isAddingAddress }] = useAddOrderAddressMutation();
+  const { data: cartData } = useGetCartQuery();
 
-  const shippingOptions = [
-    { title: "Standard Shipping", desc: "5–7 business days", price: "€5.99" },
-    { title: "Express Shipping", desc: "2–3 business days", price: "€15.99" },
-    { title: "Overnight Delivery", desc: "Next business day", price: "€29.99" },
-  ];
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone_number: "",
+    address: "",
+    postal_code: "",
+    address_name: "", // Address Type (Home/Office)
+  });
+
+  const [orderId, setOrderId] = useState<number | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [isNewAddress, setIsNewAddress] = useState(true);
+
+  const handleSelectAddress = (address: IAddressBookItem) => {
+    setSelectedAddressId(address.id);
+    setIsNewAddress(false);
+    setFormData({
+      firstName: address.firstName,
+      lastName: address.lastName,
+      email: address.email,
+      phone_number: address.phone_number,
+      address: address.address,
+      postal_code: (address.postal_code || "").toString(),
+      address_name: address.address_name,
+    });
+  };
+
+  React.useEffect(() => {
+    const savedOrderId = localStorage.getItem("checkout_order_id");
+    if (savedOrderId) {
+      setOrderId(parseInt(savedOrderId));
+    } else {
+      console.warn("No order_id found in localStorage");
+      toast.error("Order session missing. Please start from the checkout page.");
+    }
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // If user types manually, we assume they might be creating a new address or modifying one
+    // For simplicity, let's keep isNewAddress as false if it was selected from book, 
+    // but the user might want it to be true if they changed something.
+    // However, the requirement is "if address from existing then is_new_address will false".
+  };
+
+  const handleContinueToPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orderId) {
+      toast.error("Order information missing. Please go back to checkout.");
+      return;
+    }
+
+    try {
+      await addOrderAddress({
+        order_id: orderId,
+        is_new_address: isNewAddress,
+        address_name: formData.address_name,
+        address: formData.address,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone_number: formData.phone_number,
+        postal_code: parseInt(formData.postal_code) || 0,
+      }).unwrap();
+
+      router.push("/pages/payment");
+    } catch (err) {
+      console.error("Failed to add address", err);
+      alert("Failed to save shipping information. Please try again.");
+    }
+  };
+
+  const cartTotal = cartData?.total_price || 0;
+  const shippingCost = 5.99; // Should ideally come from Step 1 or a shared state
+  const tax = cartTotal * 0.19;
+  const total = cartTotal + shippingCost + tax;
 
   const ACTIVE_STEP_INDEX = 1;
-
-  const handleContinueToPayment = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true); // 👈 START LOADER
-
-    // In a real scenario, you might send data to an API here.
-    // We use setTimeout to simulate the delay before navigation.
-    setTimeout(() => {
-        router.push("/pages/payment");
-        // We don't need to set isLoading(false) because the page redirects.
-    }, 500); // Simulate a short processing delay
-  };
 
   return (
     <div className="min-h-screen bg-[#f9f7f5] font-sans flex flex-col items-center py-10">
@@ -235,6 +308,11 @@ const ShippingPage: React.FC = () => {
             Shipping Information
           </h2>
 
+          <AddressBook
+            onSelectAddress={handleSelectAddress}
+            selectedAddressId={selectedAddressId}
+          />
+
           <form
             onSubmit={handleContinueToPayment}
             className={`${jostFont.className} space-y-6`}
@@ -242,41 +320,74 @@ const ShippingPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputField
                 label="First Name"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleInputChange}
                 placeholder="John"
                 required
                 Icon={userIcon}
               />
               <InputField
                 label="Last Name"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleInputChange}
                 placeholder="Doe"
                 required
                 Icon={userIcon}
               />
             </div>
 
-            <InputField
-              label="Email Address"
-              type="email"
-              placeholder="john@example.com"
-              required
-              Icon={mailIcon}
-            />
-
-            <InputField
-              label="Phone Number"
-              placeholder="+49 123 456 7890"
-              Icon={phone}
-            />
-
-            <InputField
-              label="Street Address"
-              placeholder="Street address, apartment, suite, etc."
-              required
-              Icon={location}
-            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputField
+                label="Email Address"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                placeholder="john@example.com"
+                required
+                Icon={mailIcon}
+              />
+              <InputField
+                label="Phone Number"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleInputChange}
+                placeholder="+49 123 456 7890"
+                Icon={phone}
+              />
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Postal Code" placeholder="10115" required />
+              <InputField
+                label="Street Address"
+                name="address"
+                value={formData.address}
+                onChange={handleInputChange}
+                placeholder="Street address, apartment, suite, etc."
+                required
+                Icon={location}
+              />
+              <InputField
+                label="Address Type"
+                name="address_name"
+                value={formData.address_name}
+                onChange={handleInputChange}
+                placeholder="Home / Office / etc."
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputField
+                label="Postal Code"
+                name="postal_code"
+                value={formData.postal_code}
+                onChange={handleInputChange}
+                placeholder="10115"
+                required
+              />
             </div>
 
             {/* Shipping Method */}
@@ -309,16 +420,15 @@ const ShippingPage: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={isLoading} // 👈 DISABLE BUTTON WHILE LOADING
+                disabled={isAddingAddress}
                 style={{ backgroundColor: ACCENT_COLOR }}
                 className={`
                     px-8 py-2 text-white rounded-lg transition duration-150 text-sm font-medium shadow-md shadow-[#a07d48]/20 flex items-center justify-center
-                    ${isLoading ? 'opacity-70 cursor-wait' : 'hover:bg-[#8a6a3f]'}
+                    ${isAddingAddress ? 'opacity-70 cursor-wait' : 'hover:bg-[#8a6a3f]'}
                 `}
               >
-                {isLoading ? (
+                {isAddingAddress ? (
                   <>
-                    {/* Spinning Loader SVG */}
                     <svg
                       className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                       xmlns="http://www.w3.org/2000/svg"
@@ -357,50 +467,51 @@ const ShippingPage: React.FC = () => {
             Order Summary
           </h3>
 
-          <div className="flex items-start space-x-4 mb-4">
-            <div className="w-16 h-16 flex-shrink-0 relative rounded-lg overflow-hidden border border-gray-200">
-              <Image
-                src={mug}
-                alt="Premium Coffee Mug"
-                className="object-cover w-full h-full"
-                fill
-                sizes="64px"
-              />
-            </div>
+          <div className="space-y-4">
+            {cartData?.cards?.map((item) => (
+              <div key={item.id} className="flex items-start space-x-4 mb-4">
+                <div className="w-16 h-16 flex-shrink-0 relative rounded-lg overflow-hidden border border-gray-200">
+                  {item.product.images?.[0]?.image ? (
+                    <Image
+                      src={item.product.images[0].image}
+                      alt={item.product.name}
+                      className="object-cover w-full h-full"
+                      fill
+                      sizes="64px"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100 text-[10px] text-gray-400">No Image</div>
+                  )}
+                </div>
 
-            <div className="pt-1">
-              <div className="flex items-center space-x-2">
-                <p className="font-medium text-gray-800 text-sm">
-                  Premium Coffee Mug
-                </p>
-                <Image
-                  src={whiteRightIcon}
-                  alt="Arrow icon"
-                  width={16}
-                  height={16}
-                />
+                <div className="pt-1">
+                  <div className="flex items-center space-x-2">
+                    <p className="font-medium text-gray-800 text-sm">
+                      {item.product.name}
+                    </p>
+                  </div>
+                  <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                </div>
               </div>
-
-              <p className="text-xs text-gray-500">Size: M • Color: Black</p>
-            </div>
+            ))}
           </div>
 
           <div className="border-t border-gray-200 my-4"></div>
 
           <div className="space-y-2 text-sm text-gray-600">
             <div className="flex justify-between">
-              <span>Subtotal (1 item)</span>
-              <span>€24.99</span>
+              <span>Subtotal ({cartData?.cards?.length || 0} item{cartData?.cards?.length !== 1 ? 's' : ''})</span>
+              <span>€{cartTotal.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>€5.99</span>
+              <span>€{shippingCost.toFixed(2)}</span>
             </div>
 
             <div className="flex justify-between">
               <span>Tax (19% VAT)</span>
-              <span>€4.75</span>
+              <span>€{tax.toFixed(2)}</span>
             </div>
           </div>
 
@@ -408,7 +519,7 @@ const ShippingPage: React.FC = () => {
 
           <div className="flex justify-between font-bold text-lg text-gray-800">
             <span>Total</span>
-            <span style={{ color: ACCENT_COLOR }}>€35.73</span>
+            <span style={{ color: ACCENT_COLOR }}>€{total.toFixed(2)}</span>
           </div>
 
           <ul

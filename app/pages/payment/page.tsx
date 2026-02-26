@@ -16,13 +16,17 @@ import {
 } from "lucide-react";
 
 // Imported Assets
-import mug from "@/public/image/shipping/mug.png";
 import leftArrow from "@/public/image/shipping/Icon (9).svg";
 import whiteRightIcon from "@/public/image/shipping/Icon.svg";
 import track from "@/public/image/shipping/Icon (5).svg";
 import base from "@/public/image/shipping/Icon (6).svg";
 import rightIcon from "@/public/image/shipping/Icon (7).svg";
 import clock from "@/public/image/shipping/Icon (8).svg";
+import { toast } from "sonner";
+import {
+  useCreatePaymentSessionMutation,
+  useGetCartQuery
+} from "@/app/store/slices/services/order/orderApi";
 
 // Fonts
 const jostFont = Jost({
@@ -62,11 +66,10 @@ const PaymentOption: React.FC<
   return (
     <div
       onClick={() => setSelected(value)}
-      className={`border rounded-xl p-4 cursor-pointer transition-all duration-200 ${
-        isSelected
-          ? "border-transparent ring-2 ring-offset-1 ring-[#a07d48] bg-[#fdfbf9] shadow-sm"
-          : "border-gray-200 hover:border-[#a07d48]/50"
-      }`}
+      className={`border rounded-xl p-4 cursor-pointer transition-all duration-200 ${isSelected
+        ? "border-transparent ring-2 ring-offset-1 ring-[#a07d48] bg-[#fdfbf9] shadow-sm"
+        : "border-gray-200 hover:border-[#a07d48]/50"
+        }`}
     >
       <label className="flex items-center text-base font-medium text-gray-800 cursor-pointer">
         <input
@@ -115,9 +118,8 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 2 }) => {
     <div className="flex items-center">
       {index > 0 && (
         <div
-          className={`h-0.5 w-12 mx-2 ${
-            lineIsSolid ? "bg-[#a07d48]" : "bg-gray-300"
-          }`}
+          className={`h-0.5 w-12 mx-2 ${lineIsSolid ? "bg-[#a07d48]" : "bg-gray-300"
+            }`}
         ></div>
       )}
 
@@ -147,21 +149,21 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 2 }) => {
 // ----------------------------------------------------------------------
 
 const SuccessModal: React.FC<{
-    router: ReturnType<typeof useRouter>;
-    onClose: () => void; // Function to close the modal
+  router: ReturnType<typeof useRouter>;
+  onClose: () => void; // Function to close the modal
 }> = ({ router, onClose }) => {
 
-    const orderId = "ORD-20251123-1001";
-    const subtotal = "€24.99";
-    const shipping = "€5.99";
-    const tax = "€4.75";
-    const totalAmount = TOTAL_AMOUNT; // Use the constant
+  const orderId = "ORD-20251123-1001";
+  const subtotal = "€24.99";
+  const shipping = "€5.99";
+  const tax = "€4.75";
+  const totalAmount = TOTAL_AMOUNT; // Use the constant
 
-    // ⬅️ UPDATED HANDLER: Simulates the receipt download by creating a file blob
-    const handleDownloadReceipt = () => {
+  // ⬅️ UPDATED HANDLER: Simulates the receipt download by creating a file blob
+  const handleDownloadReceipt = () => {
 
-        // 1. Create the content of the dummy receipt file
-        const receiptContent = `
+    // 1. Create the content of the dummy receipt file
+    const receiptContent = `
         --- PAYMENT RECEIPT ---
         Order ID: ${orderId}
         Date: ${new Date().toLocaleDateString()}
@@ -178,79 +180,79 @@ const SuccessModal: React.FC<{
         Thank you for your custom order!
         `;
 
-        // 2. Create a Blob (Binary Large Object)
-        const blob = new Blob([receiptContent], { type: 'text/plain' });
+    // 2. Create a Blob (Binary Large Object)
+    const blob = new Blob([receiptContent], { type: 'text/plain' });
 
-        // 3. Create a temporary anchor element
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+    // 3. Create a temporary anchor element
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
 
-        // 4. Set attributes for download
-        a.href = url;
-        a.download = `${orderId}-Receipt.txt`; // Recommended file name
+    // 4. Set attributes for download
+    a.href = url;
+    a.download = `${orderId}-Receipt.txt`; // Recommended file name
 
-        // 5. Trigger download and clean up
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+    // 5. Trigger download and clean up
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 
-        // Optional: Close the modal immediately after triggering the download
-        // onClose();
-    };
+    // Optional: Close the modal immediately after triggering the download
+    // onClose();
+  };
 
-    return (
-        <div className={`${jostFont.className} fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-60 backdrop-blur-sm`}>
-            <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform transition-all duration-300 scale-100 relative">
+  return (
+    <div className={`${jostFont.className} fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-60 backdrop-blur-sm`}>
+      <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl transform transition-all duration-300 scale-100 relative">
 
-                {/* Cross Icon now CLOSES the modal */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 transition"
-                    aria-label="Close"
-                    title="Close"
-                >
-                    <X className="w-5 h-5" />
-                </button>
+        {/* Cross Icon now CLOSES the modal */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-900 transition"
+          aria-label="Close"
+          title="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
-                <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-[#a07d48]/10 mb-4">
-                    <ShoppingBag className="w-8 h-8 text-[#a07d48]"/>
-                </div>
-
-                <h3 className={`${cormorantItalic.className} text-3xl font-bold mb-2 text-[#1A1410]`}>
-                    Congratulations!
-                </h3>
-
-                <p className="text-gray-700 mb-6 text-sm">
-                    Your custom order has been placed successfully! Download your receipt below.
-                </p>
-
-                <div className="bg-[#f9f7f5] p-3 rounded-lg mb-6 text-sm">
-                    <p className="font-medium text-gray-800">Order ID: <span className="text-[#a07d48]">{orderId}</span></p>
-                    <p className="text-gray-600">Total Charged: <span className="font-bold">{totalAmount}</span></p>
-                </div>
-
-                {/* Main Action Button for Download */}
-                <button
-                    onClick={handleDownloadReceipt}
-                    style={{ backgroundColor: ACCENT_COLOR }}
-                    className="w-full py-3 text-white rounded-lg shadow-lg hover:bg-[#8a6a3f] transition duration-150 font-medium text-sm flex items-center justify-center mb-3"
-                >
-                    <Download className="w-4 h-4 mr-2" />
-                    <span className="tracking-wider">DOWNLOAD RECEIPT</span>
-                </button>
-
-                {/* Secondary Button to return to shopping */}
-                <button
-                    onClick={() => { onClose(); router.push("/pages/shop"); }}
-                    className="w-full py-2 text-gray-700 bg-transparent border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-150 font-medium text-xs tracking-wider"
-                >
-                    CONTINUE SHOPPING
-                </button>
-
-            </div>
+        <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-[#a07d48]/10 mb-4">
+          <ShoppingBag className="w-8 h-8 text-[#a07d48]" />
         </div>
-    );
+
+        <h3 className={`${cormorantItalic.className} text-3xl font-bold mb-2 text-[#1A1410]`}>
+          Congratulations!
+        </h3>
+
+        <p className="text-gray-700 mb-6 text-sm">
+          Your custom order has been placed successfully! Download your receipt below.
+        </p>
+
+        <div className="bg-[#f9f7f5] p-3 rounded-lg mb-6 text-sm">
+          <p className="font-medium text-gray-800">Order ID: <span className="text-[#a07d48]">{orderId}</span></p>
+          <p className="text-gray-600">Total Charged: <span className="font-bold">{totalAmount}</span></p>
+        </div>
+
+        {/* Main Action Button for Download */}
+        <button
+          onClick={handleDownloadReceipt}
+          style={{ backgroundColor: ACCENT_COLOR }}
+          className="w-full py-3 text-white rounded-lg shadow-lg hover:bg-[#8a6a3f] transition duration-150 font-medium text-sm flex items-center justify-center mb-3"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          <span className="tracking-wider">DOWNLOAD RECEIPT</span>
+        </button>
+
+        {/* Secondary Button to return to shopping */}
+        <button
+          onClick={() => { onClose(); router.push("/pages/shop"); }}
+          className="w-full py-2 text-gray-700 bg-transparent border border-gray-300 rounded-lg hover:bg-gray-50 transition duration-150 font-medium text-xs tracking-wider"
+        >
+          CONTINUE SHOPPING
+        </button>
+
+      </div>
+    </div>
+  );
 };
 
 // ----------------------------------------------------------------------
@@ -258,29 +260,53 @@ const SuccessModal: React.FC<{
 // ----------------------------------------------------------------------
 const PaymentPage: React.FC = () => {
   const router = useRouter();
-  const [selectedPayment, setSelectedPayment] = useState<string>("card");
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // 👈 NEW STATE FOR LOADER
+  const [selectedPayment, setSelectedPayment] = useState<string>("stripe");
+  const [createPaymentSession, { isLoading: isCreatingSession }] = useCreatePaymentSessionMutation();
+  const { data: cartData } = useGetCartQuery();
+
+  const [orderId, setOrderId] = useState<number | null>(null);
+
+  React.useEffect(() => {
+    const savedOrderId = localStorage.getItem("checkout_order_id");
+    if (savedOrderId) {
+      setOrderId(parseInt(savedOrderId));
+    } else {
+      console.warn("No order_id found in localStorage");
+      toast.error("Order context missing. Please restart checkout.");
+    }
+  }, []);
+
+  const handlePlaceOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orderId) {
+      toast.error("Order information missing. Please restart the checkout process.");
+      return;
+    }
+
+    if (selectedPayment !== "stripe") {
+      toast.error("Currently only Stripe is supported.");
+      return;
+    }
+
+    try {
+      const response = await createPaymentSession({ order_id: orderId }).unwrap();
+      if (response.success && response.data.payment_url) {
+        window.location.href = response.data.payment_url;
+      } else {
+        alert("Failed to create payment session.");
+      }
+    } catch (err) {
+      console.error("Payment failed", err);
+      alert("An error occurred while initiating payment.");
+    }
+  };
+
+  const cartTotal = cartData?.total_price || 0;
+  const shippingCost = 5.99;
+  const tax = cartTotal * 0.19;
+  const total = cartTotal + shippingCost + tax;
 
   const ACTIVE_STEP_INDEX = 2;
-
-  const handlePlaceOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isLoading) return; // Prevent multiple submissions
-
-    setIsLoading(true); // 👈 START LOADER
-    console.log("Placing order with method:", selectedPayment);
-
-    // Simulate API call delay
-    setTimeout(() => {
-      setIsLoading(false); // 👈 STOP LOADER
-      setOrderPlaced(true); // Show success modal
-    }, 1500); // 1.5 second simulated delay
-  };
-
-  const handleCloseModal = () => {
-    setOrderPlaced(false);
-  };
 
 
   return (
@@ -331,53 +357,18 @@ const PaymentPage: React.FC = () => {
             </h2>
 
             <div className={`${jostFont.className} space-y-4`}>
-              {/* Credit / Debit Card */}
+              {/* Stripe */}
               <PaymentOption
-                label="Credit / Debit Card"
-                value="card"
-                selected={selectedPayment}
-                setSelected={setSelectedPayment}
-              >
-                <div className="space-y-4 pt-2">
-                  <input
-                    type="text"
-                    defaultValue="1234 5678 9012 3456"
-                    className="w-full p-3 bg-gray-100 border-none rounded-md text-gray-600 focus:ring-1 focus:ring-gray-300"
-                    placeholder="Card Number"
-                    required
-                  />
-
-                  <div className="flex space-x-4">
-                    <input
-                      type="text"
-                      defaultValue="MM/YY"
-                      className="w-1/2 p-3 bg-white border border-gray-200 rounded-md text-gray-600 placeholder-gray-400 focus:ring-1 focus:ring-gray-300"
-                      placeholder="MM/YY"
-                      required
-                    />
-                    <input
-                      type="text"
-                      defaultValue="123"
-                      className="w-1/2 p-3 bg-gray-100 border-none rounded-md text-gray-600 focus:ring-1 focus:ring-gray-300"
-                      placeholder="CVV"
-                      required
-                    />
-                  </div>
-                </div>
-              </PaymentOption>
-
-              {/* PayPal */}
-              <PaymentOption
-                label="PayPal"
-                value="paypal"
+                label="Stripe (Credit / Debit Card)"
+                value="stripe"
                 selected={selectedPayment}
                 setSelected={setSelectedPayment}
               />
 
-              {/* Bank Transfer */}
+              {/* PayPal */}
               <PaymentOption
-                label="Bank Transfer"
-                value="bank"
+                label="PayPal (Coming Soon)"
+                value="paypal"
                 selected={selectedPayment}
                 setSelected={setSelectedPayment}
               />
@@ -404,16 +395,14 @@ const PaymentPage: React.FC = () => {
               <button
                 type="submit"
                 style={{ backgroundColor: ACCENT_COLOR }}
-                disabled={isLoading || orderPlaced} // 👈 DISABLE WHEN LOADING OR ALREADY PLACED
+                disabled={isCreatingSession}
                 className={`
                     px-8 py-3 text-white rounded-lg shadow-lg transition duration-150 font-medium text-sm flex items-center justify-center
-                    ${isLoading ? 'opacity-70 cursor-wait' : 'hover:bg-[#8a6a3f]'}
+                    ${isCreatingSession ? 'opacity-70 cursor-wait' : 'hover:bg-[#8a6a3f]'}
                 `}
               >
-                {/* 👈 CONDITIONAL CONTENT */}
-                {isLoading ? (
+                {isCreatingSession ? (
                   <>
-                    {/* Spinning Loader SVG - Use ACCENT_COLOR/white */}
                     <svg
                       className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
                       xmlns="http://www.w3.org/2000/svg"
@@ -437,7 +426,7 @@ const PaymentPage: React.FC = () => {
                     Processing...
                   </>
                 ) : (
-                  `Place Order - ${TOTAL_AMOUNT}` // Use the constant
+                  `Place Order - €${total.toFixed(2)}`
                 )}
               </button>
             </div>
@@ -451,49 +440,50 @@ const PaymentPage: React.FC = () => {
               Order Summary
             </h3>
 
-            <div className="flex items-start space-x-4 mb-4">
-              <div className="w-16 h-16 relative rounded-lg overflow-hidden border border-gray-200">
-                <Image
-                  src={mug}
-                  alt="Premium Coffee Mug"
-                  className="object-cover"
-                  fill
-                  sizes="64px"
-                />
-              </div>
+            <div className="space-y-4">
+              {cartData?.cards?.map((item) => (
+                <div key={item.id} className="flex items-start space-x-4 mb-4">
+                  <div className="w-16 h-16 relative rounded-lg overflow-hidden border border-gray-200">
+                    {item.product.images?.[0]?.image ? (
+                      <Image
+                        src={item.product.images[0].image}
+                        alt={item.product.name}
+                        className="object-cover"
+                        fill
+                        sizes="64px"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-[10px] text-gray-400">No Image</div>
+                    )}
+                  </div>
 
-              <div className="pt-1">
-                <div className="flex items-center space-x-2">
-                  <p className="font-medium text-gray-800 text-sm">
-                    Premium Coffee Mug
-                  </p>
+                  <div className="pt-1">
+                    <div className="flex items-center space-x-2">
+                      <p className="font-medium text-gray-800 text-sm">
+                        {item.product.name}
+                      </p>
+                    </div>
 
-                  <Image
-                    src={whiteRightIcon}
-                    alt="Arrow"
-                    width={16}
-                    height={16}
-                  />
+                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                  </div>
                 </div>
-
-                <p className="text-xs text-gray-500">Size: M • Color: Black</p>
-              </div>
+              ))}
             </div>
 
             <div className="border-t border-gray-200 my-4" />
 
             <div className="space-y-2 text-sm text-gray-600">
               <div className="flex justify-between">
-                <span>Subtotal (1 item)</span>
-                <span>€24.99</span>
+                <span>Subtotal ({cartData?.cards?.length || 0} item{cartData?.cards?.length !== 1 ? 's' : ''})</span>
+                <span>€{cartTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>€5.99</span>
+                <span>€{shippingCost.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Tax (19% VAT)</span>
-                <span>€4.75</span>
+                <span>€{tax.toFixed(2)}</span>
               </div>
             </div>
 
@@ -501,7 +491,7 @@ const PaymentPage: React.FC = () => {
 
             <div className="flex justify-between font-bold text-lg text-gray-800">
               <span>Total</span>
-              <span style={{ color: ACCENT_COLOR }}>{TOTAL_AMOUNT}</span>
+              <span style={{ color: ACCENT_COLOR }}>€{total.toFixed(2)}</span>
             </div>
 
             {/* Extra List */}
@@ -531,9 +521,6 @@ const PaymentPage: React.FC = () => {
           </div>
         </form>
       </div>
-
-      {/* Success Modal renders here */}
-      {orderPlaced && <SuccessModal router={router} onClose={handleCloseModal} />}
 
       <Footer />
     </>
