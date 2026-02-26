@@ -2,7 +2,7 @@
 import { Send, UploadIcon, Users2Icon } from "lucide-react";
 import DiscountEmailPreview from "@/components/admin/DiscountEmailPreview";
 import React, { useState, useEffect } from "react";
-import { useGetAllDiscountCodesQuery } from "@/app/store/slices/services/adminService/adminPromos/adminPromoApi";
+import { useGetAllDiscountCodesQuery, useGetAllDiscountSeriesQuery, DiscountSeriesItem } from "@/app/store/slices/services/adminService/adminPromos/adminPromoApi";
 import { useGetAdminDiscountUsageStatsQuery } from "@/app/store/slices/services/adminService/adminStats/adminStatsApi";
 import { useGetAllTemplatesQuery } from "@/app/store/slices/services/adminService/smtp/createTemplateApi";
 import { useSendDiscountEmailMutation } from "@/app/store/slices/services/adminService/smtp/emailSendingApi";
@@ -30,8 +30,10 @@ const SendDiscountCodes = () => {
 
   // API Hooks
   // Using getAllDiscountCodes to get details (amount, prefix)
-  const { data: discountCodes, isLoading: isLoadingCodes } = useGetAllDiscountCodesQuery();
-  // Using getAdminDiscountUsageStats to get Series IDs and Names (since getAllDiscountSeries is broken)
+  const { data: discountCodesData, isLoading: isLoadingCodes } = useGetAllDiscountCodesQuery();
+  // Using getAllDiscountSeries to get actual series (user clarified we should use series)
+  const { data: discountSeriesData, isLoading: isLoadingSeries } = useGetAllDiscountSeriesQuery();
+  // Using getAdminDiscountUsageStats to get Series IDs and Names (for other stats if needed)
   const { data: usageStats, isLoading: isLoadingUsage } = useGetAdminDiscountUsageStatsQuery();
 
 
@@ -41,34 +43,10 @@ const SendDiscountCodes = () => {
 
   const templates = templatesData?.data?.email_templates || [];
 
-  // Merge Data: Usage Stats (IDs) + Discount Codes (Metadata)
+  // Available Series are now directly from getAllDiscountSeries results
   const availableSeries = React.useMemo(() => {
-    if (!usageStats?.discount_series_usage) return [];
-
-    // Create a lookup for metadata from codes
-    // We map series_name -> { amount, prefix }
-    const metadataMap = new Map();
-    if (discountCodes) {
-      discountCodes.forEach(code => {
-        if (!metadataMap.has(code.series_name)) {
-          metadataMap.set(code.series_name, {
-            amount: code.discount,
-            prefix: code.code_prefix
-          });
-        }
-      });
-    }
-
-    return usageStats.discount_series_usage.map(series => {
-      const metadata = metadataMap.get(series.name) || {};
-      return {
-        id: series.id,
-        name: series.name,
-        amount: metadata.amount || "Discount", // Fallback if no matching code found (e.g. no codes active)
-        prefix: metadata.prefix || ""
-      };
-    });
-  }, [usageStats, discountCodes]);
+    return discountSeriesData?.results || [];
+  }, [discountSeriesData]);
 
   const seriesList = availableSeries;
 
@@ -250,7 +228,7 @@ const SendDiscountCodes = () => {
   };
 
   // Find the selected series representative (any code from that series to get details)
-  const selectedSeries = seriesList.find(s => s.id === selectedSeriesId);
+  const selectedSeries = availableSeries.find((s: DiscountSeriesItem) => s.id === selectedSeriesId);
 
   return (
     <div className=" bg-gray-50 ">
@@ -340,9 +318,9 @@ const SendDiscountCodes = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="" disabled>Select a series...</option>
-                {seriesList.map((series) => (
+                {availableSeries.map((series: DiscountSeriesItem) => (
                   <option key={series.id} value={series.id}>
-                    {series.name} ({series.amount})
+                    {series.series_name} ({series.amount})
                   </option>
                 ))}
               </select>
@@ -427,7 +405,7 @@ const SendDiscountCodes = () => {
             subject={emailSubject}
             body={emailBody}
             contentType={selectedTemplate?.body_type || "text"}
-            discountCode={selectedSeries?.prefix ? `${selectedSeries.prefix}****` : (selectedSeries?.name || "CODE")}
+            discountCode={selectedSeries?.code_prefix ? `${selectedSeries.code_prefix}****` : (selectedSeries?.series_name || "CODE")}
             discountValue={selectedSeries?.amount || "Discount"}
           />
         </div>

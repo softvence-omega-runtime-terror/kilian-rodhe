@@ -21,8 +21,9 @@ const CouponCodeManager = () => {
   const [bulkDeleteDiscount, { isLoading: isDeletingMutation }] = useBulkDeleteDiscountMutation();
 
   // Fetch dynamic data
-  const { data: allCodesApi, isLoading, isError } = useGetAllDiscountCodesQuery();
-  const allCodes = allCodesApi || [];
+  const { data: allCodesApi, isLoading, isError } = useGetAllDiscountCodesQuery(currentPage);
+  const allCodes = allCodesApi?.results || [];
+  const totalCount = allCodesApi?.count || 0;
 
   // Data Normalization helper
   const getNormalizedStatus = (status: string) => {
@@ -47,7 +48,7 @@ const CouponCodeManager = () => {
   };
 
   // Filtered Codes
-  const filteredCodes = allCodes.filter((code) => {
+  const filteredCodes = allCodes.filter((code: DiscountCodeItem) => {
     const normalizedStatus = getNormalizedStatus(code.status);
     const statusFilter = activeTab === "All" || normalizedStatus === activeTab;
 
@@ -59,9 +60,10 @@ const CouponCodeManager = () => {
     return statusFilter && searchFilter;
   });
 
-  const totalPages = Math.ceil(filteredCodes.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentCodes = filteredCodes.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  // Since we are doing server-side pagination, currentCodes is just filteredCodes
+  const currentCodes = filteredCodes;
 
   const tabClasses = (tab: string) =>
     `px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-150 ${activeTab === tab ? "bg-purple-600 text-white" : "text-gray-700 bg-gray-100 hover:bg-gray-200"
@@ -82,8 +84,8 @@ const CouponCodeManager = () => {
   const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   const handlePrevious = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
 
-  const viewingRangeStart = filteredCodes.length > 0 ? startIndex + 1 : 0;
-  const viewingRangeEnd = Math.min(startIndex + ITEMS_PER_PAGE, filteredCodes.length);
+  const viewingRangeStart = totalCount > 0 ? startIndex + 1 : 0;
+  const viewingRangeEnd = Math.min(startIndex + ITEMS_PER_PAGE, totalCount);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -96,13 +98,13 @@ const CouponCodeManager = () => {
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      const allCurrentIds = currentCodes.map(code => code.id);
+      const allCurrentIds = currentCodes.map((code: DiscountCodeItem) => code.id);
       setSelectedIds(prev => {
         const uniqueIds = new Set([...prev, ...allCurrentIds]);
         return Array.from(uniqueIds);
       });
     } else {
-      const allCurrentIds = currentCodes.map(code => code.id);
+      const allCurrentIds = currentCodes.map((code: DiscountCodeItem) => code.id);
       setSelectedIds(prev => prev.filter(id => !allCurrentIds.includes(id)));
     }
   };
@@ -114,7 +116,7 @@ const CouponCodeManager = () => {
   };
 
   const isAllSelected = useMemo(() =>
-    currentCodes.length > 0 && currentCodes.every(code => selectedIds.includes(code.id)),
+    currentCodes.length > 0 && currentCodes.every((code: DiscountCodeItem) => selectedIds.includes(code.id)),
     [currentCodes, selectedIds]
   );
 
@@ -134,7 +136,7 @@ const CouponCodeManager = () => {
     const headers = ["Code", "Series", "Status", "Discount", "Redeemed By", "Expiry"];
     csvRows.push(headers.join(","));
 
-    filteredCodes.forEach((item) => {
+    filteredCodes.forEach((item: DiscountCodeItem) => {
       const cleanString = (str: string) => `"${(str || "").replace(/"/g, '""').replace(/,/g, ';')}"`;
       const row = [
         cleanString(item.code),
@@ -248,7 +250,7 @@ const CouponCodeManager = () => {
               </button>
               <button className={headerButtonClasses} onClick={handleExport}>
                 <Download className="h-4 w-4" />
-                <span>Export All ({filteredCodes.length})</span>
+                <span>Export Visible ({filteredCodes.length})</span>
               </button>
             </div>
           </div>
@@ -264,7 +266,7 @@ const CouponCodeManager = () => {
               >
                 {tab}
                 <span className="ml-2 font-normal text-xs opacity-75">
-                  ({tab === "All" ? allCodes.length : allCodes.filter(c => getNormalizedStatus(c.status) === tab).length})
+                  ({tab === "All" ? totalCount : allCodes.filter((c: DiscountCodeItem) => getNormalizedStatus(c.status) === tab).length})
                 </span>
               </button>
             ))}
@@ -291,7 +293,7 @@ const CouponCodeManager = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
-                {currentCodes.map((item) => {
+                {currentCodes.map((item: DiscountCodeItem) => {
                   const normalizedStatus = getNormalizedStatus(item.status);
                   return (
                     <tr key={item.id} className={`${selectedIds.includes(item.id) ? "bg-purple-50" : "hover:bg-purple-50"} transition-colors`}>

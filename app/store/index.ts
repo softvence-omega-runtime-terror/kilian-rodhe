@@ -1,6 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
-import { persistReducer, persistStore } from "redux-persist";
+import {
+  persistReducer,
+  persistStore,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
 import storage from "redux-persist/lib/storage";
 
 import authReducer from "./slices/authSlice";
@@ -11,7 +20,7 @@ import { baseBackendApi } from "./slices/services/baseBackendApi";
 const authPersistConfig = {
   key: "auth",
   storage,
-  whitelist: ["user", "access", "refresh", "isAuthenticated"],
+  whitelist: ["user", "access", "refresh", "isAuthenticated", "role"],
 };
 
 const persistedAuthReducer = persistReducer(
@@ -29,7 +38,9 @@ export const store = configureStore({
 
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
     }).concat(baseBackendApi.middleware),
 
   devTools: process.env.NODE_ENV !== "production",

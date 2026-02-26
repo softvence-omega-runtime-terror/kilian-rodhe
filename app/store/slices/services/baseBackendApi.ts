@@ -12,8 +12,11 @@ export const baseBackendApi = createApi({
       const token = state.auth?.access;
 
       if (token) {
-        const cleanToken = token.replace(/^"(.*)"$/, '$1');
+        // Strip surrounding quotes and whitespace (defensive clean for persisted tokens)
+        const cleanToken = token.trim().replace(/^"|"$/g, '');
         headers.set("Authorization", `Bearer ${cleanToken}`);
+      } else {
+        console.warn("[baseBackendApi] No access token found in Redux state — request will be unauthenticated");
       }
 
       // These headers help with Django CSRF/Origin checks when using JWT
