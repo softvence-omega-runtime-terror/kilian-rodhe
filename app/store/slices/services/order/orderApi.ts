@@ -72,6 +72,47 @@ export interface IOrderResponse {
   results: IOrder[];
 }
 
+export interface IAddAddressRequest {
+  order_id: number;
+  is_new_address: boolean;
+  address_name: string;
+  address: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone_number: string;
+  postal_code: number;
+}
+
+export interface IPaymentSessionResponse {
+  success: boolean;
+  message: string;
+  data: {
+    payment_url: string;
+    session_id: string;
+    order_id: number;
+    amount: number;
+  };
+}
+
+export interface IAddressBookItem {
+  id: number;
+  address_name: string;
+  address: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone_number: string;
+  postal_code: number;
+  user: number;
+}
+
+export interface IAddressBookResponse {
+  success: boolean;
+  message: string;
+  address: IAddressBookItem[];
+}
+
 export const orderApi = baseBackendApi.injectEndpoints({
   endpoints: (builder) => ({
     getCart: builder.query<ICartResponse, void>({
@@ -125,6 +166,27 @@ export const orderApi = baseBackendApi.injectEndpoints({
       }),
       providesTags: ["Orders"],
     }),
+    addOrderAddress: builder.mutation<any, IAddAddressRequest>({
+      query: (body) => ({
+        url: "/order/UseAddressBook/Add-order-address/",
+        method: "POST",
+        body,
+      }),
+    }),
+    createPaymentSession: builder.mutation<IPaymentSessionResponse, { order_id: number }>({
+      query: (body) => ({
+        url: "/order/payment/create/",
+        method: "POST",
+        body,
+      }),
+    }),
+    getAddressBook: builder.query<IAddressBookResponse, void>({
+      query: () => ({
+        url: "/order/UseAddressBook/",
+        method: "GET",
+      }),
+      providesTags: ["AddressBook"],
+    }),
   }),
 });
 
@@ -135,5 +197,8 @@ export const {
   useDeleteCartItemMutation,
   useCheckoutMutation,
   useGetShipmentsTypeQuery,
-  useGetOrdersQuery
+  useGetOrdersQuery,
+  useAddOrderAddressMutation,
+  useCreatePaymentSessionMutation,
+  useGetAddressBookQuery
 } = orderApi;

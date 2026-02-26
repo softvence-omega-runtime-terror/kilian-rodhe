@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Image from "next/image";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Plus, Minus, Trash2, Check, ShoppingBag } from "lucide-react";
@@ -221,16 +222,21 @@ const CheckoutReview: React.FC = () => {
       });
 
     try {
-      await checkout({
+      const response = await checkout({
         card_products: checkoutProducts,
         shipping_id: selectedShipping || 0
       }).unwrap();
+
+      // Save order_id to localStorage for persistence in next steps
+      if (response?.order?.id) {
+        localStorage.setItem("checkout_order_id", response.order.id.toString());
+      }
 
       // Navigate to the next step
       router.push("/pages/shipping");
     } catch (err) {
       console.error("Checkout failed", err);
-      alert("Failed to proceed to checkout. Please try again.");
+      toast.error("Failed to proceed to checkout. Please try again.");
     }
   };
 
