@@ -17,7 +17,7 @@ interface TopUpModalProps {
 
 const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
     const [amount, setAmount] = useState<number>(10);
-    const [currency, setCurrency] = useState<string>("EUR");
+    const [currency, setCurrency] = useState<string>("eur");
     const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
     const [topUp, { isLoading }] = useTopUpMutation();
 
@@ -79,11 +79,11 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
                     <div className="space-y-2">
                         <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</label>
                         <div className="grid grid-cols-2 gap-3">
-                            {['EUR', 'USD'].map((curr) => (
+                            {['eur', 'usd'].map((curr) => (
                                 <button
                                     key={curr}
                                     onClick={() => setCurrency(curr)}
-                                    className={`py-2 border rounded-md transition-all ${currency === curr
+                                    className={`py-2 border rounded-md transition-all uppercase ${currency === curr
                                             ? 'bg-red-800 text-white border-red-800 shadow-md'
                                             : 'border-gray-200 text-gray-600 hover:border-red-800'
                                         }`}
