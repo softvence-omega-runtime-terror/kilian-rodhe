@@ -8,16 +8,24 @@ export const baseBackendApi = createApi({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
 
     prepareHeaders: (headers, { getState }) => {
-      // Correctly access state - it might be RootState or any if type-safe RootState is not imported here
       const state = getState() as { auth: AuthState };
       const token = state.auth?.access;
 
       if (token) {
-        // Ensure no quotes remain (already handled in slice, but defensive)
         const cleanToken = token.replace(/^"(.*)"$/, '$1');
         headers.set("Authorization", `Bearer ${cleanToken}`);
       }
-      //  return the headers with token access and refresh
+
+      // These headers help with Django CSRF/Origin checks when using JWT
+      headers.set("X-Requested-With", "XMLHttpRequest");
+      headers.set("Accept", "application/json");
+      // Access-Control-Allow-Origin
+      headers.set("Origin", "https://thundra.de");
+      headers.set("Access-Control-Allow-Origin", "https://thundra.de");
+      headers.set("Access-Control-Allow-Credentials", "true");
+      headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
       return headers;
     },
 

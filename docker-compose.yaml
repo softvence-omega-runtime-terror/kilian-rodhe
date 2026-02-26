@@ -1,0 +1,16 @@
+services:
+  web:
+    container_name: kilian-rodhe-nextjs-app
+    image: softvence/kilian-rodhe-nextjs-app:latest
+    platform: linux/amd64
+    profiles:
+      - prod
+      - web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=https://api.thundra.de
+      - NEXT_PUBLIC_API_BASE_URL_AI=https://ai.thundra.de
