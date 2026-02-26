@@ -19,11 +19,17 @@ export const baseBackendApi = createApi({
       // These headers help with Django CSRF/Origin checks when using JWT
       headers.set("X-Requested-With", "XMLHttpRequest");
       headers.set("Accept", "application/json");
+      // Access-Control-Allow-Origin
+      headers.set("Origin", "https://thundra.de");
+      headers.set("Access-Control-Allow-Origin", "https://thundra.de");
+      headers.set("Access-Control-Allow-Credentials", "true");
+      headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
       return headers;
     },
 
-    credentials: "omit",
+    credentials: "include",
   }),
 
   tagTypes: [
