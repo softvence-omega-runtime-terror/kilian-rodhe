@@ -5,12 +5,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { useGetProductDetailsQuery, useGetProductsQuery } from "@/app/store/slices/services/product/productApi";
 import { useGetCustomProductsQuery, useSaveCustomProductVersionMutation, ISaveCustomProductVersionRequest } from "@/app/store/slices/services/ai/aiApi";
+import { useDeductBalanceMutation } from "@/app/store/slices/services/wallet/walletApi";
 // ✅ Framer Motion import: Variants TargetAndTransition
 import { motion, type Variants, type TargetAndTransition } from "framer-motion";
 import { toast } from "sonner";
 
 // --- Imported Components (Assumed to exist in your project structure) ---
 import LivePreviewModal from "@/components/previewModel";
+import WalletManager from "./wallet/WalletManager";
 // import CustomTextDesign from "@/components/customTextDesign";
 import AiDesignGenerate from "./aiDesignGenerate";
 
@@ -93,7 +95,7 @@ const CombinedDesignPageFixed = () => {
     // API Hooks
     const { data: customProductsData, refetch: refetchCustomProducts } = useGetCustomProductsQuery();
     const [saveCustomProductVersion, { isLoading: isSaving }] = useSaveCustomProductVersionMutation();
-
+    const [deductBalance] = useDeductBalanceMutation();
 
     // Logo Upload State
     const [logoImage, setLogoImage] = useState<string | null>(null);
@@ -166,18 +168,8 @@ const CombinedDesignPageFixed = () => {
             formData.append('cameraperspective', payload.cameraperspective || '');
             formData.append('weatherenv', payload.weatherenv || '');
 
-            if (selectedAiFile) {
-                // If it's a blob from handleImageSelect, we give it a filename
-                if (!(selectedAiFile instanceof File)) {
-                    formData.append('product_image', selectedAiFile, 'selected-image.png');
-                } else {
-                    formData.append('product_image', selectedAiFile);
-                }
-            }
-            // Fallback for just in case if selectedAiFile is missing but selectedAiImage is present
-            else if (selectedAiImage) {
-                formData.append('product_image', selectedAiImage);
-            }
+            // product_image_url should be a string URL as per Swagger and requested fix
+            formData.append('product_image_url', selectedAiImage || '');
 
             if (logoFile) {
                 formData.append('logo_image', logoFile);
@@ -187,6 +179,7 @@ const CombinedDesignPageFixed = () => {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
+                    // Content-Type is multipart/form-data, browser handles boundaries when using FormData
                 },
                 body: formData,
             });
@@ -195,6 +188,16 @@ const CombinedDesignPageFixed = () => {
             if (data.generated_design_url || data.mockup_url) {
                 setAiGeneratedImages(data);
                 toast.success("Design generated successfully!");
+
+                // Deduct balance after successful generation
+                try {
+                    await deductBalance().unwrap();
+                    console.log("Balance deducted successfully");
+                } catch (deductErr) {
+                    console.error("Failed to deduct balance:", deductErr);
+                    // We don't necessarily want to block the user if deduction fails on client side
+                    // but we should log it.
+                }
             } else {
                 toast.error("Format error in AI response.");
                 console.error("API response missing URLs:", data);
@@ -664,6 +667,11 @@ const CombinedDesignPageFixed = () => {
                             isGenerating={isGenerating}
                         />
                     </div>
+
+                    <div className="mt-8 mb-6">
+                        <WalletManager />
+                    </div>
+
                     <motion.div
                         variants={fadeInVariants}
                         initial="hidden"
