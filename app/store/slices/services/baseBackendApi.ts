@@ -20,11 +20,11 @@ export const baseBackendApi = createApi({
       headers.set("X-Requested-With", "XMLHttpRequest");
       headers.set("Accept", "application/json");
       // Access-Control-Allow-Origin
-      headers.set("Origin", "https://thundra.de");
-      headers.set("Access-Control-Allow-Origin", "https://thundra.de");
-      headers.set("Access-Control-Allow-Credentials", "true");
-      headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-      headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      // headers.set("Origin", "https://thundra.de");
+      // headers.set("Access-Control-Allow-Origin", "https://thundra.de");
+      // headers.set("Access-Control-Allow-Credentials", "true");
+      // headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      // headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
       return headers;
     },
