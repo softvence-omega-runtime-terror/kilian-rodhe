@@ -180,24 +180,20 @@ export const adminPromApi = baseBackendApi.injectEndpoints({
         }),
 
         // get all discount coupon codes
-        getAllDiscountCodes: builder.query<DiscountCodeItem[], void>({
-            query: () => ({
-                url: "/discount/discount-codes/get-all-codes/",
+        getAllDiscountCodes: builder.query<GetAllDiscountCodesResponse, number | void>({
+            query: (page = 1) => ({
+                url: `/discount/discount-codes/get-all-codes/?page=${page}`,
                 method: "GET",
             }),
-            transformResponse: (response: GetAllDiscountCodesResponse) =>
-                response.results,
             providesTags: ["DiscountCodes"],
         }),
 
         // get all discount series
-        getAllDiscountSeries: builder.query<DiscountSeriesItem[], void>({
-            query: () => ({
-                url: "/discount/discount-codes/",
+        getAllDiscountSeries: builder.query<GetAllDiscountSeriesResponse, number | void>({
+            query: (page = 1) => ({
+                url: `/discount/discount-codes/?page=${page}`,
                 method: "GET",
             }),
-            transformResponse: (response: GetAllDiscountSeriesResponse) =>
-                response.results,
             providesTags: ["DiscountCodes"],
         }),
 

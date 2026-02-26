@@ -7,8 +7,19 @@ import {
   Zap,
   AlertTriangle,
   Play,
+  Loader2,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import {
+  useGetAutomationsQuery,
+  useCreateAutomationMutation,
+  useDeleteAutomationMutation,
+  useToggleAutomationStatusMutation,
+  AutomationData
+} from "@/app/store/slices/services/adminService/adminAutomation/adminAutomationApi";
+import { useGetAllDiscountSeriesQuery, DiscountSeriesItem } from "@/app/store/slices/services/adminService/adminPromos/adminPromoApi";
+import { useGetAllTemplatesQuery } from "@/app/store/slices/services/adminService/smtp/createTemplateApi";
+import { toast } from "react-hot-toast";
 
 // --- Sub-Component: Modal Structure (for Reusability) ---
 type ModalWrapperProps = {
@@ -66,31 +77,30 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({ isOpen, onClose, children }
 type CreateAutomationModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onCreateAutomation: (newAutomation: {
-    title: string;
-    trigger: string;
-    delay: string;
-    totalSent: number;
-    codeSeries: string;
-    codesSent: number;
-    status: string;
-  }) => void;
 };
 
-const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({ isOpen, onClose, onCreateAutomation }) => {
+const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({ isOpen, onClose }) => {
   const [automationName, setAutomationName] = useState("");
   const [triggerType, setTriggerType] = useState("");
-  const [delay, setDelay] = useState("");
-  const [codeSeries, setCodeSeries] = useState("");
-  const [emailTemplate, setEmailTemplate] = useState("");
-  const [startImmediately, setStartImmediately] = useState(true); // Toggle state
+  const [delayValue, setDelayValue] = useState<number>(1);
+  const [delayUnit, setDelayUnit] = useState<"seconds" | "minutes" | "hours" | "days">("seconds");
+  const [codeSeriesId, setCodeSeriesId] = useState<number | "">("");
+  const [emailTemplateId, setEmailTemplateId] = useState<number | "">("");
+  const [startImmediately, setStartImmediately] = useState(true);
+
+  const { data: discountSeries, isLoading: isLoadingSeries } = useGetAllDiscountSeriesQuery();
+  const { data: emailTemplatesResponse, isLoading: isLoadingTemplates } = useGetAllTemplatesQuery();
+  const emailTemplates = emailTemplatesResponse?.data?.email_templates || [];
+
+  const [createAutomation, { isLoading: isCreating }] = useCreateAutomationMutation();
 
   const resetForm = () => {
     setAutomationName("");
     setTriggerType("");
-    setDelay("");
-    setCodeSeries("");
-    setEmailTemplate("");
+    setDelayValue(1);
+    setDelayUnit("seconds");
+    setCodeSeriesId("");
+    setEmailTemplateId("");
     setStartImmediately(true);
   };
 
@@ -99,30 +109,44 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({ isOpen, o
     onClose();
   };
 
-  const handleCreateAutomation = () => {
-    if (!automationName || triggerType === "" || delay === "") return;
-
-    const newAutomation = {
-      title: automationName,
-      trigger: triggerType,
-      delay,
-      totalSent: 0, // default value
-      codeSeries,
-      codesSent: 0, // default value
-      status: startImmediately ? "Active" : "Paused", // Set status based on toggle
-    };
-    onCreateAutomation(newAutomation);
-    handleClose();
+  const calculateTotalSeconds = () => {
+    switch (delayUnit) {
+      case "minutes": return delayValue * 60;
+      case "hours": return delayValue * 3600;
+      case "days": return delayValue * 86400;
+      default: return delayValue;
+    }
   };
 
-  // Switch button toggle
+  const handleCreateAutomation = async () => {
+    if (!automationName || !triggerType || delayValue < 0 || !codeSeriesId || !emailTemplateId) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      await createAutomation({
+        name: automationName,
+        event_type: triggerType,
+        delay_seconds: calculateTotalSeconds(),
+        discount_series: Number(codeSeriesId),
+        email_template: Number(emailTemplateId),
+        is_active: startImmediately,
+      }).unwrap();
+      toast.success("Automation created successfully");
+      handleClose();
+    } catch (error) {
+      console.error("Failed to create automation:", error);
+      toast.error("Failed to create automation");
+    }
+  };
+
   const handleToggle = () => {
-    setStartImmediately((prevState) => !prevState); // Toggle the state
+    setStartImmediately((prevState) => !prevState);
   };
 
   return (
     <ModalWrapper isOpen={isOpen} onClose={handleClose}>
-      {/* Modal Header */}
       <div className="flex justify-between items-center p-6 border-b border-gray-100">
         <div className="flex items-center">
           <Zap className="w-6 h-6 mr-2 text-[#9810FA]" />
@@ -138,9 +162,7 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({ isOpen, o
         </button>
       </div>
 
-      {/* Modal Form Body */}
-      <div className="p-6 space-y-6">
-        {/* Automation Name */}
+      <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Automation Name
@@ -153,7 +175,6 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({ isOpen, o
             onChange={(e) => setAutomationName(e.target.value)}
           />
         </div>
-        {/* Trigger Type */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Trigger Type
@@ -164,56 +185,76 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({ isOpen, o
             onChange={(e) => setTriggerType(e.target.value)}
           >
             <option value="">Select trigger...</option>
-            <option>User Signup</option>
-            <option>Item Purchased</option>
-            <option>Abandoned Cart</option>
+            <option value="user_sign_up">User Signup</option>
+            <option value="item_purchased">Item Purchased</option>
+            <option value="abandoned_cart">Abandoned Cart</option>
           </select>
         </div>
-        {/* Delay / Schedule */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Delay / Schedule
           </label>
-          <input
-            type="text"
-            placeholder="e.g., 24 hours"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-            value={delay}
-            onChange={(e) => setDelay(e.target.value)}
-          />
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="e.g., 24"
+              className="grow px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#9810FA] focus:border-[#9810FA]"
+              value={delayValue}
+              onChange={(e) => setDelayValue(Number(e.target.value))}
+              min="0"
+            />
+            <select
+              className="w-32 px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#9810FA] focus:border-[#9810FA]"
+              value={delayUnit}
+              onChange={(e) => setDelayUnit(e.target.value as any)}
+            >
+              <option value="seconds">Seconds</option>
+              <option value="minutes">Minutes</option>
+              <option value="hours">Hours</option>
+              <option value="days">Days</option>
+            </select>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            How long to wait after the trigger before sending
+          </p>
         </div>
-        {/* Code Series */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Code Series
+            Discount Series
           </label>
           <select
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-            value={codeSeries}
-            onChange={(e) => setCodeSeries(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#9810FA] focus:border-[#9810FA]"
+            value={codeSeriesId}
+            onChange={(e) => setCodeSeriesId(Number(e.target.value))}
+            disabled={isLoadingSeries}
           >
-            <option value="">Select code series...</option>
-            <option>WELCOME10</option>
-            <option>FLASH20</option>
+            <option value="">{isLoadingSeries ? "Loading series..." : "Select discount series..."}</option>
+            {discountSeries?.results?.map((series) => (
+              <option key={series.id} value={series.id}>
+                {series.series_name}
+              </option>
+            ))}
           </select>
         </div>
-        {/* Email Template */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Email Template
           </label>
           <select
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-            value={emailTemplate}
-            onChange={(e) => setEmailTemplate(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-[#9810FA] focus:border-[#9810FA]"
+            value={emailTemplateId}
+            onChange={(e) => setEmailTemplateId(Number(e.target.value))}
+            disabled={isLoadingTemplates}
           >
-            <option value="">Select template..</option>
-            <option>Welcome Email V1</option>
-            <option>First Purchase Discount</option>
+            <option value="">{isLoadingTemplates ? "Loading templates..." : "Select template.."}</option>
+            {emailTemplates.map((template) => (
+              <option key={template.id} value={template.id}>
+                {template.name}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Start Automation Immediately Toggle */}
         <div className="flex justify-between items-center pt-4">
           <div>
             <p className="text-sm font-medium text-gray-700">
@@ -232,8 +273,8 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({ isOpen, o
                 type="checkbox"
                 id="start-toggle"
                 className="sr-only peer"
-                checked={startImmediately} // Controlled by React state
-                onChange={handleToggle} // Toggle the state when clicked
+                checked={startImmediately}
+                onChange={handleToggle}
               />
               <div className="block bg-gray-200 w-10 h-6 rounded-full peer-checked:bg-[#9810FA]"></div>
               <div className="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition transform peer-checked:translate-x-4"></div>
@@ -242,14 +283,13 @@ const CreateAutomationModal: React.FC<CreateAutomationModalProps> = ({ isOpen, o
         </div>
       </div>
 
-      {/* Footer / Action Button */}
       <div className="p-6 pt-0">
         <button
-          className="w-full py-3 bg-[#9810FA] text-white font-semibold rounded-xl hover:bg-[#860ee0] transition duration-150 "
+          className="w-full py-3 bg-[#9810FA] text-white font-semibold rounded-xl hover:bg-[#860ee0] transition duration-150 flex items-center justify-center disabled:opacity-50"
           onClick={handleCreateAutomation}
-          disabled={!automationName || triggerType === "" || delay === ""}
+          disabled={isCreating || !automationName || !triggerType || !codeSeriesId || !emailTemplateId}
         >
-          Create Automation
+          {isCreating ? <Loader2 className="w-5 h-5 animate-spin" /> : "Create Automation"}
         </button>
       </div>
     </ModalWrapper>
@@ -278,8 +318,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
           Confirm Deletion
         </h3>
         <p className="mt-2 text-sm text-gray-500">
-          Are you sure you want to delete the automation &ldquo;{automationTitle}
-          &ldquo;? This action cannot be undone.
+          Are you sure you want to delete the automation &ldquo;{automationTitle}&rdquo;? This action cannot be undone.
         </p>
         <div className="mt-6 flex justify-center gap-4">
           <button
@@ -304,85 +343,72 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
 const AutomationCard = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [automationToDeleteIndex, setAutomationToDeleteIndex] = useState<number | null>(null);
+  const [automationToDeleteId, setAutomationToDeleteId] = useState<number | null>(null);
 
-  const [automations, setAutomations] = useState([
-    {
-      title: "New Customer Welcome",
-      trigger: "User Signup",
-      delay: "0 minutes",
-      totalSent: 3421,
-      codeSeries: "WELCOME10",
-      codesSent: 3421,
-      status: "Active",
-    },
-    {
-      title: "Flash Sale",
-      trigger: "Item Purchased",
-      delay: "24 hours",
-      totalSent: 1200,
-      codeSeries: "FLASH20",
-      codesSent: 1200,
-      status: "Paused",
-    },
-    {
-      title: "Abandoned Cart Reminder",
-      trigger: "Abandoned Cart",
-      delay: "Immediately",
-      totalSent: 5000,
-      codeSeries: "REMIND10",
-      codesSent: 5000,
-      status: "Active",
-    },
-  ]);
+  const { data: rawAutomations, isLoading, isError } = useGetAutomationsQuery();
+  const automations: AutomationData[] = Array.isArray(rawAutomations) ? rawAutomations : [];
+  const [deleteAutomation] = useDeleteAutomationMutation();
+  const [toggleStatus] = useToggleAutomationStatusMutation();
 
-  // --- Create Automation Modal Handlers ---
+  const { data: discountSeries } = useGetAllDiscountSeriesQuery();
+  const { data: emailTemplatesResponse } = useGetAllTemplatesQuery();
+  const emailTemplates = emailTemplatesResponse?.data?.email_templates || [];
+
   const handleOpenCreateModal = () => setIsCreateModalOpen(true);
   const handleCloseCreateModal = () => setIsCreateModalOpen(false);
-  const handleCreateAutomation = (newAutomation: { title: string; trigger: string; delay: string; totalSent: number; codeSeries: string; codesSent: number; status: string; }) => {
-    setAutomations((prevAutomations) => [...prevAutomations, newAutomation]);
+
+  const handlePauseAutomation = async (id: number, currentStatus: boolean) => {
+    try {
+      await toggleStatus({ id, is_active: !currentStatus }).unwrap();
+      toast.success(`Automation ${!currentStatus ? "activated" : "paused"} successfully`);
+    } catch (error) {
+      console.error("Failed to toggle automation status:", error);
+      toast.error("Failed to update status");
+    }
   };
 
-  // --- Pause/Resume Handler ---
-  const handlePauseAutomation = (index: number) => {
-    setAutomations((prevAutomations) => {
-      const updatedAutomations = [...prevAutomations];
-      const currentStatus = updatedAutomations[index].status;
-      // Toggle status
-      updatedAutomations[index].status =
-        currentStatus === "Active" ? "Paused" : "Active";
-      return updatedAutomations;
-    });
-  };
-
-  // --- Delete Modal Handlers ---
-  const handleOpenDeleteModal = (index: number | null) => {
-    setAutomationToDeleteIndex(index);
+  const handleOpenDeleteModal = (id: number) => {
+    setAutomationToDeleteId(id);
     setIsDeleteModalOpen(true);
   };
 
   const handleCloseDeleteModal = () => {
     setIsDeleteModalOpen(false);
-    setAutomationToDeleteIndex(null);
+    setAutomationToDeleteId(null);
   };
 
-  const confirmDelete = () => {
-    if (automationToDeleteIndex !== null) {
-      setAutomations((prevAutomations) => {
-        const updatedAutomations = prevAutomations.filter(
-          (_, i) => i !== automationToDeleteIndex
-        );
-        return updatedAutomations;
-      });
-      handleCloseDeleteModal(); // Close the modal and reset index
+  const confirmDelete = async () => {
+    if (automationToDeleteId !== null) {
+      try {
+        await deleteAutomation(automationToDeleteId).unwrap();
+        toast.success("Automation deleted successfully");
+        handleCloseDeleteModal();
+      } catch (error) {
+        console.error("Failed to delete automation:", error);
+        toast.error("Failed to delete automation");
+      }
     }
   };
 
-  // Get the title of the automation to display in the delete modal
-  const automationTitleToDelete =
-    automationToDeleteIndex !== null
-      ? automations[automationToDeleteIndex]?.title
-      : "";
+  const automationToDelete = automations.find((a: AutomationData) => a.id === automationToDeleteId);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="w-8 h-8 animate-spin text-[#9810FA]" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center">
+        <AlertTriangle className="w-10 h-10 text-red-400 mb-3" />
+        <p className="text-gray-700 font-semibold">Failed to load automations</p>
+        <p className="text-sm text-gray-400 mt-1">Check your connection or ensure you are logged in as admin.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 p-6 rounded-xl">
@@ -399,12 +425,17 @@ const AutomationCard = () => {
         </button>
       </div>
 
-      {automations.map((automation, index) => (
+      {automations?.length === 0 && (
+        <div className="text-center py-12 bg-white rounded-xl border-2 border-dashed border-gray-200">
+          <p className="text-gray-500">No automations found. Create one to get started!</p>
+        </div>
+      )}
+
+      {automations.map((automation: AutomationData) => (
         <div
-          key={index}
+          key={automation.id}
           className="bg-white border border-gray-200 rounded-xl mb-3 p-4 sm:p-6"
         >
-          {/* Card Content */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
             <div className="flex items-start flex-grow">
               <div className="w-10 h-10 mr-4 bg-purple-100 rounded-full flex items-center justify-center">
@@ -412,33 +443,31 @@ const AutomationCard = () => {
               </div>
               <div className="min-w-0">
                 <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-1">
-                  {automation.title}
+                  {automation.name}
                 </h3>
                 <div className="flex items-center text-xs sm:text-sm text-gray-500 flex-wrap gap-x-4 gap-y-1">
                   <span className="flex items-center">
                     <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                    <span>Trigger: {automation.trigger}</span>
+                    <span>Trigger: {automation.event_type.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</span>
                   </span>
                   <span className="flex items-center">
                     <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                    <span>Delay: {automation.delay}</span>
+                    <span>Delay: {automation.delay_seconds}s</span>
                   </span>
                   <span className="flex items-center">
                     <Send className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                    <span>{automation.totalSent.toLocaleString()} sent</span>
+                    <span>Created: {new Date(automation.created_at).toLocaleDateString()}</span>
                   </span>
                 </div>
               </div>
             </div>
-            {/* Status Badge */}
             <span
-              className={`mt-3 sm:mt-0 px-3 py-1 text-xs font-semibold rounded-full ${
-                automations[index].status === "Active"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-yellow-100 text-yellow-700"
-              }`}
+              className={`mt-3 sm:mt-0 px-3 py-1 text-xs font-semibold rounded-full ${automation.is_active
+                ? "bg-green-100 text-green-700"
+                : "bg-yellow-100 text-yellow-700"
+                }`}
             >
-              {automations[index].status}
+              {automation.is_active ? "Active" : "Paused"}
             </span>
           </div>
           <hr className="my-5 border-gray-100" />
@@ -446,29 +475,29 @@ const AutomationCard = () => {
             <div>
               <div className="text-gray-500 font-medium mb-1">Code Series</div>
               <div className="text-gray-900 font-semibold">
-                {automation.codeSeries}
+                {discountSeries?.results?.find((s: DiscountSeriesItem) => s.id === automation.discount_series)?.series_name || `Series ID: ${automation.discount_series}`}
               </div>
             </div>
             <div>
-              <div className="text-gray-500 font-medium mb-1">Codes Sent</div>
+              <div className="text-gray-500 font-medium mb-1">Email Template</div>
               <div className="text-gray-900 font-semibold">
-                {automation.codesSent.toLocaleString()}
+                {emailTemplates.find(t => t.id === automation.email_template)?.name || `Template ID: ${automation.email_template}`}
               </div>
             </div>
             <div className="col-span-2 md:col-span-1">
               <div className="text-gray-500 font-medium mb-1">Status</div>
               <div className="text-gray-900 font-semibold">
-                {automations[index].status}{" "}
+                {automation.is_active ? "Active" : "Paused"}
               </div>
             </div>
           </div>
           <hr className="my-6 border-gray-100" />
           <div className="flex flex-wrap gap-4">
             <button
-              onClick={() => handlePauseAutomation(index)}
+              onClick={() => handlePauseAutomation(automation.id, automation.is_active)}
               className="flex items-center px-4 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
             >
-              {automations[index].status === "Active" ? (
+              {automation.is_active ? (
                 <>
                   <Pause className="w-4 h-4 mr-1" /> Pause
                 </>
@@ -479,7 +508,7 @@ const AutomationCard = () => {
               )}
             </button>
             <button
-              onClick={() => handleOpenDeleteModal(index)} // Open confirmation modal
+              onClick={() => handleOpenDeleteModal(automation.id)}
               className="flex items-center px-4 py-2 text-sm border border-red-300 rounded-lg text-red-600 hover:bg-red-50 transition"
             >
               <Trash2 className="w-4 h-4 mr-1" />
@@ -489,17 +518,15 @@ const AutomationCard = () => {
         </div>
       ))}
 
-      {/* Modals */}
       <CreateAutomationModal
         isOpen={isCreateModalOpen}
         onClose={handleCloseCreateModal}
-        onCreateAutomation={handleCreateAutomation}
       />
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={handleCloseDeleteModal}
         onConfirm={confirmDelete}
-        automationTitle={automationTitleToDelete}
+        automationTitle={automationToDelete?.name}
       />
     </div>
   );
