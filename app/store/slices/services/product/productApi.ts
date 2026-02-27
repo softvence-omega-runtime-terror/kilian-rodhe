@@ -71,7 +71,7 @@ export interface ISubCategory {
 export interface IProductResponse {
   success: boolean;
   message: string;
-  data: {
+  results: {
     sub_categories: ISubCategory[];
     categories: IProduct[];
   };

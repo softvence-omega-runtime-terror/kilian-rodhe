@@ -245,9 +245,7 @@ const mockPaymentInfo = {
   paymentDate: "Oct 10, 2025",
   subtotal: "€34.99",
   shipping: "€4.99",
-  taxRate: "19%",
-  taxAmount: "€6.65",
-  total: "€46.63",
+  total: "€39.98",
 };
 
 const mockDeliveryInfo = {
@@ -538,10 +536,6 @@ const PaymentDetailsCard: React.FC = () => {
         <div className="flex justify-between text-base text-gray-700">
           <span>Shipping</span>
           <span className="font-medium">{info.shipping}</span>
-        </div>
-        <div className="flex justify-between text-base text-gray-700 border-b border-dashed pb-3 border-gray-300">
-          <span>Tax ({info.taxRate})</span>
-          <span className="font-medium">{info.taxAmount}</span>
         </div>
       </div>
 

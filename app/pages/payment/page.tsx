@@ -5,7 +5,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import React, { useState } from "react"; // 👈 Import useState
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 
 import {
@@ -25,7 +25,8 @@ import clock from "@/public/image/shipping/Icon (8).svg";
 import { toast } from "sonner";
 import {
   useCreatePaymentSessionMutation,
-  useGetCartQuery
+  useGetCartQuery,
+  useGetOrderDetailsQuery
 } from "@/app/store/slices/services/order/orderApi";
 
 // Fonts
@@ -172,7 +173,6 @@ const SuccessModal: React.FC<{
         
         Subtotal (1 item): ${subtotal}
         Shipping: ${shipping}
-        Tax (19% VAT): ${tax}
         --------------------------
         TOTAL CHARGED: ${totalAmount}
         --------------------------
@@ -262,9 +262,12 @@ const PaymentPage: React.FC = () => {
   const router = useRouter();
   const [selectedPayment, setSelectedPayment] = useState<string>("stripe");
   const [createPaymentSession, { isLoading: isCreatingSession }] = useCreatePaymentSessionMutation();
-  const { data: cartData } = useGetCartQuery();
+  const { data: cartData, isLoading: cartLoading } = useGetCartQuery();
 
   const [orderId, setOrderId] = useState<number | null>(null);
+  const { data: orderDetails, isLoading: orderLoading } = useGetOrderDetailsQuery(orderId as number, {
+    skip: !orderId,
+  });
 
   React.useEffect(() => {
     const savedOrderId = localStorage.getItem("checkout_order_id");
@@ -301,10 +304,11 @@ const PaymentPage: React.FC = () => {
     }
   };
 
-  const cartTotal = cartData?.total_price || 0;
-  const shippingCost = 5.99;
-  const tax = cartTotal * 0.19;
-  const total = cartTotal + shippingCost + tax;
+  const cartTotal = orderDetails?.product_total_amount || 0;
+  const shippingCost = orderDetails?.shipping_cost || 0;
+  const total = orderDetails?.total_cost || (cartTotal + shippingCost);
+
+  const subtotal = cartTotal;
 
   const ACTIVE_STEP_INDEX = 2;
 
@@ -441,49 +445,52 @@ const PaymentPage: React.FC = () => {
             </h3>
 
             <div className="space-y-4">
-              {cartData?.cards?.map((item) => (
-                <div key={item.id} className="flex items-start space-x-4 mb-4">
-                  <div className="w-16 h-16 relative rounded-lg overflow-hidden border border-gray-200">
-                    {item.product.images?.[0]?.image ? (
-                      <Image
-                        src={item.product.images[0].image}
-                        alt={item.product.name}
-                        className="object-cover"
-                        fill
-                        sizes="64px"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-[10px] text-gray-400">No Image</div>
-                    )}
-                  </div>
-
-                  <div className="pt-1">
-                    <div className="flex items-center space-x-2">
-                      <p className="font-medium text-gray-800 text-sm">
-                        {item.product.name}
-                      </p>
+              {orderDetails ? (
+                orderDetails.items.map((item) => (
+                  <div key={item.id} className="flex items-start space-x-4 mb-4">
+                    <div className="w-16 h-16 relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+                      <ShoppingBag className="text-gray-300" size={24} />
                     </div>
 
-                    <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                    <div className="pt-1">
+                      <div className="flex items-center space-x-2">
+                        <p className="font-medium text-gray-800 text-sm">
+                          {item.order_product_name}
+                        </p>
+                      </div>
+
+                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                      <p className="text-xs font-semibold text-[#a07d48]">€{parseFloat(item.order_product_price).toFixed(2)}</p>
+                    </div>
                   </div>
+                ))
+              ) : cartLoading || orderLoading ? (
+                <div className="animate-pulse space-y-4">
+                  {[1, 2].map(i => (
+                    <div key={i} className="flex space-x-4">
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-100 rounded w-3/4"></div>
+                        <div className="h-4 bg-gray-100 rounded w-1/2"></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <p className="text-sm text-gray-500 italic">No items found.</p>
+              )}
             </div>
 
             <div className="border-t border-gray-200 my-4" />
 
-            <div className="space-y-2 text-sm text-gray-600">
+            <div className="space-y-4 text-sm text-gray-600">
               <div className="flex justify-between">
-                <span>Subtotal ({cartData?.cards?.length || 0} item{cartData?.cards?.length !== 1 ? 's' : ''})</span>
-                <span>€{cartTotal.toFixed(2)}</span>
+                <span>Subtotal ({orderDetails?.items?.length || 0} item{orderDetails?.items?.length !== 1 ? 's' : ''})</span>
+                <span className="text-gray-900 font-medium">€{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>€{shippingCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Tax (19% VAT)</span>
-                <span>€{tax.toFixed(2)}</span>
+                <span className="text-gray-900 font-medium">{shippingCost > 0 ? `€${shippingCost.toFixed(2)}` : 'Free'}</span>
               </div>
             </div>
 

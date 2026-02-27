@@ -415,11 +415,56 @@ const CustomDesignCard = ({
 };
 
 // ----------------------------------------------------
+// 4.5.1 ITEM IMAGE SLIDER
+// ----------------------------------------------------
+
+const ItemImageSlider = ({ images }: { images: string[] }) => {
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  React.useEffect(() => {
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIdx((prev) => (prev + 1) % images.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="w-16 h-20 bg-gray-100 rounded shrink-0 flex items-center justify-center text-[10px] text-gray-400">
+        No Img
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-16 h-20 relative rounded overflow-hidden shrink-0 group">
+      <img
+        src={images[currentIdx]}
+        className="w-full h-full object-cover transition-opacity duration-500"
+        alt="Product"
+      />
+      {images.length > 1 && (
+        <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-0.5">
+          {images.map((_, i) => (
+            <div
+              key={i}
+              className={`w-1 h-1 rounded-full ${i === currentIdx ? 'bg-white' : 'bg-white/40'}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ----------------------------------------------------
 // 4.6 ORDER CARD
 // ----------------------------------------------------
 
 const OrderCard = ({ order }: { order: IOrder }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const router = useRouter();
 
   const formattedDate = new Date(order.created_at).toLocaleDateString('en-US', {
     month: 'short',
@@ -451,9 +496,7 @@ const OrderCard = ({ order }: { order: IOrder }) => {
       <div className="p-5 space-y-4">
         {order.items.slice(0, isExpanded ? undefined : 2).map((item) => (
           <div key={item.id} className="flex gap-4">
-            <div className="w-16 h-20 bg-gray-100 rounded shrink-0 flex items-center justify-center text-[10px] text-gray-400">
-              Img
-            </div>
+            <ItemImageSlider images={item.item_image} />
             <div className="flex-1 min-w-0">
               <h4 className="text-sm font-semibold text-gray-900 truncate">{item.order_product_name}</h4>
               <div className="flex justify-between items-center mt-2">
@@ -496,11 +539,19 @@ const OrderCard = ({ order }: { order: IOrder }) => {
       </div>
 
       <div className="p-5 bg-gray-50 border-t border-[#E8E3DC] flex justify-between items-center">
-        <div>
+        <div className="flex-1">
           <p className="text-[10px] text-gray-500">Shipping: €{order.shipping_cost.toFixed(2)}</p>
           <p className="text-xs font-bold text-gray-900 mt-1">Total Due</p>
+          <p className="text-2xl font-bold text-[#a07d48]">€{order.total_cost.toFixed(2)}</p>
         </div>
-        <p className="text-2xl font-bold text-[#a07d48]">€{order.total_cost.toFixed(2)}</p>
+        {order.status.toLowerCase() === 'pending' && (
+          <button
+            onClick={() => router.push(`/pages/shipping?order_id=${order.id}`)}
+            className="px-6 py-2 bg-[#a07d48] text-white text-sm font-bold rounded shadow-md hover:bg-[#8b6f47] transition"
+          >
+            PAY NOW
+          </button>
+        )}
       </div>
     </div>
   );

@@ -55,7 +55,7 @@ const CombinedDesignPageFixed = () => {
     });
 
     // If no productId in URL, pick the first product from all products
-    const effectiveProductId = productId || allProductsData?.data?.categories?.[0]?.id?.toString();
+    const effectiveProductId = productId || allProductsData?.results?.categories?.[0]?.id?.toString();
 
     const { data: detailsData } = useGetProductDetailsQuery(effectiveProductId ? parseInt(effectiveProductId) : 0, {
         skip: !effectiveProductId,

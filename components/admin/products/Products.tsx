@@ -250,8 +250,8 @@ const App = () => {
   console.log(data, "all prods data")
 
   useEffect(() => {
-    if (data?.data?.categories) {
-      const mapped: Product[] = data.data.categories.map((p) => {
+    if (data?.results?.categories) {
+      const mapped: Product[] = data.results.categories.map((p) => {
         const categoryTitle = typeof p.category === 'object' && p.category?.title ? p.category.title : 'Unknown';
         const ageRangeLabel = typeof p.age_range === 'object' && p.age_range?.start
           ? `Age ${p.age_range.start}-${p.age_range.end}`

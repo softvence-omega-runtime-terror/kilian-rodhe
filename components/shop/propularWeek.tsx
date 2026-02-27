@@ -58,6 +58,7 @@ import { IProduct } from "@/app/store/slices/services/product/productApi";
 
 export default function PopularWeek({ products, isLoading }: { products: IProduct[], isLoading: boolean }) {
   const router = useRouter();
+  console.log("popular week", products)
   // const [likedProductId, setLikedProductId] = useState<number | null>(null);
 
   const handleOrderNow = async (productId: number) => {
