@@ -3,9 +3,8 @@
 import React from "react";
 import TitleText from "./titleText";
 import Card from "./Card";
+import Loader from "./Loader";
 import { useGetProductCategoriesQuery } from "../app/store/slices/services/product/productApi";
-
-
 
 const CollectionSections = () => {
   const { data, isLoading } = useGetProductCategoriesQuery();
@@ -23,7 +22,7 @@ const CollectionSections = () => {
         {/* Responsive Card Layout Container (4 Cards) */}
         <div className="flex flex-wrap justify-center gap-6 md:gap-8 lg:gap-4 xl:gap-6 mt-10">
           {isLoading ? (
-            <div>Loading...</div>
+            <Loader />
           ) : (
             categories.map((item) => (
               <div key={item.id} className={cardWrapperClasses}>

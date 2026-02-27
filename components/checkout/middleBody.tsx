@@ -232,8 +232,8 @@ const CheckoutReview: React.FC = () => {
         localStorage.setItem("checkout_order_id", response.order.id.toString());
       }
 
-      // Navigate to the next step
-      router.push("/pages/shipping");
+      // Navigate to the next step with order_id in URL
+      router.push(`/pages/shipping?order_id=${response.order.id}`);
     } catch (err) {
       console.error("Checkout failed", err);
       toast.error("Failed to proceed to checkout. Please try again.");
@@ -496,17 +496,13 @@ const CheckoutReview: React.FC = () => {
                 <span>Shipping</span>
                 <span className="text-gray-900 font-medium">{shippingCost > 0 ? `€${shippingCost.toFixed(2)}` : 'Free'}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Estimated Tax (19%)</span>
-                <span className="text-gray-900 font-medium">€{(subtotal * 0.19).toFixed(2)}</span>
-              </div>
             </div>
 
             <div className="border-t border-gray-100 my-6"></div>
 
             <div className="flex justify-between items-center font-bold text-2xl text-gray-900">
               <span className={cormorantItalic.className}>Total Due</span>
-              <span className="text-[#a07d48]">€{(total + (subtotal * 0.19)).toFixed(2)}</span>
+              <span className="text-[#a07d48]">€{total.toFixed(2)}</span>
             </div>
 
             <button
