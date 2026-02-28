@@ -134,19 +134,8 @@ const ManualDiscountForm: React.FC = () => {
   };
 
   // Filter lists based on search
-  const pRes: any = productsRes;
-  const cRes: any = categories;
-
-  const productsList = Array.isArray(pRes?.data)
-    ? pRes.data
-    : (pRes?.data?.categories || pRes?.data?.products || pRes?.categories || pRes?.products || pRes?.results?.categories || pRes?.results?.products || []);
-
-  const categoriesList = Array.isArray(cRes?.data)
-    ? cRes.data
-    : (Array.isArray(cRes) ? cRes : cRes?.categories || cRes?.results?.categories || []);
-
-  const filteredProducts = productsList.filter((p: any) =>
-    p?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = productsRes?.results?.categories?.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   const filteredCategories = categoriesList.filter((c: any) =>

@@ -6,7 +6,11 @@ import Image, { StaticImageData } from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGetProductsQuery, ICategory, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
 import { motion, AnimatePresence } from "framer-motion";
+import Loader from "../../../components/Loader";
+import EmptyState from "../../../components/EmptyState";
 
 // Images (Ensure you have a checkmark icon or use an SVG/Unicode character)
 // import hoodi from "@/public/image/collections/imag1.jpg";
@@ -407,10 +411,10 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   });
 
   const productsToDisplay: Product[] = useMemo(() => {
-    if (!Array.isArray(productsData?.data?.categories)) return [];
+    if (!Array.isArray(productsData?.results?.categories)) return [];
 
     // Map API data to UI Product type
-    const mapped = productsData.data.categories.map((p) => ({
+    const mapped = productsData.results.categories.map((p) => ({
       id: p.id,
       imageSrc: p.images[0]?.image || "",
       isBestSeller: false,
@@ -442,7 +446,13 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   // ... (Action handlers same)
   const [addToCart] = useAddToCartMutation();
 
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+
   const handleOrderNow = useCallback(async (product: Product) => {
+    if (!isAuthenticated) {
+      setToast({ message: "Unauthorized: Please login to order products.", type: 'error' });
+      return;
+    }
     try {
       await addToCart({ product: product.id, quantity: 1 }).unwrap();
       router.push(`/pages/checkout`);
@@ -450,9 +460,13 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
       console.error("Failed to add to cart", error);
       setToast({ message: "Failed to add to cart. Please try again.", type: 'error' });
     }
-  }, [router, addToCart]);
+  }, [router, addToCart, isAuthenticated]);
 
   const handleAddToCart = useCallback(async (product: Product) => {
+    if (!isAuthenticated) {
+      setToast({ message: "Unauthorized: Please login to add to cart.", type: 'error' });
+      return;
+    }
     try {
       await addToCart({ product: product.id, quantity: 1 }).unwrap();
       setToast({ message: "Added to cart successfully!", type: 'success' });
@@ -460,13 +474,13 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
       console.error("Failed to add to cart", error);
       setToast({ message: "Failed to add to cart. Please try again.", type: 'error' });
     }
-  }, [addToCart]);
+  }, [addToCart, isAuthenticated]);
 
   const handleCustomizeRoute = useCallback((id: number) => {
     router.push(`/pages/customise?id=${id}`);
   }, [router]);
 
-  const totalFilteredProducts = Array.isArray(productsData?.data?.categories) ? productsData.data.categories.length : 0;
+  const totalFilteredProducts = Array.isArray(productsData?.results?.categories) ? productsData.results.categories.length : 0;
   const canLoadMore = false;
 
   const handleLoadMore = useCallback(() => {
@@ -592,7 +606,7 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
               SUB CATEGORY
             </h3>
             <ul className="space-y-1 text-sm tracking-wide text-gray-800">
-              {productsData?.data?.sub_categories?.map((sub) => (
+              {productsData?.results?.sub_categories?.map((sub) => (
                 <li
                   key={sub.id}
                   className={`cursor-pointer transition ${selectedSubCategoryId === sub.id ? 'text-black font-bold' : 'hover:text-black'
@@ -682,12 +696,9 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
         ) : (
           <div className="text-center py-20 text-gray-600">
             {isLoading ? (
-              <p className="text-xl font-semibold">Loading products...</p>
+              <Loader text="Loading products..." />
             ) : (
-              <>
-                <p className="text-xl font-semibold">No products found matching your criteria.</p>
-                <p className="mt-2">Try adjusting your filters.</p>
-              </>
+              <EmptyState message="No products found matching your criteria." />
             )}
           </div>
         )}
