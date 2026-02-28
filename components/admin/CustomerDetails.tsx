@@ -1,117 +1,26 @@
-"use client";
 import React from "react";
-import { ArrowLeftIcon, Edit, Trash2 } from "lucide-react";
+import { ArrowLeftIcon, Loader2 } from "lucide-react";
 import Image from "next/image";
+import { useGetCustomerByIdQuery } from "@/app/store/slices/services/adminService/customerAdminApi";
 
 // Assuming these paths are correct
 import starIcon from "@/public/image/admin/products/star.svg";
 import shopIcon from "@/public/image/admin/products/shop.svg";
 import baseIcon from "@/public/image/admin/products/bach.svg";
 import incrementIcon from "@/public/image/admin/Settings/incrementWhiteBtn.svg";
+
 // ---------------- Types ----------------
 
-type ViewType = "list" | "add" | "view" | "edit";
+type ViewType = "list" | "add" | "view";
 type ViewChangeHandler = (view: ViewType, id?: number) => void;
 
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  ageGroup: string;
-  price: string;
-  stock: number;
-  sales: number;
-  status: "Active" | "Out of Stock";
+interface OrderItem {
+  id: string;
+  date: string;
+  productName: string;
+  amount: string;
+  status: string;
 }
-
-// ---------------- Dummy Data ----------------
-
-const initialProductData: Product[] = [
-  {
-    id: 1,
-    name: "Premium Custom T-Shirt",
-    category: "T-Shirts",
-    ageGroup: "Adults (18-35)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Premium Custom T-Shirt",
-    category: "T-Shirts",
-    ageGroup: "Adults (18-35)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Premium Custom T-Shirt",
-    category: "T-Shirts",
-    ageGroup: "Adults (18-35)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Premium Custom T-Shirt",
-    category: "T-Shirts",
-    ageGroup: "Adults (18-35)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 5,
-    name: "Premium Custom T-Shirt",
-    category: "T-Shirts",
-    ageGroup: "Adults (18-35)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 6,
-    name: "Premium Custom T-Shirt",
-    category: "T-Shirts",
-    ageGroup: "Adults (18-35)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-];
-
-const orderData = [
-  {
-    id: "ORD-2847",
-    date: "Oct 10, 2025",
-    productName: "Custom T-Shirt",
-    amount: "34.99",
-    status: "Completed",
-  },
-  {
-    id: "ORD-2801",
-    date: "Oct 05, 2025",
-    productName: "AI Design Hoodie",
-    amount: "54.99",
-    status: "Completed",
-  },
-  {
-    id: "ORD-2765",
-    date: "Sep 28, 2025",
-    productName: "Custom Mug",
-    amount: "19.99",
-    status: "Completed",
-  },
-];
 
 const FolderIcon = () => (
   <Image src={shopIcon} alt="shop" height={20} width={20} />
@@ -138,16 +47,36 @@ const Card = ({
   </div>
 );
 
-const ProductDetailScreen = ({
+const CustomerDetailScreen = ({
   onViewChange,
-  productId,
+  productId: customerId, // Kept productId as name for compatibility with Customers.tsx for now, but internal usage is customerId
 }: {
   onViewChange: ViewChangeHandler;
   productId: number;
 }) => {
-  const product = initialProductData.find((p) => p.id === productId);
+  const { data: customer, isLoading, isError } = useGetCustomerByIdQuery(customerId);
 
-  if (!product) {
+  // Still using dummy data for orders as the customer endpoint doesn't return full order history yet
+  const orderData: OrderItem[] = [
+    {
+      id: "ORD-2847",
+      date: "Oct 10, 2025",
+      productName: "Custom T-Shirt",
+      amount: "34.99",
+      status: "Completed",
+    },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+        <Loader2 className="w-8 h-8 animate-spin text-[#8B6F47]" />
+        <p className="mt-4 text-gray-500">Loading customer details...</p>
+      </div>
+    );
+  }
+
+  if (isError || !customer) {
     return (
       <div className="p-4 sm:p-8 w-full min-h-screen bg-gray-50 font-sans">
         <div className="flex items-center space-x-4 mb-8 pb-4 border-b border-[#e8e3dc]">
@@ -159,19 +88,23 @@ const ProductDetailScreen = ({
           </button>
 
           <Title
-            text="Product Not Found"
-            paragraph={`Could not load product ID: ${productId}`}
+            text="Customer Not Found"
+            paragraph={`Could not load customer ID: ${customerId}`}
           />
         </div>
 
         <Card>
           <p className="text-red-500">
-            Error: The requested product could not be loaded.
+            Error: The requested customer could not be loaded.
           </p>
         </Card>
       </div>
     );
   }
+
+  const fullName = (customer.first_name || customer.last_name)
+    ? `${customer.first_name || ''} ${customer.last_name || ''}`.trim()
+    : customer.email.split('@')[0];
 
   return (
     <>
@@ -186,21 +119,10 @@ const ProductDetailScreen = ({
               <ArrowLeftIcon className="w-6 h-6" />
             </button>
 
-            <Title text="Customer Details" paragraph="Customer Detailst" />
+            <Title text="Customer Details" paragraph="View customer profile and activity" />
           </div>
 
-          <div className="flex space-x-3">
-            <button className="flex items-center px-4 py-2 bg-white text-gray-700 font-semibold rounded-xl border border-[#E8E3DC] hover:bg-gray-50 transition ">
-              <Edit className="w-4 h-4 mr-2" /> Edit Product
-            </button>
 
-            <button
-              onClick={() => alert(`Deleting product ${product.id}`)}
-              className="flex items-center px-4 py-2 bg-white text-red-500 font-semibold rounded-xl border border-red-200 hover:bg-red-50 transition"
-            >
-              <Trash2 className="w-4 h-4 mr-2" /> Delete
-            </button>
-          </div>
         </div>
 
         {/* Layout Grid */}
@@ -209,16 +131,16 @@ const ProductDetailScreen = ({
           <div className="lg:col-span-1 space-y-8">
             <Card className="p-4 space-y-5">
               <div className="flex flex-col items-center space-y-3 pt-4 pb-6 border-b border-gray-200">
-                <div className="w-24 h-24 flex items-center justify-center bg-[#8B6F47] rounded-full text-white text-3xl font-bold">
-                  ES
+                <div className="w-24 h-24 flex items-center justify-center bg-[#8B6F47] rounded-full text-white text-3xl font-bold uppercase">
+                  {fullName.substring(0, 2)}
                 </div>
 
                 <h2 className="text-xl font-semibold text-gray-800">
-                  Emma Schmidt
+                  {fullName}
                 </h2>
 
                 <div className="py-1 px-3 rounded-full text-sm font-medium text-[#8B6F47] bg-[#8B6F47]/10 border border-[#8B6F47]">
-                  Regular
+                  {customer.segment}
                 </div>
 
                 <div className="flex space-x-0.5 text-yellow-500">
@@ -244,12 +166,12 @@ const ProductDetailScreen = ({
                       d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                     ></path>
                   </svg>
-                  <div>
+                  <div className="overflow-hidden">
                     <span className="text-sm text-gray-500 font-medium block">
                       Email Address
                     </span>
-                    <span className="text-base font-semibold text-gray-700">
-                      emma.s@email.com
+                    <span className="text-base font-semibold text-gray-700 truncate block">
+                      {customer.email}
                     </span>
                   </div>
                 </div>
@@ -274,7 +196,7 @@ const ProductDetailScreen = ({
                       Phone Number
                     </span>
                     <span className="text-base font-semibold text-gray-700">
-                      +49 176 1234 5678
+                      N/A
                     </span>
                   </div>
                 </div>
@@ -305,7 +227,7 @@ const ProductDetailScreen = ({
                       Address
                     </span>
                     <span className="text-base font-semibold text-gray-700">
-                      Berliner Str. 42, 10115 Berlin
+                      N/A
                     </span>
                   </div>
                 </div>
@@ -330,7 +252,7 @@ const ProductDetailScreen = ({
                       Customer Since
                     </span>
                     <span className="text-base font-semibold text-gray-700">
-                      Jan 15, 2024
+                      {new Date(customer.created_at).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
@@ -352,7 +274,7 @@ const ProductDetailScreen = ({
 
                     <div>
                       <div className="text-[16px] text-[#1A1410] leading-none">
-                        12
+                        {customer.total_orders}
                       </div>
                       <div className="text-[12px] text-[#6b6560]">
                         Total Orders
@@ -372,7 +294,7 @@ const ProductDetailScreen = ({
 
                     <div>
                       <div className="text-[16px] text-[#1A1410] leading-none">
-                        €418.88
+                        €{Number(customer.total_spent).toFixed(2)}
                       </div>
                       <div className="text-[12px] text-[#6b6560]">
                         Total Spent
@@ -387,7 +309,7 @@ const ProductDetailScreen = ({
 
                     <div>
                       <div className="text-[16px] text-[#1A1410] leading-none">
-                        AI Generated
+                        {customer.preferred_design}
                       </div>
                       <div className="text-[12px] text-[#6b6560]">
                         Preferred Design
@@ -403,12 +325,14 @@ const ProductDetailScreen = ({
                     <span className="text-base text-[#6b6560] ">
                       Average Order Value
                     </span>
-                    <span className="text-base font-semibold">€34.91</span>
+                    <span className="text-base font-semibold">
+                      €{customer.total_orders > 0 ? (Number(customer.total_spent) / customer.total_orders).toFixed(2) : '0.00'}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center text-gray-700">
                     <span className="text-base text-[#6b6560]">Last Order</span>
                     <span className="text-base font-semibold">
-                      Oct 10, 2025
+                      {customer.last_order ? new Date(customer.last_order).toLocaleDateString() : 'Never'}
                     </span>
                   </div>
                 </div>
@@ -427,13 +351,12 @@ const ProductDetailScreen = ({
                   </h2>
                   {/* Total Orders Badge */}
                   <div className="py-1 px-3 bg-gray-100 text-sm font-medium text-gray-700 rounded-full border border-gray-200">
-                    {orderData.length} Orders
+                    {customer.total_orders} Orders
                   </div>
                 </div>
 
                 {/* Order List Container */}
                 <div className="space-y-4">
-                  {/* --- 2. Using map() to render the data --- */}
                   {orderData.map((order) => (
                     <div
                       key={order.id}
@@ -490,7 +413,12 @@ const ProductDetailScreen = ({
                       </div>
                     </div>
                   ))}
-                  {/* --- End of map() --- */}
+
+                  {customer.total_orders === 0 && (
+                    <div className="text-center py-6 text-gray-500 border-2 border-dashed border-[#e8e3dc] rounded-xl">
+                      No order history available for this customer.
+                    </div>
+                  )}
                 </div>
               </div>
             </Card>
@@ -501,4 +429,4 @@ const ProductDetailScreen = ({
   );
 };
 
-export default ProductDetailScreen;
+export default CustomerDetailScreen;

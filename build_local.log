@@ -1,0 +1,120 @@
+
+> template@0.1.0 build
+> next build --turbopack
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 26ms
+ ✓ Compiled successfully in 3.4s
+   Linting and checking validity of types ...
+
+./app/pages/my-creation/myCreationBody.tsx
+294:3  Warning: '_productId' is defined but never used.  @typescript-eslint/no-unused-vars
+335:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+585:10  Warning: '_orderedProducts' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+586:10  Warning: '_myDesigns' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/pages/payment/page.tsx
+151:7  Warning: '_SuccessModal' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/AnalysisBodyTable.tsx
+45:14  Warning: '_e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/Categories.tsx
+101:18  Warning: '_e' is defined but never used.  @typescript-eslint/no-unused-vars
+304:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+422:14  Warning: '_err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/CmsHomeFeatureIcon.tsx
+155:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/admin/ContactInfoPreview.tsx
+147:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/admin/Order.tsx
+105:11  Warning: 'Order' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/OrderView.tsx
+26:8  Warning: 'Image' is defined but never used.  @typescript-eslint/no-unused-vars
+31:8  Warning: 'productImage' is defined but never used.  @typescript-eslint/no-unused-vars
+38:11  Warning: 'Product' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/SocialMediaLink.tsx
+155:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/admin/emailsComponent/AnalysisBodyTable.tsx
+45:14  Warning: '_e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/emailsComponent/DiscountEmailSend.tsx
+33:22  Warning: '_isLoadingCodes' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+35:48  Warning: '_isLoadingSeries' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+37:17  Warning: '_usageStats' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/aiDesignGenerate.tsx
+26:3  Warning: '_onPreviewClick' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/livePreview.tsx
+69:12  Warning: '_selectedAiFile' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+267:11  Warning: '_designTools' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+283:11  Warning: '_toolsStagger' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+288:11  Warning: '_buttonHover' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+294:11  Warning: '_activeModeStyle' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+296:11  Warning: '_inactiveModeStyle' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/shipping/middleBody.tsx
+75:7  Warning: '_ShippingMethod' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/33) ...
+   Generating static pages (8/33) 
+   Generating static pages (16/33) 
+   Generating static pages (24/33) 
+ ✓ Generating static pages (33/33)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                   Size  First Load JS
+┌ ○ /                                          0 B         224 kB
+├ ○ /_not-found                                0 B         156 kB
+├ ○ /admin                                 2.24 kB         176 kB
+├ ○ /admin/cms                             19.8 kB         193 kB
+├ ○ /admin/customers                       16.8 kB         190 kB
+├ ○ /admin/design                           8.3 kB         182 kB
+├ ○ /admin/discounts                       31.4 kB         205 kB
+├ ○ /admin/orders                          6.99 kB         181 kB
+├ ○ /admin/products                        18.3 kB         192 kB
+├ ○ /admin/settings                        29.3 kB         203 kB
+├ ○ /admin/signup                          3.06 kB         177 kB
+├ ○ /pages/checkout                        4.84 kB         220 kB
+├ ○ /pages/children-collections            5.86 kB         221 kB
+├ ○ /pages/collections                     7.63 kB         223 kB
+├ ○ /pages/contact                             0 B         215 kB
+├ ○ /pages/createaccount                   9.58 kB         166 kB
+├ ○ /pages/customise                       11.7 kB         227 kB
+├ ○ /pages/forgatepassword                 9.17 kB         166 kB
+├ ○ /pages/landing                             0 B         224 kB
+├ ○ /pages/login                           11.8 kB         168 kB
+├ ○ /pages/my-creation                     4.85 kB         220 kB
+├ ○ /pages/my-creation/create-your-design  10.8 kB         226 kB
+├ ○ /pages/others-collections              5.54 kB         221 kB
+├ ○ /pages/payment                         3.79 kB         219 kB
+├ ○ /pages/payment/cancel                  1.31 kB         217 kB
+├ ○ /pages/payment/success                 48.1 kB         217 kB
+├ ○ /pages/save-products                   64.3 kB         221 kB
+├ ○ /pages/shipping                        4.78 kB         220 kB
+├ ○ /pages/shop                            6.16 kB         222 kB
+└ ○ /pages/woman-collections               5.81 kB         221 kB
++ First Load JS shared by all               180 kB
+  ├ chunks/04eb3a5e76b84688.js               28 kB
+  ├ chunks/2008ffcf9e5b170c.js               13 kB
+  ├ chunks/8082ab48faca5ea1.js             17.2 kB
+  ├ chunks/a655730ccc1c0fff.js             59.2 kB
+  ├ chunks/5d61e8cd195a0f55.css            22.4 kB
+  └ other shared chunks (total)            40.2 kB
+
+
+○  (Static)  prerendered as static content
+
