@@ -4,6 +4,8 @@ import { Cormorant_Garamond } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useGetCustomProductsQuery, ICustomProductVersion, useDeleteCustomProductVersionMutation } from "@/app/store/slices/services/ai/aiApi";
 import { useGetOrdersQuery, IOrder } from "@/app/store/slices/services/order/orderApi";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
 
 // Placeholder image for standalone environment
 // const ICON_PLACEHOLDER_URL =
@@ -625,6 +627,7 @@ const EmptyCreationsState = ({
 export default function App() {
   // Initialize Next.js Router
   const router = useRouter();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const [activeTab, setActiveTab] =
     useState<"ordered" | "saved" | "my">("ordered");
@@ -735,6 +738,30 @@ export default function App() {
     // { id: "saved", label: "SAVED DESIGNS", count: savedProducts.length },
     { id: "my", label: "MY DESIGNS", count: customProductsData?.results.reduce((acc: number, p: any) => acc + p.versions.length, 0) || 0 },
   ] as const;
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+        <div className="bg-red-50 p-8 rounded-lg border-2 border-[#E8E3DC] shadow-sm max-w-md w-full">
+          <div className="h-20 w-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Login Required</h2>
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            Please login to view your creations, orders, and saved designs.
+          </p>
+          <button
+            onClick={() => router.push("/pages/login")}
+            className="w-full py-4 bg-[#D4AF37] text-white font-bold tracking-widest uppercase hover:bg-[#c9a632] transition-colors shadow-lg"
+          >
+            Login Now
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
