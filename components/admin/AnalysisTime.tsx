@@ -5,10 +5,10 @@ interface CodeUsageTimelineProps {
   data?: RedemptionLast7Days;
 }
 
-const CodeUsageTimeline: React.FC<CodeUsageTimelineProps> = ({ data }) => {
-  // Define the order of days for the timeline
-  const daysOrder: (keyof RedemptionLast7Days)[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+// Define the order of days for the timeline
+const daysOrder: (keyof RedemptionLast7Days)[] = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+const CodeUsageTimeline: React.FC<CodeUsageTimelineProps> = ({ data }) => {
   const codeUsageData = useMemo(() => {
     if (!data) return [];
 
@@ -23,7 +23,7 @@ const CodeUsageTimeline: React.FC<CodeUsageTimelineProps> = ({ data }) => {
         day,
         value,
         percentage,
-        hasPattern: day === "Thu", // Keep the pattern for Thu as per original design or make it dynamic if needed
+        hasPattern: day === "Thu",
       };
     });
   }, [data]);

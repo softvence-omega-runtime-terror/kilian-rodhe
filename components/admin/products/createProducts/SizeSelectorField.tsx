@@ -44,20 +44,23 @@ const SizeSelectorField: React.FC<SizeSelectorFieldProps> = ({
   const universalSize = "One Size (Universal)";
 
   const handleSizeClick = (size: string) => {
-    setSelectedSizes((prev) => {
-      const isUniversal = size === universalSize;
+    const isUniversal = size === universalSize;
+    let newSelected: string[] = [];
 
-      const newSelected = prev.includes(size)
-        ? prev.filter((s) => s !== size)
-        : isUniversal
-        ? [size]
-        : prev.includes(universalSize)
-        ? [size]
-        : [...prev, size];
+    if (selectedSizes.includes(size)) {
+      newSelected = selectedSizes.filter((s) => s !== size);
+    } else if (isUniversal) {
+      newSelected = [size];
+    } else if (selectedSizes.includes(universalSize)) {
+      newSelected = [size];
+    } else {
+      newSelected = [...selectedSizes, size];
+    }
 
-      onSizeChange?.(newSelected);
-      return newSelected;
-    });
+    setSelectedSizes(newSelected);
+    if (onSizeChange) {
+      onSizeChange(newSelected);
+    }
   };
 
   return (
@@ -86,10 +89,9 @@ const SizeSelectorField: React.FC<SizeSelectorFieldProps> = ({
                   onClick={() => handleSizeClick(size)}
                   disabled={selectedSizes.includes(universalSize)}
                   className={`rounded-xl border px-4 py-2 text-sm font-semibold transition-all duration-200
-                    ${
-                      isSelected
-                        ? "border-[#8B6F47] bg-[#8B6F47] text-white"
-                        : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                    ${isSelected
+                      ? "border-[#8B6F47] bg-[#8B6F47] text-white"
+                      : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
                     }
                   `}
                 >
@@ -110,10 +112,9 @@ const SizeSelectorField: React.FC<SizeSelectorFieldProps> = ({
           type="button"
           onClick={() => handleSizeClick(universalSize)}
           className={`rounded-xl border px-6 py-2 text-sm font-semibold transition-all duration-200
-            ${
-              selectedSizes.includes(universalSize)
-                ? "border-[#8B6F47] bg-[#8B6F47] text-white"
-                : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+            ${selectedSizes.includes(universalSize)
+              ? "border-[#8B6F47] bg-[#8B6F47] text-white"
+              : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
             }
           `}
         >

@@ -269,6 +269,8 @@ const App = () => {
         };
       });
       setProductData(mapped);
+    } else {
+      setProductData([]);
     }
   }, [data]);
 

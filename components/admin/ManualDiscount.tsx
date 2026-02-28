@@ -138,8 +138,8 @@ const ManualDiscountForm: React.FC = () => {
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const filteredCategories = categories?.filter(c =>
-    c.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categoriesList.filter((c: any) =>
+    c?.title?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   return (
@@ -304,7 +304,7 @@ const ManualDiscountForm: React.FC = () => {
             </div>
             <button
               onClick={toggleOneTimeUse}
-              className={`relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 ${formData.is_one_time ? "bg-indigo-600" : "bg-gray-200"}`}
+              className={`relative inline-flex shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 ${formData.is_one_time ? "bg-indigo-600" : "bg-gray-200"}`}
             >
               <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white transform ring-0 transition ease-in-out duration-200 ${formData.is_one_time ? "translate-x-5" : "translate-x-0"}`} />
             </button>
@@ -356,7 +356,7 @@ const ManualDiscountForm: React.FC = () => {
               />
               <div className="max-h-48 overflow-y-auto space-y-2 border border-gray-200 rounded-md p-2 bg-white">
                 {formData.applicable_type === "Specific Products" ? (
-                  filteredProducts.map((p) => (
+                  filteredProducts.map((p: any) => (
                     <div key={p.id} className="flex items-center">
                       <input
                         type="checkbox"
@@ -369,7 +369,7 @@ const ManualDiscountForm: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  filteredCategories.map((c) => (
+                  filteredCategories.map((c: any) => (
                     <div key={c.id} className="flex items-center">
                       <input
                         type="checkbox"

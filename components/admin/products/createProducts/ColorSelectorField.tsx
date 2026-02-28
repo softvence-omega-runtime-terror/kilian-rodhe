@@ -31,14 +31,14 @@ const ColorSelectorField: React.FC<ColorSelectorFieldProps> = ({
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
   const handleColorClick = (value: string) => {
-    setSelectedColors((prev) => {
-      const newSelected = prev.includes(value)
-        ? prev.filter((c) => c !== value)
-        : [...prev, value];
+    const newSelected = selectedColors.includes(value)
+      ? selectedColors.filter((c) => c !== value)
+      : [...selectedColors, value];
 
-      onColorChange?.(newSelected);
-      return newSelected;
-    });
+    setSelectedColors(newSelected);
+    if (onColorChange) {
+      onColorChange(newSelected);
+    }
   };
 
   return (
@@ -60,34 +60,30 @@ const ColorSelectorField: React.FC<ColorSelectorFieldProps> = ({
               type="button"
               onClick={() => handleColorClick(color.value)}
               className={`flex items-center justify-start rounded-xl border p-3 transition-all duration-200
-                ${
-                  isSelected
-                    ? "border-[#8B6F47] bg-[#8B6F47]/10 ring-2 ring-[#8B6F47]/50"
-                    : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"
+                ${isSelected
+                  ? "border-[#8B6F47] bg-[#8B6F47]/10 ring-2 ring-[#8B6F47]/50"
+                  : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"
                 }
               `}
             >
               <span
-                className={`mr-3 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 shadow-sm ${
-                  color.value === "white" ? "border-gray-400" : ""
-                }`}
+                className={`mr-3 flex h-6 w-6 items-center justify-center rounded-full border border-gray-200 shadow-sm ${color.value === "white" ? "border-gray-400" : ""
+                  }`}
                 style={{ backgroundColor: color.hex }}
               >
                 {isSelected && (
                   <Check
-                    className={`h-4 w-4 ${
-                      color.value === "white" || color.value === "yellow"
+                    className={`h-4 w-4 ${color.value === "white" || color.value === "yellow"
                         ? "text-[#8B6F47]"
                         : "text-white"
-                    }`}
+                      }`}
                   />
                 )}
               </span>
 
               <span
-                className={`font-medium ${
-                  isSelected ? "text-[#8B6F47]" : "text-gray-700"
-                }`}
+                className={`font-medium ${isSelected ? "text-[#8B6F47]" : "text-gray-700"
+                  }`}
               >
                 {color.label}
               </span>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Search, Filter, Download, Copy, Eye, Trash2, Loader2, Trash } from "lucide-react";
 import { useGetAllDiscountCodesQuery, DiscountCodeItem, useBulkDeleteDiscountMutation } from "@/app/store/slices/services/adminService/adminPromos/adminPromoApi";
 import { toast } from "sonner";
@@ -42,7 +42,7 @@ const CouponCodeManager = () => {
         month: 'short',
         day: 'numeric',
       }).format(date);
-    } catch (e) {
+    } catch (_e) {
       return dateString;
     }
   };

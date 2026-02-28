@@ -11,7 +11,7 @@ import { ShoppingBag } from "lucide-react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 
 // Assets
-import mug from "@/public/image/shipping/mug.png";
+// import mug from "@/public/image/shipping/mug.png";
 import userIcon from "@/public/image/shipping/Icon (1).svg";
 import mailIcon from "@/public/image/shipping/Icon (2).svg";
 import phone from "@/public/image/shipping/Icon (3).svg";
@@ -74,7 +74,7 @@ interface InputFieldProps {
 
 // ---------------- Shipping Method Component ---------------- (No changes)
 
-const ShippingMethod: React.FC<ShippingMethodProps> = ({
+const _ShippingMethod: React.FC<ShippingMethodProps> = ({
   title,
   desc,
   price,

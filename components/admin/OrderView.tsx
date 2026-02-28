@@ -24,11 +24,11 @@ import {
   Calendar, // For Estimated Delivery/Payment Date
 } from "lucide-react";
 import Image from "next/image";
+import { useGetOrderByIdQuery } from "@/app/store/slices/services/adminService/orderAdminApi";
 
 // Assuming these paths are correct - Keep them as placeholders
 
 import productImage from "@/public/image/admin/products/productImage.jpg";
-import rightIcon from "@/public/image/admin/products/rightRounderIcon.svg";
 
 // ---------------- Types ----------------
 
@@ -156,104 +156,8 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
 };
 // --- END: TimelineStep Component ---
 
-// ---------------- Dummy Data ----------------
 
-const initialProductData: Product[] = [
-  {
-    id: 1,
-    name: "Premium Custom T-Shirt",
-    typeGenerate: "AI Generated",
-    imageSize: "4800x6000 px (300 DPI)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 2,
-    name: "Premium Custom T-Shirt",
-    typeGenerate: "AI Generated",
-    imageSize: "4800x6000 px (300 DPI)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 3,
-    name: "Premium Custom T-Shirt",
-    typeGenerate: "AI Generated",
-    imageSize: "4800x6000 px (300 DPI)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 4,
-    name: "Premium Custom T-Shirt",
-    typeGenerate: "AI Generated",
-    imageSize: "4800x6000 px (300 DPI)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
 
-  {
-    id: 5,
-    name: "Premium Custom T-Shirt",
-    typeGenerate: "AI Generated",
-    imageSize: "4800x6000 px (300 DPI)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-  {
-    id: 6,
-    name: "Premium Custom T-Shirt",
-    typeGenerate: "AI Generated",
-    imageSize: "4800x6000 px (300 DPI)",
-    price: "€34.99",
-    stock: 156,
-    sales: 234,
-    status: "Active",
-  },
-];
-
-// --- Order Summary Mock Data (Fixed missing 'quantity') ---
-const mockOrderSummary = {
-  status: "Processing",
-  color: "Black",
-  size: "L",
-  totalAmount: "€34.99",
-  quantity: 1, // ADDED: Quantity was missing, causing an error in OrderSummaryCard
-};
-
-// --- Customer Data (Kept as is) ---
-const mockCustomerInfo = {
-  customerName: "Emma Schmidt",
-  emailAddress: "emma.s@email.com",
-  phoneNumber: "+49 176 1234 5678",
-  shippingAddress: "Berliner Str. 42, 10115 Berlin, Germany",
-};
-
-// --- ADDED: Payment and Delivery Mock Data (From images 9ddf52 and 9e3945) ---
-const mockPaymentInfo = {
-  paymentMethod: "Credit Card (****1234)",
-  paymentDate: "Oct 10, 2025",
-  subtotal: "€34.99",
-  shipping: "€4.99",
-  total: "€39.98",
-};
-
-const mockDeliveryInfo = {
-  estimatedDelivery: "Oct 15, 2025",
-  shippingMethod: "DHL Express",
-  qualityAssurance:
-    "This order has been verified to meet our 300 DPI quality standards for optimal print results.",
-};
 // --- END: Payment and Delivery Mock Data ---
 
 // ---------------- Reusable Components ----------------
@@ -335,64 +239,7 @@ const SummaryStat: React.FC<SummaryStatProps> = ({
 };
 
 // --- OrderSummary Card Component (Kept as is) ---
-const OrderSummaryCard: React.FC = () => {
-  const summary = mockOrderSummary;
 
-  return (
-    <Card>
-      {/* Header with Status Badge */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-normal text-[#1a1410] font-sans">
-          Order Summary
-        </h2>
-        {/* Processing Status Badge */}
-        <div className="flex items-center px-4 py-2 bg-blue-100 text-[#1447E6] rounded-full text-sm font-medium">
-          <Clock className="w-4 h-4 mr-1 text-[#1447E6] " />
-          {summary.status}
-        </div>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {/* Quantity (Now works as 'quantity' is in mock data) */}
-        <SummaryStat
-          icon={<Package />}
-          label="Quantity"
-          value={`${summary.quantity} items`}
-        />
-
-        {/* 🎨 Color */}
-        <div
-          className={`flex flex-col justify-start p-5 gap-2 rounded-xl bg-[#faf9f7] w-full`}
-        >
-          {/* 1. Palette Icon + Label (Color) */}
-          <div className="flex items-center text-sm text-gray-600 font-medium">
-            <Palette className="w-5 h-5 mr-1 text-yellow-800/80" />
-            Color
-          </div>
-
-          {/* 2. Black Dot + Text */}
-          <div className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-black border border-gray-400" />
-            <span>{summary.color}</span>
-          </div>
-        </div>
-        {/* END: Color Customization */}
-
-        {/* Size */}
-        <SummaryStat icon={<Expand />} label="Size" value={summary.size} />
-
-        {/* Total Amount (Last Column, brown background) */}
-        <SummaryStat
-          icon={<DollarSign />}
-          label="Total Amount"
-          value={summary.totalAmount}
-          isTotal={true}
-        />
-      </div>
-    </Card>
-  );
-};
 // --- END: OrderSummary Card Component ---
 
 // --- CustomerStat Component (Kept as is, no cloneElement type issue here) ---
@@ -429,103 +276,10 @@ const CustomerStat: React.FC<CustomerStatProps> = ({
 );
 
 // --- CustomerInformationCard Component (Kept as is) ---
-const CustomerInformationCard: React.FC = () => {
-  const info = mockCustomerInfo;
 
-  return (
-    <Card>
-      <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
-        Customer Information
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Customer Name */}
-        <CustomerStat
-          icon={<User />}
-          label="Customer Name"
-          value={info.customerName}
-          bgColor="bg-[#faf9f7]"
-          iconColor="text-blue-500"
-        />
-
-        {/* Email Address */}
-        <CustomerStat
-          icon={<Mail />}
-          label="Email Address"
-          value={info.emailAddress}
-          bgColor="bg-[#faf9f7]"
-          iconColor="text-green-500"
-        />
-
-        {/* Phone Number */}
-        <CustomerStat
-          icon={<Phone />}
-          label="Phone Number"
-          value={info.phoneNumber}
-          bgColor="bg-[#faf9f7]"
-          iconColor="text-purple-500"
-        />
-
-        {/* Shipping Address */}
-        <CustomerStat
-          icon={<MapPin />}
-          label="Shipping Address"
-          value={info.shippingAddress}
-          bgColor="bg-[#faf9f7]"
-          iconColor="text-orange-500"
-        />
-      </div>
-    </Card>
-  );
-};
 // --- END: CustomerInformationCard Component ---
 
 // --- ADDED: Payment Details Card (No cloneElement issue here) ---
-const PaymentDetailsCard: React.FC = () => {
-  const info = mockPaymentInfo;
-
-  // Reusable component for Payment Method/Date
-  const PaymentDetailItem = ({
-    icon,
-    label,
-    value,
-  }: {
-    // Also updated type here for consistency
-    icon: React.ReactElement<{ className?: string }>;
-    label: string;
-    value: string;
-  }) => (
-    <div className="flex items-start p-4 rounded-xl bg-[#faf9f7]">
-      {/* Icon with brown accent color (matching the Palette icon brown) */}
-      <div className="mr-3 mt-1 text-yellow-800/80">
-        {React.cloneElement(icon, { className: "w-5 h-5" })}
-      </div>
-      <div className="flex flex-col">
-        <span className="text-sm text-gray-500 font-medium">{label}</span>
-        <span className="text-base font-semibold text-gray-800">{value}</span>
-      </div>
-    </div>
-  );
-
-  return (
-    <Card className="flex flex-col h-full">
-      <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
-        Payment Details
-      </h2>
-
-      {/* Payment Method and Date */}
-      <div className="space-y-4 mb-6 border-b border-gray-200 pb-6">
-        <PaymentDetailItem
-          icon={<CreditCard />}
-          label="Payment Method"
-          value={info.paymentMethod}
-        />
-        <PaymentDetailItem
-          icon={<Calendar />}
-          label="Payment Date"
-          value={info.paymentDate}
-        />
-      </div>
 
       {/* Financial Breakdown */}
       <div className="space-y-3 flex-grow">
@@ -552,62 +306,7 @@ const PaymentDetailsCard: React.FC = () => {
 // --- END: Payment Details Card ---
 
 // --- ADDED: Delivery Information Card (No cloneElement issue here) ---
-const DeliveryInformationCard: React.FC = () => {
-  const info = mockDeliveryInfo;
 
-  const DeliveryDetailItem = ({
-    icon,
-    label,
-    value,
-  }: {
-    // Also updated type here for consistency
-    icon: React.ReactElement<{ className?: string }>;
-    label: string;
-    value: string;
-  }) => (
-    <div className="flex items-start p-4 rounded-xl bg-[#faf9f7]">
-      {/* Icon with brown accent color */}
-      <div className="mr-3 mt-1 text-yellow-800/80">
-        {React.cloneElement(icon, { className: "w-5 h-5" })}
-      </div>
-      <div className="flex flex-col">
-        <span className="text-sm text-gray-500 font-medium">{label}</span>
-        <span className="text-base font-semibold text-gray-800">{value}</span>
-      </div>
-    </div>
-  );
-
-  return (
-    <Card className="flex flex-col h-full">
-      <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
-        Delivery Information
-      </h2>
-
-      {/* Estimated Delivery */}
-      <div className="space-y-4 mb-6">
-        <DeliveryDetailItem
-          icon={<Calendar />}
-          label="Estimated Delivery"
-          value={info.estimatedDelivery}
-        />
-        {/* Shipping Method */}
-        <DeliveryDetailItem
-          icon={<Truck />} // Using Truck icon for shipping method
-          label="Shipping Method"
-          value={info.shippingMethod}
-        />
-      </div>
-
-      {/* Quality Assurance Box (with blue border and light background) */}
-      <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/50">
-        <h3 className="text-base font-semibold text-gray-800 mb-1">
-          Quality Assurance
-        </h3>
-        <p className="text-sm text-gray-600">{info.qualityAssurance}</p>
-      </div>
-    </Card>
-  );
-};
 // --- END: Delivery Information Card ---
 
 // ---------------- Main App Component ----------------
@@ -619,10 +318,13 @@ const App = ({
   onViewChange: ViewChangeHandler;
   productId: number;
 }) => {
-  const product = initialProductData.find((p) => p.id === productId);
-  // const detail = DetailedProductData; // detail is no longer needed for Sales Performance
+  const { data: order, isLoading, error } = useGetOrderByIdQuery(productId);
 
-  if (!product) {
+  if (isLoading) {
+    return <div className="p-8 text-center text-gray-500 font-sans">Loading order details...</div>;
+  }
+
+  if (error || !order) {
     return (
       <div className="p-4 sm:p-8 w-full  bg-gray-50 font-sans">
         <div className="flex items-center space-x-4 mb-8 pb-4 border-b border-[#e8e3dc]">
@@ -634,19 +336,47 @@ const App = ({
           </button>
 
           <Title
-            text="Product Not Found"
-            paragraph={`Could not load product ID: ${productId}`}
+            text="Order Not Found"
+            paragraph={`Could not load order ID: ${productId}`}
           />
         </div>
 
         <Card>
           <p className="text-red-500">
-            Error: The requested product could not be loaded.
+            Error: The requested order could not be loaded.
           </p>
         </Card>
       </div>
     );
   }
+
+  const mockOrderStatusDetails = {
+    currentStep: order.status === "paid" ? "Order Placed" : order.status,
+    steps: [
+      {
+        name: "Order Placed",
+        date: new Date(order.date).toLocaleDateString(),
+      },
+      {
+        name: "Quality Check Passed",
+        date: "Verified",
+      },
+      {
+        name: "In Production",
+        date: order.status === "processing" ? "Active" : "Completed",
+      },
+      {
+        name: "Shipped",
+        date: order.status === "shipped" ? "In Transit" : "Pending",
+      },
+      {
+        name: "Delivered",
+        date: ["completed", "delivered"].includes(order.status.toLowerCase()) ? "Success" : "Pending",
+      },
+    ],
+  };
+
+  const { steps, currentStep } = mockOrderStatusDetails;
 
   return (
     <>
@@ -688,14 +418,7 @@ const App = ({
               <h1 className=" text-[#1A1410] text-[16px] font-sans font-medium ">
                 Product & Design
               </h1>
-              <div className="relative w-full aspect-square rounded-xl overflow-hidden ">
-                <Image
-                  src={productImage}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+
 
               {/* Status & Info */}
               <div className="space-y-3">
@@ -705,7 +428,7 @@ const App = ({
                       Product Name
                     </span>
                     <span className="text-[14px] text-[#1A1410] font-medium">
-                      Custom T-Shirt
+                      {order.product}
                     </span>
                   </div>
                 </div>
@@ -715,17 +438,16 @@ const App = ({
                     Design Type
                   </span>
                   <span className="text-sm font-medium text-[#8200DB] py-1 px-3 rounded-xl bg-[#F3E8FF] border border-transparent ">
-                    {product.typeGenerate}
+                    {order.design_type}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-500 font-medium">
-                    Resolution
+                    Order UID
                   </span>
                   <span className="text-sm font-semibold border flex justify-center gap-2 border-[#e8e3dc] text-gray-700 py-1 px-3 rounded-xl bg-[#DCFCE7]">
-                    <Image src={rightIcon} alt="icon" height={20} width={20} />{" "}
-                    {product.imageSize}
+                    {order.order_uid}
                   </span>
                 </div>
               </div>
@@ -755,13 +477,6 @@ const App = ({
                     status = "pending";
                   }
 
-                  if (
-                    step.name === "Quality Check Passed" &&
-                    currentIndex > 0
-                  ) {
-                    status = "complete";
-                  }
-
                   return (
                     <TimelineStep
                       key={step.name}
@@ -779,15 +494,137 @@ const App = ({
           {/* Right Column (Order Summary, Customer Info, Payment & Delivery) */}
           <div className="lg:col-span-2 space-y-8">
             {/* 1. Order Summary Card */}
-            <OrderSummaryCard />
+            <Card>
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-normal text-[#1a1410] font-sans">
+                  Order Summary
+                </h2>
+                <div className="flex items-center px-4 py-2 bg-blue-100 text-[#1447E6] rounded-full text-sm font-medium">
+                  <Clock className="w-4 h-4 mr-1 text-[#1447E6] " />
+                  {order.status}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <SummaryStat
+                  icon={<Package />}
+                  label="Quantity"
+                  value={`${order.items.reduce((acc: number, item: any) => acc + item.quantity, 0)} items`}
+                />
+
+                {/* 🎨 Color - Mocking as not in admin order detail yet */}
+                <div className={`flex flex-col justify-start p-5 gap-2 rounded-xl bg-[#faf9f7] w-full`}>
+                  <div className="flex items-center text-sm text-gray-600 font-medium">
+                    <Palette className="w-5 h-5 mr-1 text-yellow-800/80" />
+                    Color
+                  </div>
+                  <div className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-full bg-black border border-gray-400" />
+                    <span>Multiple</span>
+                  </div>
+                </div>
+
+                <SummaryStat icon={<Expand />} label="Items" value={`${order.items.length}`} />
+
+                <SummaryStat
+                  icon={<DollarSign />}
+                  label="Total Amount"
+                  value={`€${order.amount}`}
+                  isTotal={true}
+                />
+              </div>
+            </Card>
 
             {/* 2. Customer Information Card */}
-            <CustomerInformationCard />
+            <Card>
+              <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
+                Customer Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CustomerStat
+                  icon={<User />}
+                  label="Customer Name"
+                  value={order.shipping_details?.customer_name || order.customer_email.split('@')[0]}
+                  bgColor="bg-[#faf9f7]"
+                  iconColor="text-blue-500"
+                />
+                <CustomerStat
+                  icon={<Mail />}
+                  label="Email Address"
+                  value={order.customer_email}
+                  bgColor="bg-[#faf9f7]"
+                  iconColor="text-green-500"
+                />
+                <CustomerStat
+                  icon={<Phone />}
+                  label="Phone Number"
+                  value={order.shipping_details?.phone || "N/A"}
+                  bgColor="bg-[#faf9f7]"
+                  iconColor="text-purple-500"
+                />
+                <CustomerStat
+                  icon={<MapPin />}
+                  label="Shipping Address"
+                  value={order.shipping_details?.address || "N/A"}
+                  bgColor="bg-[#faf9f7]"
+                  iconColor="text-orange-500"
+                />
+              </div>
+            </Card>
 
             {/* 3. Payment Details and Delivery Information (Side by Side) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <PaymentDetailsCard />
-              <DeliveryInformationCard />
+              {/* Payment Details */}
+              <Card className="flex flex-col h-full">
+                <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
+                  Payment Details
+                </h2>
+                <div className="space-y-4 mb-6 border-b border-gray-200 pb-6">
+                  <div className="flex items-start p-4 rounded-xl bg-[#faf9f7]">
+                    <CreditCard className="w-5 h-5 mr-3 mt-1 text-yellow-800/80" />
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-500 font-medium">Method</span>
+                      <span className="text-base font-semibold text-gray-800">{order.payment_details?.method || "Paid"}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-3 flex-grow">
+                  <div className="flex justify-between text-base text-gray-700">
+                    <span>Subtotal</span>
+                    <span className="font-medium">€{order.payment_details?.subtotal || order.amount}</span>
+                  </div>
+                  <div className="flex justify-between text-base text-gray-700">
+                    <span>Shipping</span>
+                    <span className="font-medium">€{order.payment_details?.shipping_cost || "0.00"}</span>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center pt-3 mt-4">
+                  <span className="text-xl font-semibold text-[#1a1410]">Total</span>
+                  <span className="text-xl font-semibold text-[#8b6f47]">€{order.amount}</span>
+                </div>
+              </Card>
+
+              {/* Delivery Info */}
+              <Card className="flex flex-col h-full">
+                <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
+                  Delivery Information
+                </h2>
+                <div className="space-y-4 mb-6">
+                  <div className="flex items-start p-4 rounded-xl bg-[#faf9f7]">
+                    <Calendar className="w-5 h-5 mr-3 mt-1 text-yellow-800/80" />
+                    <div className="flex flex-col">
+                      <span className="text-sm text-gray-500 font-medium">Payment Date</span>
+                      <span className="text-base font-semibold text-gray-800">{new Date(order.date).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/50">
+                  <h3 className="text-base font-semibold text-gray-800 mb-1">
+                    Quality Assurance
+                  </h3>
+                  <p className="text-sm text-gray-600">Standard verified.</p>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
