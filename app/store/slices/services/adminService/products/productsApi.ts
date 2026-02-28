@@ -47,7 +47,7 @@ export interface ApiProduct {
 interface GetProductsResponse {
   success: boolean;
   message: string;
-  data: {
+  results: {
     sub_categories: { id: number; title: string }[];
     categories: ApiProduct[];
   };

@@ -8,11 +8,24 @@ import TopHeader from "./TopHeader";
 import MiddleBody from "./MiddleBody";
 import CustomDesignStudio from "../../../components/customSignStdio";
 import { useGetProductCategoriesQuery } from "@/app/store/slices/services/product/productApi";
+import Loader from "../../../components/Loader";
 
 const Page = () => {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("category");
-  const { data: categoriesData } = useGetProductCategoriesQuery();
+  const { data: categoriesData, isLoading } = useGetProductCategoriesQuery();
+
+  if (isLoading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader />
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   const currentCategory = categoriesData?.results?.find(
     (cat) => cat.id.toString() === categoryId
