@@ -51,6 +51,8 @@ const cormorantNormal = Cormorant_Garamond({
 import { useGetProductDetailsQuery, useGetProductReviewsQuery } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 import { getColorValue, isLightColor } from "@/app/utils/colorUtils";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
 
 // --- Interface Definitions ---
 interface Thumbnail {
@@ -219,6 +221,8 @@ export default function ProductPage({ productId }: { productId?: number }) {
   const [addToCart] = useAddToCartMutation();
   const router = useRouter();
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
+
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const handleCustomizeWithAi = () => {
     if (productId) {
@@ -669,6 +673,10 @@ export default function ProductPage({ productId }: { productId?: number }) {
               type="button"
               onClick={async () => {
                 if (!productId) return;
+                if (!isAuthenticated) {
+                  setToast({ message: "Please login to add to cart.", type: 'error' });
+                  return;
+                }
                 try {
                   await addToCart({ product: productId, quantity }).unwrap();
                   setToast({ message: "Added to cart!", type: "success" });

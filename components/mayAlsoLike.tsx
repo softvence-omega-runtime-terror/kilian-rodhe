@@ -167,7 +167,7 @@ const YouMayAlsoLike: React.FC<YouMayAlsoLikeProps> = ({ productId }) => {
 
   // 3. Map API products to local Product interface
   const products: Product[] =
-    productsData?.data?.categories
+    productsData?.results?.categories
       ?.filter((p) => p.id !== productId) // Exclude current product
       .slice(0, 4) // Limit to 4 items
       .map((p) => ({

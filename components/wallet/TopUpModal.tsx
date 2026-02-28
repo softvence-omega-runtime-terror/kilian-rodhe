@@ -29,8 +29,8 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
                 amount,
                 currency,
                 payment_method: paymentMethod,
-                success_url: `${window.location.origin}/pages/payment-success`,
-                cancel_url: `${window.location.origin}/pages/payment-cancel`,
+                success_url: `${window.location.origin}/pages/payment/success`,
+                cancel_url: `${window.location.origin}/pages/payment/cancel`,
             }).unwrap();
 
             if (res.success && res.data.session_url) {

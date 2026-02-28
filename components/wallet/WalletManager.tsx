@@ -5,6 +5,9 @@ import { useGetWalletQuery } from "@/app/store/slices/services/wallet/walletApi"
 import TopUpModal from "./TopUpModal";
 import { Jost } from "next/font/google";
 import { motion } from "framer-motion";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
+import { toast } from "sonner";
 
 const jostFont = Jost({
     subsets: ["latin"],
@@ -14,6 +17,7 @@ const jostFont = Jost({
 const WalletManager = () => {
     const { data: walletData, isLoading } = useGetWalletQuery();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
     const wallet = walletData?.results?.[0];
 
@@ -48,7 +52,13 @@ const WalletManager = () => {
             </div>
 
             <motion.button
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => {
+                    if (!isAuthenticated) {
+                        toast.error("Please login to top up your balance.");
+                        return;
+                    }
+                    setIsModalOpen(true);
+                }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="w-full py-3 bg-gray-900 text-white rounded-md uppercase tracking-[2.1px] text-[12px] font-medium hover:bg-black transition-colors shadow-md"

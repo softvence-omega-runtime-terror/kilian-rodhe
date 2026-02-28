@@ -3,6 +3,7 @@ import HeaderElement from "@/components/shop/headerElements";
 import PropularWeek from "./propularWeek";
 import BottomCard from "./bottomCard";
 import { useGetProductsQuery, IProductQueryParams } from "@/app/store/slices/services/product/productApi";
+import EmptyState from "../EmptyState";
 
 const ShopRightSideElements = ({ filters }: { filters: IProductQueryParams }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -11,7 +12,7 @@ const ShopRightSideElements = ({ filters }: { filters: IProductQueryParams }) =>
     page: currentPage
   });
 
-  const products = Array.isArray(productsData?.data?.categories) ? productsData.data.categories : [];
+  const products = Array.isArray(productsData?.results?.categories) ? productsData.results.categories : [];
   // const totalCount = 0; // The API doesn't seem to return total count yet, or maybe it does in 'count'
   // Let's check IProductResponse again. It had success, message, data, errors. 
   // Wait, I noticed ICategoryResponse had results and count, but IProductResponse only has data.
@@ -20,6 +21,16 @@ const ShopRightSideElements = ({ filters }: { filters: IProductQueryParams }) =>
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+  console.log("rightsideeement :", productsData)
+
+  if (!isLoading && products.length === 0) {
+    return (
+      <div className="px-4 lg:px-0 md:px-0">
+        <HeaderElement />
+        <EmptyState />
+      </div>
+    );
+  }
 
   return (
     <div className="px-4 lg:px-0 md:px-0">

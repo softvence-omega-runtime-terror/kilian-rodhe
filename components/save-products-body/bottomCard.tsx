@@ -12,6 +12,9 @@ import arrowIcon from "@/public/image/shopIcon/arrowIcon.svg";
 import colorStarIcon from "@/public/image/shopIcon/colorStar.svg";
 import nextButtonImage from "@/public/image/shopIcon/nextArrow.svg";
 import { ISavedProduct, useDeleteSavedProductMutation } from "@/app/store/slices/services/product/productApi";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
+import ToastMessage from "../ToastMessage";
 
 const jostFont = Jost({
   subsets: ["latin"],
@@ -42,6 +45,8 @@ export default function BottomCard({
 }: BottomCardProps) {
   const router = useRouter();
   const [removedProductName, setRemovedProductName] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'info' | 'error' } | null>(null);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const MAX_PAGES_TO_SHOW = 6;
 
@@ -81,6 +86,10 @@ export default function BottomCard({
   };
 
   const handleOrderNow = () => {
+    if (!isAuthenticated) {
+      setToast({ message: "Please login to order products.", type: 'error' });
+      return;
+    }
     router.push(`/pages/shipping`);
   };
 
@@ -261,6 +270,16 @@ export default function BottomCard({
           })}
         </div>
       </main>
+
+      <AnimatePresence>
+        {toast && (
+          <ToastMessage
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {removedProductName && (

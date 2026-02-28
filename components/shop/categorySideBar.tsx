@@ -4,51 +4,30 @@ import React, { useState } from "react"; // 👈 useState import kora holo
 
 import { Inter } from "next/font/google";
 
-// Imported local images (keep them as is)
-// import allCategoriesIcon from "@/public/image/shopIcon/Icon (1).svg";
-// import menIcon from "@/public/image/shopIcon/Icon (3).svg";
-// import womenIcon from "@/public/image/shopIcon/Icon (4).svg";
-// import kidsIcon from "@/public/image/shopIcon/Icon (5).svg";
-// import apparelIcon from "@/public/image/shopIcon/Icon (6).svg";
-// import tshirtIcon from "@/public/image/shopIcon/Icon (7).svg";
-// import hoodiBoxIcon from "@/public/image/shopIcon/Icon (8).svg";
-// import capIcon from "@/public/image/shopIcon/Icon (9).svg";
-// import mugIcon from "@/public/image/shopIcon/Icon (10).svg";
-// import bagsIcon from "@/public/image/shopIcon/Icon (11).svg";
 import { useGetProductCategoriesQuery } from "@/app/store/slices/services/product/productApi";
 import Image from "next/image";
+import Loader from "../Loader";
 
 const inter = Inter({ subsets: ["latin"] });
-
-// const categories = [
-//   {
-//     name: "All Categories",
-//     count: null,
-//     image: allCategoriesIcon,
-//     // Note: 'active: true' removed from here
-//   },
-//   { name: "New Arrival", count: 20, image: tshirtIcon },
-//   { name: "Men", count: 95, image: menIcon },
-//   { name: "Women", count: 150, image: womenIcon },
-//   { name: "Kids", count: 48, image: kidsIcon },
-//   { name: "Apparel", count: 250, image: apparelIcon },
-//   { name: "T-Shirts", count: 120, image: tshirtIcon },
-//   { name: "Hoodies", count: 85, image: hoodiBoxIcon },
-//   { name: "Caps", count: 45, image: capIcon },
-//   { name: "Mugs", count: 65, image: mugIcon },
-//   { name: "Bags", count: 42, image: bagsIcon },
-// ];
 
 const CategorySidebar = ({
   onSelectCategory,
 }: {
   onSelectCategory: (id: number | null) => void;
 }) => {
-  const { data: categoriesData } = useGetProductCategoriesQuery();
+  const { data: categoriesData, isLoading } = useGetProductCategoriesQuery();
   const allCategories = categoriesData?.results || [];
+  const [activeCategory, setActiveCategory] = useState("All Categories");
+
+  if (isLoading) {
+    return (
+      <div className="w-full lg:w-58 md:w-full border border-[#E5E5E5] bg-white p-4">
+        <Loader text="Loading Categories..." />
+      </div>
+    );
+  }
   console.log(allCategories);
   // 1. State hook: Default active category hobe "All Categories"
-  const [activeCategory, setActiveCategory] = useState("All Categories");
 
   // 2. Click Handler function: Category name ke active category hishebe set korbe
   const handleCategoryClick = (categoryName: string, id: number | null) => {

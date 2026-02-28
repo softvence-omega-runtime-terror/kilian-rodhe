@@ -2,7 +2,12 @@
 "use client";
 
 import Image, { StaticImageData } from "next/image"; // Import StaticImageData
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
+import ToastMessage from "../ToastMessage";
 
 import { Jost } from "next/font/google";
 
@@ -57,6 +62,25 @@ const products = [
 ];
 
 export default function Home() {
+  const router = useRouter();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const [toast, setToast] = useState<{ message: string, type: 'success' | 'info' | 'error' } | null>(null);
+
+  const handleOrderNow = () => {
+    if (!isAuthenticated) {
+      setToast({ message: "Please login to order products.", type: 'error' });
+      return;
+    }
+    router.push(`/pages/shipping`);
+  };
+
+  const handleCustomize = (id?: number) => {
+    if (id) {
+      router.push(`/pages/customise?id=${id}`);
+    } else {
+      router.push(`/pages/customise`);
+    }
+  };
   return (
     <div className={` bg-white ${jostFont.className}`}>
       <main className="max-w-8xl ">
@@ -71,7 +95,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: product.delay }}
 
-              // whileHover={{ scale: 1.01 }}
+            // whileHover={{ scale: 1.01 }}
             >
               {/* Image Container (Main Product Image) */}
               <div className="relative w-full h-80 overflow-hidden mb-6">
@@ -98,6 +122,7 @@ export default function Home() {
                 </div>
 
                 <motion.button
+                  onClick={() => handleCustomize()}
                   className={`${jostFont.className} absolute bottom-[8%] w-9/10 right-[5%] h-12 border-2 border-[#ffffff] bg-white/10 text-[#fff] tracking-[2.1px] uppercase text-[14px] font-medium transition-colors duration-300 flex items-center justify-center`}
                 >
                   CUSTOMIZE
@@ -142,6 +167,7 @@ export default function Home() {
                   className={`${jostFont.className} shadow text-[14px] w-full h-12 mb-8 bg-[#D4AF37] text-[#000] py-3 tracking-[2.1px] uppercase font-medium hover:bg-[#c2a25b] transition-colors duration-300`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={handleOrderNow}
                 >
                   ORDER NOW
                 </motion.button>
@@ -151,7 +177,17 @@ export default function Home() {
         </div>
       </main>
 
-   
+      <AnimatePresence>
+        {toast && (
+          <ToastMessage
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </AnimatePresence>
+
+
     </div>
   );
 }

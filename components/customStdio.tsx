@@ -49,7 +49,7 @@ export default function CustomDesignStudio() {
   const { data: productsData } = useGetProductsQuery({});
 
   const handleStartDesigning = () => {
-    const defaultProduct = productsData?.data?.categories?.[0];
+    const defaultProduct = productsData?.results?.categories?.[0];
     if (defaultProduct) {
       router.push(`/pages/my-creation/create-your-design?id=${defaultProduct.id}`);
     } else {

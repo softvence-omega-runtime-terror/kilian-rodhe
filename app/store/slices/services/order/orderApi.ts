@@ -51,6 +51,7 @@ export interface IOrderItem {
   order_product_color_code: string[];
   quantity: number;
   subtotal: string;
+  item_image: string[];
 }
 
 export interface IOrder {
@@ -82,6 +83,7 @@ export interface IAddAddressRequest {
   email: string;
   phone_number: string;
   postal_code: number;
+  address_id?: number | null;
 }
 
 export interface IPaymentSessionResponse {
@@ -187,6 +189,20 @@ export const orderApi = baseBackendApi.injectEndpoints({
       }),
       providesTags: ["AddressBook"],
     }),
+    deleteAddress: builder.mutation<{ success: boolean; message: string }, number>({
+      query: (id) => ({
+        url: `/order/UseAddressBook/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["AddressBook"],
+    }),
+    getOrderDetails: builder.query<IOrder, number>({
+      query: (id) => ({
+        url: `/order/orders/${id}/`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [{ type: "Orders", id }],
+    }),
   }),
 });
 
@@ -200,5 +216,7 @@ export const {
   useGetOrdersQuery,
   useAddOrderAddressMutation,
   useCreatePaymentSessionMutation,
-  useGetAddressBookQuery
+  useGetAddressBookQuery,
+  useDeleteAddressMutation,
+  useGetOrderDetailsQuery,
 } = orderApi;
