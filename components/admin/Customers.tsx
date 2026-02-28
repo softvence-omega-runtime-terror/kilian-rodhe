@@ -1,17 +1,20 @@
-import React, { useState } from "react";
-import { Search, Eye, Edit, Trash2 } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Search, Eye, Loader2 } from "lucide-react";
 
 import CustomerDetails from "./CustomerDetails";
-import EditCustomer from "./EditCustomer";
 
 // NOTE: Ensure the path to your icon is correct in your project structure
 import orderIcon from "@/public/image/admin/products/orderIcon.svg";
 import Image from "next/image";
 import Footer from "./FooterAdmin";
 import AddNewProductScreen from "./products/createProducts/AddProductSection";
+import {
+  useGetCustomersQuery,
+  useDeleteCustomerMutation,
+} from "@/app/store/slices/services/adminService/customerAdminApi";
 
 // --- Type Definitions ---
-type ViewType = "list" | "add" | "view" | "edit";
+type ViewType = "list" | "add" | "view";
 type ViewChangeHandler = (view: ViewType, id?: number) => void;
 
 // -----------------------------
@@ -28,79 +31,15 @@ interface Customer {
   id: number;
   name: string;
   email: string;
-  segment: "Regular" | "New";
+  segment: string;
   totalOrders: number;
-  totalSpent: string;
-  preferredDesign: "AI Generated" | "User Upload";
+  totalSpent: string | number;
+  preferredDesign: string;
   lastOrder: string;
 }
 
-// --- INITIAL CUSTOMER DATA ---
-const initialCustomerData: Customer[] = [
-  {
-    id: 1,
-    name: "Emma Schmidt",
-    email: "emma.s@email.com",
-    segment: "Regular",
-    totalOrders: 12,
-    totalSpent: "€418.88",
-    preferredDesign: "AI Generated",
-    lastOrder: "Oct 10, 2025",
-  },
-  {
-    id: 2,
-    name: "Lucas Müller",
-    email: "lucas.m@email.com",
-    segment: "Regular",
-    totalOrders: 8,
-    totalSpent: "€279.92",
-    preferredDesign: "AI Generated",
-    lastOrder: "Oct 10, 2025",
-  },
-  {
-    id: 3,
-    name: "Sophie Weber",
-    email: "sophie.w@email.com",
-    segment: "Regular",
-    totalOrders: 15,
-    totalSpent: "€524.85",
-    preferredDesign: "User Upload",
-    lastOrder: "Oct 09, 2025",
-  },
-  {
-    id: 4,
-    name: "Noah Fischer",
-    email: "noah.f@email.com",
-    segment: "Regular",
-    totalOrders: 5,
-    totalSpent: "€174.95",
-    preferredDesign: "User Upload",
-    lastOrder: "Oct 09, 2025",
-  },
-  {
-    id: 5,
-    name: "Mia Becker",
-    email: "mia.b@email.com",
-    segment: "New",
-    totalOrders: 20,
-    totalSpent: "€798.80",
-    preferredDesign: "AI Generated",
-    lastOrder: "Oct 08, 2025",
-  },
-  {
-    id: 6,
-    name: "Leon Wagner",
-    email: "leon.w@email.com",
-    segment: "New",
-    totalOrders: 3,
-    totalSpent: "€104.97",
-    preferredDesign: "User Upload",
-    lastOrder: "Oct 08, 2025",
-  },
-];
-
 // Segment Badge Component
-const SegmentBadge = ({ segment }: { segment: "Regular" | "New" }) => {
+const SegmentBadge = ({ segment }: { segment: string }) => {
   const isRegular = segment === "Regular";
   return (
     <span
@@ -152,14 +91,10 @@ const HighlightText = ({
 const CustomerTable = ({
   data,
   onViewProduct,
-  onEditProduct,
-  onDeleteProduct,
   searchTerm,
 }: {
   data: Customer[];
   onViewProduct: (id: number) => void;
-  onEditProduct: (id: number) => void;
-  onDeleteProduct: (id: number) => void;
   searchTerm: string;
 }) => (
   <div className="bg-white rounded-xl border border-[#e8e3dc] overflow-x-auto">
@@ -215,7 +150,7 @@ const CustomerTable = ({
 
             <td className="px-6 py-4 text-sm font-medium text-gray-800">
               <HighlightText
-                text={customer.totalSpent}
+                text={typeof customer.totalSpent === 'number' ? `€${customer.totalSpent.toFixed(2)}` : customer.totalSpent}
                 highlight={searchTerm}
               />
             </td>
@@ -228,7 +163,7 @@ const CustomerTable = ({
             </td>
 
             <td className="px-6 py-4 text-sm text-gray-500">
-              {customer.lastOrder}
+              {customer.lastOrder ? new Date(customer.lastOrder).toLocaleDateString() : 'N/A'}
             </td>
 
             <td className="px-6 py-4 text-right text-sm font-medium">
@@ -240,23 +175,6 @@ const CustomerTable = ({
                 >
                   <Eye className="w-4 h-4" />
                   <span>View</span>
-                </button>
-
-                <button
-                  onClick={() => onEditProduct(customer.id)}
-                  className="text-blue-500 hover:text-blue-700 flex items-center space-x-1"
-                  title="Edit Customer"
-                >
-                  <Edit className="w-4 h-4" />
-                  <span>Edit</span>
-                </button>
-
-                <button
-                  onClick={() => onDeleteProduct(customer.id)}
-                  className="text-red-500 hover:text-red-700 p-1"
-                  title="Delete Customer"
-                >
-                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </td>
@@ -278,45 +196,61 @@ const CustomerTable = ({
 // -----------------------------
 const ProductListScreen = ({
   onViewChange,
-  onDeleteProduct,
-  productData,
 }: {
   onViewChange: ViewChangeHandler;
-  onDeleteProduct: (id: number) => void;
-  productData: Customer[];
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSegment, setSelectedSegment] = useState("All Segments");
   const [selectedType, setSelectedType] = useState("All Types");
 
-  const filteredCustomers = productData.filter((customer) => {
-    const searchLower = searchTerm.toLowerCase().trim();
-
-    const matchesSearch =
-      customer.name.toLowerCase().includes(searchLower) ||
-      customer.email.toLowerCase().includes(searchLower) ||
-      customer.totalSpent.toLowerCase().includes(searchLower) ||
-      customer.preferredDesign.toLowerCase().includes(searchLower);
-
-    const matchesSegment =
-      selectedSegment === "All Segments" ||
-      customer.segment === selectedSegment;
-
-    const matchesType =
-      selectedType === "All Types" || customer.preferredDesign === selectedType;
-
-    return matchesSearch && matchesSegment && matchesType;
+  const { data: apiResponse, isLoading, isError } = useGetCustomersQuery({
+    search: searchTerm || undefined,
+    segment: selectedSegment === "All Segments" ? undefined : selectedSegment,
+    preferred_design: selectedType === "All Types" ? undefined : selectedType,
   });
+
+  const customerData = useMemo(() => {
+    if (!apiResponse?.results) return [];
+    return apiResponse.results.map(item => ({
+      id: item.id,
+      name: (item.first_name || item.last_name) ? `${item.first_name || ''} ${item.last_name || ''}`.trim() : item.email.split('@')[0],
+      email: item.email,
+      segment: item.segment,
+      totalOrders: item.total_orders,
+      totalSpent: item.total_spent,
+      preferredDesign: item.preferred_design,
+      lastOrder: item.last_order || '',
+    }));
+  }, [apiResponse]);
 
   const uniqueSegments = [
     "All Segments",
-    ...Array.from(new Set(initialCustomerData.map((c) => c.segment))),
+    "Regular",
+    "New"
   ];
 
   const uniqueTypes = [
     "All Types",
-    ...Array.from(new Set(initialCustomerData.map((c) => c.preferredDesign))),
+    "AI Generated",
+    "User Upload"
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-[#8B6F47]" />
+        <p className="mt-4 text-gray-500">Loading customers...</p>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-10 text-red-500">
+        Error loading customers. Please try again later.
+      </div>
+    );
+  }
 
   return (
     <div className="pt-8 px-4 sm:p-10 w-full bg-gray-50">
@@ -329,7 +263,7 @@ const ProductListScreen = ({
 
       <div className="bg-white p-4 md:p-6 rounded-2xl border border-[#e8e3dc] mb-6">
         <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="relative flex-grow w-full">
+          <div className="relative grow w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
             <input
               type="text"
@@ -372,10 +306,8 @@ const ProductListScreen = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-6">
         <div className="md:col-span-2">
           <CustomerTable
-            data={filteredCustomers}
+            data={customerData}
             onViewProduct={(id) => onViewChange("view", id)}
-            onEditProduct={(id) => onViewChange("edit", id)}
-            onDeleteProduct={onDeleteProduct}
             searchTerm={searchTerm}
           />
         </div>
@@ -388,9 +320,6 @@ const ProductListScreen = ({
 // Main App Component
 // -----------------------------
 const App = () => {
-  const [customerData, setCustomerData] =
-    useState<Customer[]>(initialCustomerData);
-
   const [view, setView] = useState<ViewType>("list");
   const [currentCustomerId, setCurrentCustomerId] = useState<number>(0);
 
@@ -399,56 +328,32 @@ const App = () => {
     setView(newView);
   };
 
-  const handleDeleteProduct = (id: number) => {
-    const isConfirmed = window.confirm(
-      `Are you sure you want to delete customer ID: ${id}?`
-    );
-
-    if (isConfirmed) {
-      setCustomerData((prev) => prev.filter((customer) => customer.id !== id));
-
-      alert(`Customer ID ${id} deleted successfully.`);
-
-      if (view !== "list" && currentCustomerId === id) {
-        handleViewChange("list");
-      }
-    }
-  };
-
   return (
-    <div className="bg-gray-50">
-      {view === "list" && (
-        <ProductListScreen
-          onViewChange={handleViewChange}
-          onDeleteProduct={handleDeleteProduct}
-          productData={customerData}
-        />
-      )}
+    <div className="bg-gray-50 flex flex-col min-h-screen">
+      <div className="grow">
+        {view === "list" && (
+          <ProductListScreen
+            onViewChange={handleViewChange}
+          />
+        )}
 
-      {view === "add" && (
-        <AddNewProductScreen
-          onViewChange={(newView: string) =>
-            handleViewChange(newView as ViewType)
-          }
-        />
-      )}
+        {view === "add" && (
+          <AddNewProductScreen
+            onViewChange={(newView: string) =>
+              handleViewChange(newView as ViewType)
+            }
+          />
+        )}
 
-      {view === "view" && currentCustomerId > 0 && (
-        <CustomerDetails
-          onViewChange={(newView: string) =>
-            handleViewChange(newView as ViewType)
-          }
-          productId={currentCustomerId}
-        />
-      )}
-
-      {view === "edit" && currentCustomerId > 0 && (
-        <EditCustomer
-          onViewChange={(newView: string) =>
-            handleViewChange(newView as ViewType)
-          }
-        />
-      )}
+        {view === "view" && currentCustomerId > 0 && (
+          <CustomerDetails
+            onViewChange={(newView: string) =>
+              handleViewChange(newView as ViewType)
+            }
+            productId={currentCustomerId}
+          />
+        )}
+      </div>
 
       <div className="mt-6 relative -bottom-17">
         <Footer />
