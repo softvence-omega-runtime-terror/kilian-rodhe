@@ -284,19 +284,6 @@ const CustomerStat: React.FC<CustomerStatProps> = ({
   </div>
 );
 
-// --- CustomerInformationCard Component (Kept as is) ---
-
-// --- END: CustomerInformationCard Component ---
-
-// --- ADDED: Payment Details Card (No cloneElement issue here) ---
-
-// --- END: Payment Details Card ---
-
-// --- ADDED: Delivery Information Card (No cloneElement issue here) ---
-
-// --- END: Delivery Information Card ---
-
-// ---------------- Main App Component ----------------
 
 const App = ({
   onViewChange,
