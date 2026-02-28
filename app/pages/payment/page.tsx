@@ -148,7 +148,7 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 2 }) => {
 // Success Modal Component (No changes)
 // ----------------------------------------------------------------------
 
-const SuccessModal: React.FC<{
+const _SuccessModal: React.FC<{
   router: ReturnType<typeof useRouter>;
   onClose: () => void; // Function to close the modal
 }> = ({ router, onClose }) => {
@@ -376,7 +376,7 @@ const PaymentPage: React.FC = () => {
 
             {/* Secure Box */}
             <div className="mt-8 p-4 border border-green-500 rounded-lg bg-green-50/50 flex items-start">
-              <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 shrink-0" />
               <div className="text-sm text-gray-600">
                 <p className="font-semibold text-green-700">Secure Payment</p>
                 <p>Your payment information is encrypted and secure.</p>

@@ -1,0 +1,91 @@
+
+> template@0.1.0 build
+> next build --turbopack
+
+   ▲ Next.js 15.5.4 (Turbopack)
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ ✓ Finished writing to disk in 38ms
+ ✓ Compiled successfully in 4.1s
+   Linting and checking validity of types ...
+
+./app/pages/my-creation/myCreationBody.tsx
+294:3  Warning: 'productId' is defined but never used.  @typescript-eslint/no-unused-vars
+335:13  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+585:10  Warning: 'orderedProducts' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+586:10  Warning: 'myDesigns' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/pages/payment/page.tsx
+151:7  Warning: 'SuccessModal' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./app/pages/payment/success/page.tsx
+4:8  Warning: 'Image' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/AnalysisBodyTable.tsx
+45:14  Warning: '_e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/Categories.tsx
+101:18  Warning: '_e' is defined but never used.  @typescript-eslint/no-unused-vars
+304:11  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+422:14  Warning: '_err' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/CmsHomeFeatureIcon.tsx
+155:29  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/admin/ContactInfoPreview.tsx
+147:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/admin/SocialMediaLink.tsx
+155:25  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./components/admin/emailsComponent/AnalysisBodyTable.tsx
+1:27  Warning: 'useCallback' is defined but never used.  @typescript-eslint/no-unused-vars
+45:14  Warning: 'e' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/admin/emailsComponent/DiscountEmailSend.tsx
+33:22  Warning: '_isLoadingCodes' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+35:48  Warning: 'isLoadingSeries' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+37:17  Warning: '_usageStats' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+44:9  Warning: The 'templates' logical expression could make the dependencies of useEffect Hook (at line 68) change on every render. To fix this, wrap the initialization of 'templates' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+
+./components/admin/emailsComponent/EmailTemplateTab.tsx
+4:5  Warning: 'Calendar' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/aiDesignGenerate.tsx
+9:8  Warning: 'blueSpecialIcom' is defined but never used.  @typescript-eslint/no-unused-vars
+26:3  Warning: 'onPreviewClick' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./components/checkout/middleBody.tsx
+114:9  Warning: The 'cartItems' logical expression could make the dependencies of useMemo Hook (at line 186) change on every render. To fix this, wrap the initialization of 'cartItems' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+114:9  Warning: The 'cartItems' logical expression could make the dependencies of useMemo Hook (at line 192) change on every render. To fix this, wrap the initialization of 'cartItems' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+115:9  Warning: The 'shippingOptions' logical expression could make the dependencies of useEffect Hook (at line 143) change on every render. To fix this, wrap the initialization of 'shippingOptions' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+136:6  Warning: React Hook React.useEffect has a missing dependency: 'selectedItems.length'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./components/livePreview.tsx
+20:8  Warning: 'aiDesignIcon' is defined but never used.  @typescript-eslint/no-unused-vars
+69:12  Warning: 'selectedAiFile' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+267:11  Warning: 'designTools' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+283:11  Warning: 'toolsStagger' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+288:11  Warning: 'buttonHover' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+294:11  Warning: 'activeModeStyle' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+296:11  Warning: 'inactiveModeStyle' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./components/shipping/middleBody.tsx
+13:8  Warning: 'mug' is defined but never used.  @typescript-eslint/no-unused-vars
+75:7  Warning: 'ShippingMethod' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+Failed to compile.
+
+./app/pages/my-creation/myCreationBody.tsx:294:3
+Type error: Property 'productId' does not exist on type '{ version: ICustomProductVersion; _productId: number; onDelete?: ((id: number, title: string, version: number) => void) | undefined; }'.
+
+[0m [90m 292 |[39m [36mconst[39m [33mCustomDesignCard[39m [33m=[39m ({
+ [90m 293 |[39m   version[33m,[39m
+[31m[1m>[22m[39m[90m 294 |[39m   productId[33m,[39m
+ [90m     |[39m   [31m[1m^[22m[39m
+ [90m 295 |[39m   onDelete
+ [90m 296 |[39m }[33m:[39m {
+ [90m 297 |[39m   version[33m:[39m [33mICustomProductVersion[39m[33m,[39m[0m
+Next.js build worker exited with code: 1 and signal: null

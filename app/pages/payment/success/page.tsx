@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { CheckCircle, ArrowRight, ShoppingBag } from "lucide-react";
 import { Jost, Cormorant_Garamond } from "next/font/google";

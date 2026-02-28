@@ -1,11 +1,10 @@
 import React from "react";
+import { Mail, Phone, MessageSquare, MapPin, Clock, Loader2, Globe } from "lucide-react";
+
 import {
-  FaFacebookF,
-  FaInstagram,
-  FaTwitter,
-  FaLinkedinIn,
-} from "react-icons/fa";
-import { Mail, Phone, MessageSquare, MapPin, Clock } from "lucide-react";
+  useGetContactInfoQuery,
+  useGetSocialMediaQuery,
+} from "../../app/store/slices/services/adminService/contentAndCmsApi";
 
 // Icon mapping
 const ContactIcons = {
@@ -24,12 +23,12 @@ interface ContactItemProps {
 }
 const ContactItem: React.FC<ContactItemProps> = ({ Icon, title, value }) => (
   <div className="flex items-start space-x-3">
-    <div className="flex-shrink-0 p-2 border shadow-md border-gray-200 rounded-xl bg-[#FFFFFF] text-gray-700 mt-0.5">
+    <div className="shrink-0 p-2 border shadow-md border-gray-200 rounded-xl bg-[#FFFFFF] text-gray-700 mt-0.5">
       <Icon className="w-5 h-5" />
     </div>
     <div className="flex flex-col">
       <span className="text-sm font-medium text-gray-700">{title}</span>
-      <span className="text-base text-gray-900 font-normal">{value}</span>
+      <span className="text-base text-gray-900 font-normal break-all">{value || "Not specified"}</span>
     </div>
   </div>
 );
@@ -38,7 +37,7 @@ const ContactItem: React.FC<ContactItemProps> = ({ Icon, title, value }) => (
 interface LocationOrHoursItemProps {
   Icon: React.ElementType;
   title: string;
-  children: React.ReactNode; // ✅ Fix: can accept div/span/etc
+  children: React.ReactNode;
 }
 const LocationOrHoursItem: React.FC<LocationOrHoursItemProps> = ({
   Icon,
@@ -46,35 +45,31 @@ const LocationOrHoursItem: React.FC<LocationOrHoursItemProps> = ({
   children,
 }) => (
   <div className="flex items-start space-x-3 ">
-    <div className="flex-shrink-0 text-gray-700 mt-0.5 p-2 border shadow-md border-gray-200 rounded-xl bg-[#FFFFFF]">
+    <div className="shrink-0 text-gray-700 mt-0.5 p-2 border shadow-md border-gray-200 rounded-xl bg-[#FFFFFF]">
       <Icon className="w-5 h-5" />
     </div>
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       <span className="text-sm font-medium text-gray-700">{title}</span>
       {children}
     </div>
   </div>
 );
 
-// --- SocialIcon ---
-interface SocialIconProps {
-  Icon: React.ElementType;
-  href: string;
-}
-const SocialIcon: React.FC<SocialIconProps> = ({ Icon, href }) => (
-  <a
-    href={href}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="p-3 border border-gray-300 rounded-lg text-gray-600 hover:text-blue-600 transition duration-150"
-  >
-    <Icon className="w-5 h-5" />
-  </a>
-);
-
 export default function ContactCard() {
+  const { data: contactRes, isLoading: contactLoading } = useGetContactInfoQuery();
+  const { data: socialRes, isLoading: socialLoading } = useGetSocialMediaQuery();
+
+  const contactData = Array.isArray(contactRes?.data) ? contactRes?.data[0] : contactRes?.data;
+  const socialLinks = Array.isArray(socialRes?.data) ? socialRes?.data : [];
+
   return (
-    <div className="p-6 bg-white border-2 border-[#e8e3dc] rounded-xl">
+    <div className="p-6 bg-white border-2 border-[#e8e3dc] rounded-xl relative overflow-hidden">
+      {contactLoading && (
+        <div className="absolute inset-0 z-10 bg-white/60 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-amber-800" />
+        </div>
+      )}
+
       <h2 className="text-xl font-semibold text-gray-800 mb-2">
         Contact Information Preview
       </h2>
@@ -88,24 +83,24 @@ export default function ContactCard() {
             <ContactItem
               Icon={ContactIcons.Email}
               title="Email"
-              value="support@thundra.com"
+              value={contactData?.email || ""}
             />
             <ContactItem
               Icon={ContactIcons.Phone}
               title="Phone"
-              value="+49 30 12345678"
+              value={contactData?.phone_number ? `+${contactData.phone_number}` : ""}
             />
             <ContactItem
               Icon={ContactIcons.Whatsapp}
               title="WhatsApp"
-              value="+49 151 23456789"
+              value={contactData?.whatsappNumber ? `+${contactData.whatsappNumber}` : ""}
             />
           </div>
 
           <div className="space-y-6">
             <LocationOrHoursItem Icon={ContactIcons.Address} title="Address">
-              <span className="text-base text-gray-900 font-normal">
-                Friedrichstraße 123, 10117 Berlin, Germany
+              <span className="text-base text-gray-900 font-normal block max-w-sm mt-1">
+                {contactData?.businessAddress || "Not specified"}
               </span>
             </LocationOrHoursItem>
 
@@ -113,7 +108,7 @@ export default function ContactCard() {
               Icon={ContactIcons.Hours}
               title="Business Hours"
             >
-              <div className="text-base text-gray-900 font-normal">
+              <div className="text-base text-gray-900 font-normal mt-1">
                 <p>
                   <span className="font-medium">Monday - Friday:</span> 9:00 AM
                   - 6:00 PM
@@ -135,12 +130,30 @@ export default function ContactCard() {
         <h3 className="text-base font-semibold text-gray-700 mb-4">
           Follow Us
         </h3>
-        <div className="flex space-x-3">
-          <SocialIcon Icon={FaFacebookF} href="#" />
-          <SocialIcon Icon={FaInstagram} href="#" />
-          <SocialIcon Icon={FaTwitter} href="#" />
-          <SocialIcon Icon={FaLinkedinIn} href="#" />
-        </div>
+        {socialLoading ? (
+          <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+        ) : socialLinks.length > 0 ? (
+          <div className="flex space-x-3 flex-wrap gap-y-3">
+            {socialLinks.map((item: any) => (
+              <a
+                key={item.id}
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 border border-gray-300 rounded-lg text-gray-600 hover:text-blue-600 hover:border-blue-300 transition duration-150 flex items-center justify-center bg-white"
+                title={item.name || "Social Link"}
+              >
+                {item.icon ? (
+                  <img src={item.icon} alt={item.name || "Icon"} className="w-5 h-5 object-contain" />
+                ) : (
+                  <Globe className="w-5 h-5" />
+                )}
+              </a>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500 italic">No social media links active.</p>
+        )}
       </div>
     </div>
   );

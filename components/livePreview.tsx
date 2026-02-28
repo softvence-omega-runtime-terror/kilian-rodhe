@@ -17,7 +17,7 @@ import WalletManager from "./wallet/WalletManager";
 import AiDesignGenerate from "./aiDesignGenerate";
 
 // --- Image Imports (Assumed to exist in the specified paths) ---
-import aiDesignIcon from "../public/image/livePreview/aidesignIcon.svg";
+// import aiDesignIcon from "../public/image/livePreview/aidesignIcon.svg";
 import alineIcon from "../public/image/livePreview/alineIcon.svg";
 import colorIcon from "../public/image/livePreview/colorIcon.svg";
 import imageIcon from "../public/image/livePreview/imageIcon.svg";
@@ -66,7 +66,7 @@ const CombinedDesignPageFixed = () => {
     // State to manage the active design mode: always 'ai' now
     const [designMode] = useState("ai");
     const [selectedAiImage, setSelectedAiImage] = useState<string | null>(null);
-    const [selectedAiFile, setSelectedAiFile] = useState<File | Blob | null>(null);
+    const [_selectedAiFile, setSelectedAiFile] = useState<File | Blob | null>(null);
     const [aiGeneratedImages, setAiGeneratedImages] = useState<{
         generated_design_url: string;
         mockup_url: string;
@@ -264,7 +264,7 @@ const CombinedDesignPageFixed = () => {
     };
 
 
-    const designTools = [
+    const _designTools = [
         { src: tIcon, label: "Text" },
         { src: colorIcon, label: "Colors" },
         { src: layerIcon, label: "Layers" },
@@ -280,20 +280,20 @@ const CombinedDesignPageFixed = () => {
         visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
     };
 
-    const toolsStagger: Variants = {
+    const _toolsStagger: Variants = {
         hidden: { opacity: 1 },
         visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
     };
 
-    const buttonHover: TargetAndTransition = {
+    const _buttonHover: TargetAndTransition = {
         scale: 1.05,
         transition: { type: "spring", stiffness: 400, damping: 10 },
     };
 
     // Define active and inactive button styles
-    const activeModeStyle =
+    const _activeModeStyle =
         "bg-gradient-to-r from-red-800 to-red-900 text-white shadow-md";
-    const inactiveModeStyle = "text-gray-600 hover:bg-gray-200";
+    const _inactiveModeStyle = "text-gray-600 hover:bg-gray-200";
 
     return (
         <div className=" bg-gray-50 font-sans text-gray-800 p-4 sm:p-8">
@@ -528,7 +528,7 @@ const CombinedDesignPageFixed = () => {
                                     crisp, stunning results. Your custom product will look amazing
                                     both on screen and in real life, guaranteed.
                                 </p>
-                                <hr className="h-[2px] w-full border-0 bg-gradient-to-r from-transparent via-[rgba(212,175,55,0.8)] to-transparent rounded-full mb-1.5" />
+                                <hr className="h-[2px] w-full border-0 bg-linear-to-r from-transparent via-[rgba(212,175,55,0.8)] to-transparent rounded-full mb-1.5" />
                                 <div className="flex flex-wrap gap-x-4 text-xs">
                                     <p
                                         className={`${jostFont.className} text-[12px] text-[#6B6B6B] tracking-[0.5px] flex items-center`}
@@ -662,7 +662,7 @@ const CombinedDesignPageFixed = () => {
                     {/* Dynamic Content: AI Generator always shown now */}
                     <div className="">
                         <AiDesignGenerate
-                            onPreviewClick={openPreviewModal}
+                            _onPreviewClick={openPreviewModal}
                             onGenerate={handleAiGenerate}
                             isGenerating={isGenerating}
                         />

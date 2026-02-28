@@ -291,11 +291,11 @@ const ProductCard = ({ product, tabType, onDelete }: ProductCardProps) => {
 
 const CustomDesignCard = ({
   version,
-  productId,
+  _productId,
   onDelete
 }: {
   version: ICustomProductVersion,
-  productId: number,
+  _productId: number,
   onDelete?: (id: number, title: string, version: number) => void;
 }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -582,8 +582,8 @@ export default function App() {
 
   const [savedProducts, setSavedProducts] =
     useState<Product[]>(DUMMY_SAVED_DESIGNS);
-  const [orderedProducts] = useState<Product[]>(DUMMY_ORDERED_PRODUCTS);
-  const [myDesigns, setMyDesigns] =
+  const [_orderedProducts] = useState<Product[]>(DUMMY_ORDERED_PRODUCTS);
+  const [_myDesigns] =
     useState<Product[]>(DUMMY_MY_DESIGNS);
 
   const [modalState, setModalState] = useState<{
@@ -634,10 +634,6 @@ export default function App() {
     } else if (modalState.tab === "my") {
       if (modalState.id && !isNaN(Number(modalState.id))) {
         deleteDesignVersion(Number(modalState.id));
-      } else {
-        setMyDesigns((prev: Product[]) =>
-          prev.filter((p: Product) => p.id !== modalState.id)
-        );
       }
     }
 
@@ -761,7 +757,7 @@ export default function App() {
                       <CustomDesignCard
                         key={version.id}
                         version={version}
-                        productId={product.product}
+                        _productId={product.product}
                         onDelete={(id, title, version) => openDeleteModal(id, title, "my", version)}
                       />
                     ))

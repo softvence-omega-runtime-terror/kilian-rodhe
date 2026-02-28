@@ -250,8 +250,13 @@ const App = () => {
   console.log(data, "all prods data")
 
   useEffect(() => {
-    if (data?.data?.categories) {
-      const mapped: Product[] = data.data.categories.map((p) => {
+    const d: any = data;
+    const productsList = Array.isArray(d?.data)
+      ? d.data
+      : (d?.data?.categories || d?.data?.products || d?.categories || d?.products || d?.results?.categories || d?.results?.products || []);
+
+    if (productsList && productsList.length > 0) {
+      const mapped: Product[] = productsList.map((p: any) => {
         const categoryTitle = typeof p.category === 'object' && p.category?.title ? p.category.title : 'Unknown';
         const ageRangeLabel = typeof p.age_range === 'object' && p.age_range?.start
           ? `Age ${p.age_range.start}-${p.age_range.end}`
@@ -269,6 +274,8 @@ const App = () => {
         };
       });
       setProductData(mapped);
+    } else {
+      setProductData([]);
     }
   }, [data]);
 
