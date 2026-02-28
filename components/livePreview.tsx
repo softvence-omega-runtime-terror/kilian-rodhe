@@ -195,7 +195,8 @@ const CombinedDesignPageFixed = () => {
                 formData.append('logo_image', logoFile);
             }
 
-            const response = await fetch('http://23.20.201.40:8010/generate_merchandise', {
+            // const response = await fetch('http://23.20.201.40:8010/generate_merchandise', {
+            const response = await fetch('https://ai.thundra.de/generate_merchandise', {
                 method: 'POST',
                 headers: {
                     'accept': 'application/json',
