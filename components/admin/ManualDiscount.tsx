@@ -134,11 +134,11 @@ const ManualDiscountForm: React.FC = () => {
   };
 
   // Filter lists based on search
-  const filteredProducts = productsRes?.results?.categories?.filter(p =>
+  const filteredProducts = productsRes?.results?.categories?.filter((p: any) =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const filteredCategories = categoriesList.filter((c: any) =>
+  const filteredCategories = (categories as any[])?.filter((c: any) =>
     c?.title?.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
