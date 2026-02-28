@@ -2,35 +2,26 @@
 import React from "react";
 import {
   ArrowLeftIcon,
-  // Removed unused icons like Edit, Trash2, Box, ShoppingCart
   Printer,
-  // Icons required for the timeline
   CheckCircle,
   Clock,
   Truck,
   CheckCircle2,
-  // Icons required for the Order Summary Card
   Package,
   Palette,
   Expand,
   DollarSign,
-  // Icons for Customer Information Card
   User,
   Mail,
   Phone,
   MapPin,
-  // ADDED: Icons for Payment and Delivery Information
-  CreditCard, // For Payment Method
-  Calendar, // For Estimated Delivery/Payment Date
+  CreditCard,
+  Calendar,
 } from "lucide-react";
 import Image from "next/image";
 import { useGetOrderByIdQuery } from "@/app/store/slices/services/adminService/orderAdminApi";
 
-// Assuming these paths are correct - Keep them as placeholders
-
 import productImage from "@/public/image/admin/products/productImage.jpg";
-
-// ---------------- Types ----------------
 
 type ViewType = "listOrder" | "add" | "viewOrder" | "edit";
 type ViewChangeHandler = (view: ViewType, id?: number) => void;
@@ -46,8 +37,6 @@ interface Product {
   status: "Active" | "Out of Stock";
 }
 
-// --- Timeline Types and Data (Kept as is) ---
-
 interface TimelineStepProps {
   status: "complete" | "current" | "pending";
   stepName: string;
@@ -55,35 +44,6 @@ interface TimelineStepProps {
   isLast: boolean;
 }
 
-const mockOrderStatus = {
-  currentStep: "In Production",
-  steps: [
-    {
-      name: "Order Placed",
-      date: "Oct 10, 2025",
-    },
-    {
-      name: "Quality Check Passed",
-      date: "300 DPI Verified",
-    },
-    {
-      name: "In Production",
-      date: "Currently printing...",
-    },
-    {
-      name: "Shipped",
-      date: "Pending shipment",
-    },
-    {
-      name: "Delivered",
-      date: "Est. Oct 15, 2025",
-    },
-  ],
-};
-
-const { steps, currentStep } = mockOrderStatus;
-
-// --- TimelineStep Component (Kept as is) ---
 const TimelineStep: React.FC<TimelineStepProps> = ({
   status,
   stepName,
@@ -95,18 +55,7 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
   let detailColor: string;
   let textWeight: string;
 
-  const isQCCompleted =
-    steps.findIndex((s) => s.name === currentStep) >
-    steps.findIndex((s) => s.name === "Quality Check Passed");
-  const isCompleted =
-    steps.findIndex((s) => s.name === currentStep) >
-    steps.findIndex((s) => s.name === stepName);
-
-  if (
-    isCompleted ||
-    stepName === "Order Placed" ||
-    (stepName === "Quality Check Passed" && isQCCompleted)
-  ) {
+  if (status === "complete") {
     Icon = CheckCircle;
     iconClasses = "text-green-500 bg-green-50";
     detailColor = "text-gray-500";
@@ -136,17 +85,13 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
   return (
     <div className="flex">
       <div className="flex flex-col items-center mr-4">
-        {/* Status Icon */}
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center p-1 ${iconClasses}`}
         >
           <Icon className="w-5 h-5" />
         </div>
-        {/* Vertical Line */}
         {!isLast && <div className="h-10 w-0.5 bg-gray-200 mt-0.5" />}
       </div>
-
-      {/* Content */}
       <div className="pt-1.5 pb-4">
         <p className={`text-base text-gray-800 ${textWeight}`}>{stepName}</p>
         <p className={`text-sm ${detailColor}`}>{stepDetail}</p>
@@ -154,32 +99,12 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
     </div>
   );
 };
-// --- END: TimelineStep Component ---
-
-// ---------------- Dummy Data ----------------
-
-
-
-
-
-
-
-
-
-
-// --- END: Payment and Delivery Mock Data ---
-
-// ---------------- Reusable Components ----------------
 
 const Title = ({ text, paragraph }: { text: string; paragraph?: string }) => (
   <div className="flex flex-col space-y-1">
     <h2 className="text-[24px] font-normal text-[#1a1410]">{text}</h2>
     {paragraph && (
-      <p
-        className=" text-[#6b6560] 
-                 text-[16px] 
-                 font-normal"
-      >
+      <p className="text-[#6b6560] text-[16px] font-normal">
         {paragraph}
       </p>
     )}
@@ -200,9 +125,7 @@ const Card = ({
   </div>
 );
 
-// --- Summary Stat Component (Type fix applied here) ---
 interface SummaryStatProps {
-  // FIX: Type must allow additional props like 'className' when cloned
   icon: React.ReactElement<{ className?: string }>;
   label: string;
   value: string | React.ReactElement;
@@ -216,13 +139,10 @@ const SummaryStat: React.FC<SummaryStatProps> = ({
   isTotal = false,
 }) => {
   if (isTotal) {
-    // Styling for the Total Amount box (Brown background)
     return (
       <div className="flex items-start p-6 rounded-xl w-full h-full bg-[linear-gradient(180deg,#8b6f47,#7a5f3a)] text-white">
-        {/* Adjusted icon positioning for total box */}
         <div className="flex flex-col items-start gap-1">
           <div className="flex items-center text-sm font-medium">
-            {/* LINE 264 FIX: icon prop is now typed correctly */}
             {React.cloneElement(icon, { className: "w-5 h-5 mr-1" })} {label}
           </div>
           <span className="text-2xl font-semibold">{value}</span>
@@ -235,7 +155,6 @@ const SummaryStat: React.FC<SummaryStatProps> = ({
     <div
       className={`flex flex-col justify-start p-5 gap-2 rounded-xl bg-[#faf9f7] w-full`}
     >
-      {/* Icon for regular stats */}
       <div className="flex items-center text-sm text-gray-600 font-medium">
         {React.cloneElement(icon, {
           className: "w-5 h-5 mr-1 text-yellow-800/80",
@@ -247,13 +166,8 @@ const SummaryStat: React.FC<SummaryStatProps> = ({
   );
 };
 
-// --- OrderSummary Card Component (Kept as is) ---
-
-// --- END: OrderSummary Card Component ---
-
-// --- CustomerStat Component (Kept as is, no cloneElement type issue here) ---
 interface CustomerStatProps {
-  icon: React.ReactElement<{ className?: string }>; // Also updated here for consistency
+  icon: React.ReactElement<{ className?: string }>;
   label: string;
   value: string;
   bgColor: string;
@@ -264,7 +178,6 @@ const CustomerStat: React.FC<CustomerStatProps> = ({
   icon,
   label,
   value,
-  // bgColor and iconColor are now fixed styles in the card above but included here for completeness
   bgColor,
   iconColor,
 }) => (
@@ -283,7 +196,6 @@ const CustomerStat: React.FC<CustomerStatProps> = ({
     </div>
   </div>
 );
-
 
 const App = ({
   onViewChange,
@@ -357,7 +269,6 @@ const App = ({
       <div className="p-4 sm:p-8 w-full bg-gray-50 font-sans">
         {/* Header */}
         <div className="flex flex-col-reverse lg:flex-row items-start lg:items-center justify-between mb-8 pb-4 border-b border-[#e8e3dc] space-y-4 lg:space-y-0">
-          {/* Left Section (Back Button and Title) - Always full width */}
           <div className="flex w-full lg:w-auto items-center space-x-4 order-2 lg:order-1">
             <button
               onClick={() => onViewChange("listOrder")}
@@ -372,9 +283,7 @@ const App = ({
             />
           </div>
 
-          {/* Right Section (Print Button) - Full width on small screens, condensed on large screens */}
           <div className="flex w-full lg:w-auto space-x-3 order-1 lg:order-2">
-            {/* ADDED: onClick handler for printing */}
             <button
               onClick={() => window.print()}
               className="flex w-full lg:w-auto items-center justify-center px-4 py-2 bg-[linear-gradient(180deg,#8b6f47,#7a5f3a)] text-white font-semibold rounded-xl border border-[#E8E3DC] hover:opacity-90 transition "
@@ -393,8 +302,6 @@ const App = ({
                 Product & Design
               </h1>
 
-
-              {/* Status & Info */}
               <div className="space-y-3">
                 <div className="flex w-full justify-between items-center border-b pb-2 border-[#e8e3dc] ">
                   <div className="flex flex-col ">
@@ -427,7 +334,6 @@ const App = ({
               </div>
             </Card>
 
-            {/* Order Status Timeline */}
             <Card>
               <h3 className="text-xl font-normal text-gray-800 mb-6">
                 Order Status
@@ -436,12 +342,8 @@ const App = ({
               <div className="space-y-0">
                 {steps.map((step, index) => {
                   let status: TimelineStepProps["status"];
-                  const stepIndex = steps.findIndex(
-                    (s) => s.name === step.name
-                  );
-                  const currentIndex = steps.findIndex(
-                    (s) => s.name === currentStep
-                  );
+                  const stepIndex = steps.findIndex((s) => s.name === step.name);
+                  const currentIndex = steps.findIndex((s) => s.name === currentStep);
 
                   if (stepIndex < currentIndex) {
                     status = "complete";
@@ -467,7 +369,6 @@ const App = ({
 
           {/* Right Column (Order Summary, Customer Info, Payment & Delivery) */}
           <div className="lg:col-span-2 space-y-8">
-            {/* 1. Order Summary Card */}
             <Card>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-normal text-[#1a1410] font-sans">
@@ -486,7 +387,6 @@ const App = ({
                   value={`${order.items.reduce((acc: number, item: any) => acc + item.quantity, 0)} items`}
                 />
 
-                {/* 🎨 Color - Mocking as not in admin order detail yet */}
                 <div className={`flex flex-col justify-start p-5 gap-2 rounded-xl bg-[#faf9f7] w-full`}>
                   <div className="flex items-center text-sm text-gray-600 font-medium">
                     <Palette className="w-5 h-5 mr-1 text-yellow-800/80" />
@@ -509,7 +409,6 @@ const App = ({
               </div>
             </Card>
 
-            {/* 2. Customer Information Card */}
             <Card>
               <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
                 Customer Information
@@ -546,9 +445,7 @@ const App = ({
               </div>
             </Card>
 
-            {/* 3. Payment Details and Delivery Information (Side by Side) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Payment Details */}
               <Card className="flex flex-col h-full">
                 <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
                   Payment Details
@@ -562,7 +459,7 @@ const App = ({
                     </div>
                   </div>
                 </div>
-                <div className="space-y-3 flex-grow">
+                <div className="space-y-3 grow">
                   <div className="flex justify-between text-base text-gray-700">
                     <span>Subtotal</span>
                     <span className="font-medium">€{order.payment_details?.subtotal || order.amount}</span>
@@ -578,7 +475,6 @@ const App = ({
                 </div>
               </Card>
 
-              {/* Delivery Info */}
               <Card className="flex flex-col h-full">
                 <h2 className="text-xl font-normal text-[#1a1410] font-sans mb-6">
                   Delivery Information
