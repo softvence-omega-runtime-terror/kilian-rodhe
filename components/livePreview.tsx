@@ -9,6 +9,9 @@ import { useDeductBalanceMutation } from "@/app/store/slices/services/wallet/wal
 // ✅ Framer Motion import: Variants TargetAndTransition
 import { motion, type Variants, type TargetAndTransition } from "framer-motion";
 import { toast } from "sonner";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
+import { useGetWalletQuery } from "@/app/store/slices/services/wallet/walletApi";
 
 // --- Imported Components (Assumed to exist in your project structure) ---
 import LivePreviewModal from "@/components/previewModel";
@@ -97,6 +100,10 @@ const CombinedDesignPageFixed = () => {
     const [saveCustomProductVersion, { isLoading: isSaving }] = useSaveCustomProductVersionMutation();
     const [deductBalance] = useDeductBalanceMutation();
 
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
+    const { data: walletData } = useGetWalletQuery();
+    const wallet = walletData?.results?.[0];
+
     // Logo Upload State
     const [logoImage, setLogoImage] = useState<string | null>(null);
     const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -149,6 +156,19 @@ const CombinedDesignPageFixed = () => {
     };
 
     const handleAiGenerate = async (payload: any) => {
+        if (!isAuthenticated) {
+            toast.error("Please login to generate AI designs.");
+            return;
+        }
+
+        const freeGens = wallet?.free_generations ?? 0;
+        const balance = Number(wallet?.generation_balance ?? 0);
+
+        if (freeGens <= 0 && balance <= 0) {
+            toast.error("Insufficient balance. Please top up to generate more designs.");
+            return;
+        }
+
         setIsGenerating(true);
         try {
             const formData = new FormData();
@@ -212,6 +232,11 @@ const CombinedDesignPageFixed = () => {
     };
 
     const handleSaveDesign = async () => {
+        if (!isAuthenticated) {
+            toast.error("Please login to save your design.");
+            return;
+        }
+
         if (!aiGeneratedImages || !productId) {
             toast.error("No generated design to save.");
             return;

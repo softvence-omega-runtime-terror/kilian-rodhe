@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation";
 import { useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
 import ToastMessage from "../ToastMessage";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
 
 const jostFont = Jost({
   subsets: ["latin"],
@@ -61,7 +63,13 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
   console.log("popular week", products)
   // const [likedProductId, setLikedProductId] = useState<number | null>(null);
 
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+
   const handleOrderNow = async (productId: number) => {
+    if (!isAuthenticated) {
+      setToastMessage({ message: "Please login to order products", type: "error" });
+      return;
+    }
     try {
       await addToCart({ product: productId, quantity: 1 }).unwrap();
       router.push(`/pages/checkout`);
@@ -72,6 +80,10 @@ export default function PopularWeek({ products, isLoading }: { products: IProduc
   };
 
   const handleAddToCart = async (productId: number) => {
+    if (!isAuthenticated) {
+      setToastMessage({ message: "Please login to add to cart", type: "error" });
+      return;
+    }
     try {
       await addToCart({ product: productId, quantity: 1 }).unwrap();
       setToastMessage({ message: "Added to cart!", type: "success" });

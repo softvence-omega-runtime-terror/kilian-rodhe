@@ -6,6 +6,8 @@ import Image, { StaticImageData } from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useGetProductsQuery, ICategory, useSaveProductMutation } from "@/app/store/slices/services/product/productApi";
 import { useAddToCartMutation } from "@/app/store/slices/services/order/orderApi";
+import { useAppSelector } from "@/app/store/hooks";
+import { selectIsAuthenticated } from "@/app/store/slices/authSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import Loader from "../../../components/Loader";
 import EmptyState from "../../../components/EmptyState";
@@ -444,7 +446,13 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
   // ... (Action handlers same)
   const [addToCart] = useAddToCartMutation();
 
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+
   const handleOrderNow = useCallback(async (product: Product) => {
+    if (!isAuthenticated) {
+      setToast({ message: "Unauthorized: Please login to order products.", type: 'error' });
+      return;
+    }
     try {
       await addToCart({ product: product.id, quantity: 1 }).unwrap();
       router.push(`/pages/checkout`);
@@ -452,9 +460,13 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
       console.error("Failed to add to cart", error);
       setToast({ message: "Failed to add to cart. Please try again.", type: 'error' });
     }
-  }, [router, addToCart]);
+  }, [router, addToCart, isAuthenticated]);
 
   const handleAddToCart = useCallback(async (product: Product) => {
+    if (!isAuthenticated) {
+      setToast({ message: "Unauthorized: Please login to add to cart.", type: 'error' });
+      return;
+    }
     try {
       await addToCart({ product: product.id, quantity: 1 }).unwrap();
       setToast({ message: "Added to cart successfully!", type: 'success' });
@@ -462,7 +474,7 @@ export default function ShopPage({ currentCategory }: MiddleBodyProps) {
       console.error("Failed to add to cart", error);
       setToast({ message: "Failed to add to cart. Please try again.", type: 'error' });
     }
-  }, [addToCart]);
+  }, [addToCart, isAuthenticated]);
 
   const handleCustomizeRoute = useCallback((id: number) => {
     router.push(`/pages/customise?id=${id}`);
