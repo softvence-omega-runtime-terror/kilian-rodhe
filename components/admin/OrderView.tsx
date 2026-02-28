@@ -156,15 +156,6 @@ const TimelineStep: React.FC<TimelineStepProps> = ({
 };
 // --- END: TimelineStep Component ---
 
-// ---------------- Dummy Data ----------------
-
-
-
-
-
-
-
-
 
 
 // --- END: Payment and Delivery Mock Data ---
@@ -284,6 +275,41 @@ const CustomerStat: React.FC<CustomerStatProps> = ({
   </div>
 );
 
+// --- CustomerInformationCard Component (Kept as is) ---
+
+// --- END: CustomerInformationCard Component ---
+
+// --- ADDED: Payment Details Card (No cloneElement issue here) ---
+
+      {/* Financial Breakdown */}
+      <div className="space-y-3 flex-grow">
+        <div className="flex justify-between text-base text-gray-700">
+          <span>Subtotal</span>
+          <span className="font-medium">{info.subtotal}</span>
+        </div>
+        <div className="flex justify-between text-base text-gray-700">
+          <span>Shipping</span>
+          <span className="font-medium">{info.shipping}</span>
+        </div>
+      </div>
+
+      {/* Total Amount */}
+      <div className="flex justify-between items-center pt-3 mt-4">
+        <span className="text-xl font-semibold text-[#1a1410]">Total</span>
+        <span className="text-xl font-semibold text-[#8b6f47]">
+          {info.total}
+        </span>
+      </div>
+    </Card>
+  );
+};
+// --- END: Payment Details Card ---
+
+// --- ADDED: Delivery Information Card (No cloneElement issue here) ---
+
+// --- END: Delivery Information Card ---
+
+// ---------------- Main App Component ----------------
 
 const App = ({
   onViewChange,
