@@ -16,6 +16,7 @@ import { useGetWalletQuery } from "@/app/store/slices/services/wallet/walletApi"
 // --- Imported Components (Assumed to exist in your project structure) ---
 import LivePreviewModal from "@/components/previewModel";
 import WalletManager from "./wallet/WalletManager";
+import TopUpModal from "./wallet/TopUpModal"; // Assuming TopUpModal is in the same directory as WalletManager
 // import CustomTextDesign from "@/components/customTextDesign";
 import AiDesignGenerate from "./aiDesignGenerate";
 
@@ -109,9 +110,13 @@ const CombinedDesignPageFixed = () => {
     const [logoFile, setLogoFile] = useState<File | null>(null);
 
     // Lifted modal state so modal control is available at the top level
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const openPreviewModal = () => setIsModalOpen(true);
-    const closePreviewModal = () => setIsModalOpen(false);
+    const [isLivePreviewModalOpen, setIsLivePreviewModalOpen] = useState(false);
+    const openLivePreviewModal = () => setIsLivePreviewModalOpen(true);
+    const closeLivePreviewModal = () => setIsLivePreviewModalOpen(false);
+
+    const [isTopUpModalOpen, setIsTopUpModalOpen] = useState(false);
+    const openTopUpModal = () => setIsTopUpModalOpen(true);
+    const closeTopUpModal = () => setIsTopUpModalOpen(false);
 
     // Function to handle navigation to the shipping page
     const handleContinueShopping = () => {
@@ -619,7 +624,7 @@ const CombinedDesignPageFixed = () => {
                                     <Image
                                         src={tool.src}
                                         alt={`${tool.label} Icon`}
-                                        className="w-5 h-5 mx-auto"
+                                        className="w-4 h-4 mx-auto"
                                     />
                                 </div>
                                 <div>
@@ -688,24 +693,24 @@ const CombinedDesignPageFixed = () => {
                     {/* Dynamic Content: AI Generator always shown now */}
                     <div className="">
                         <AiDesignGenerate
-                            onPreviewClick={openPreviewModal}
+                            onPreviewClick={openLivePreviewModal}
                             onGenerate={handleAiGenerate}
                             isGenerating={isGenerating}
                         />
                     </div>
 
                     <div className="mt-8 mb-6">
-                        <WalletManager />
+                        <WalletManager productId={effectiveProductId} openTopUpModal={openTopUpModal} />
                     </div>
 
-                    <motion.div
+                    {/* <motion.div
                         variants={fadeInVariants}
                         initial="hidden"
                         animate="visible"
                         transition={{ delay: designMode === "ai" ? 1.5 : 0.8 }}
                     >
                         <div className="space-y-6 border border-[#E5E5E5] p-4 rounded-md">
-                            {/* Total Price */}
+                           
                             <div>
                                 <p
                                     className={`${jostFont.className} text-[14px] tracking-[0.5px] text-[#6B6B6B] text-lg font-normal `}
@@ -719,7 +724,7 @@ const CombinedDesignPageFixed = () => {
                                 </p>
                             </div>
 
-                            {/* Add to Cart Button */}
+                            // Add to Cart Button  
                             <button
                                 className={`${jostFont.className} 	w-full flex items-center opacity-[0.5] bg-[#795548] justify-center py-4 text-white transition duration-300 ease-in-out`}
                             >
@@ -742,7 +747,7 @@ const CombinedDesignPageFixed = () => {
                                 </span>
                             </button>
 
-                            {/* Continue Shopping Button with onClick handler */}
+                            // Continue Shopping Button with onClick handler 
                             <button
                                 onClick={handleContinueShopping}
                                 className={`${jostFont.className} w-full py-4 text-[#1a1a1a] border border-gray-300 bg-white text-[14px] uppercase font-medium tracking-[2.1px] transition duration-300 ease-in-out hover:bg-gray-50`}
@@ -750,7 +755,7 @@ const CombinedDesignPageFixed = () => {
                                 CONTINUE SHOPPING
                             </button>
 
-                            {/* Guarantees Section with Image Icons */}
+                            // Guarantees Section with Image Icons 
                             <div className="flex justify-center mt-6 gap-2 pt-4 border-t border-gray-100">
                                 <div
                                     className="flex flex-col items-center text-center p-3 bg-[#F5F5F5] text-[12px] px-2 w-1/2"
@@ -766,11 +771,16 @@ const CombinedDesignPageFixed = () => {
 
                             </div>
                         </div>
-                    </motion.div>
+                    </motion.div> */}
                 </motion.div>
             </div>
 
-            <LivePreviewModal isOpen={isModalOpen} onClose={closePreviewModal} />
+            <LivePreviewModal isOpen={isLivePreviewModalOpen} onClose={closeLivePreviewModal} />
+            <TopUpModal
+                isOpen={isTopUpModalOpen}
+                onClose={closeTopUpModal}
+                productId={productId}
+            />
         </div>
     );
 };
