@@ -55,7 +55,7 @@ const Step: React.FC<StepProps> = ({ index, label, currentStepIndex = 0 }) => {
   const isCurrent = index === currentStepIndex;
 
   let circleClasses =
-    "w-10 h-10 flex items-center justify-center rounded-full text-lg flex-shrink-0 transition-all duration-300";
+    "w-10 h-10 flex items-center justify-center rounded-full text-lg shrink-0 transition-all duration-300";
 
   if (isCompleted || isCurrent) {
     circleClasses +=
@@ -111,8 +111,8 @@ const CheckoutReview: React.FC = () => {
   const [checkout, { isLoading: isCheckingOut }] = useCheckoutMutation();
   const { data: shipmentsData, isLoading: shipmentsLoading } = useGetShipmentsTypeQuery();
 
-  const cartItems: ICartItem[] = cartData?.cards || [];
-  const shippingOptions = shipmentsData?.data || [];
+  const cartItems: ICartItem[] = useMemo(() => cartData?.cards || [], [cartData]);
+  const shippingOptions = useMemo(() => shipmentsData?.data || [], [shipmentsData]);
 
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<number | null>(null);
@@ -133,7 +133,7 @@ const CheckoutReview: React.FC = () => {
     if (cartItems.length > 0 && selectedItems.length === 0) {
       setSelectedItems(cartItems.map(item => item.id));
     }
-  }, [cartItems]);
+  }, [cartItems, selectedItems.length]);
 
   // Set default shipping method once data is loaded
   React.useEffect(() => {

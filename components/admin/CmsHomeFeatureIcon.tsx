@@ -1,213 +1,251 @@
-import React, { useState } from "react";
-// Lucide icons used for UI elements
-import {
-  FileText,
-  Plus,
-  Trash2,
-  Zap,
-  Shield,
-  Clock,
-  Award,
-} from "lucide-react";
+import React, { useState, useRef } from "react";
+import { FileText, Plus, Trash2, Loader2, Save, Image as ImageIcon } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
-import CmsHomePageTitle from "./CmsHomePageTitle"; // Assuming this component exists
+import CmsHomePageTitle from "./CmsHomePageTitle";
 
-// Component for a single feature row
-interface Feature {
-  id: number;
-  title: string;
-  description: string;
-}
+import {
+  useGetHomepageSaveFeatureQuery,
+  useCreateHomepageSaveFeatureMutation,
+  useUpdateHomepageSaveFeatureMutation,
+  useDeleteHomepageSaveFeatureMutation,
+} from "../../app/store/slices/services/adminService/homepageCmsApi";
 
-interface FeatureRowProps {
-  feature: Feature;
-  index: number;
-  // Explicitly defined types for onUpdate
-  onUpdate: (index: number, field: "title" | "description", value: string) => void;
-  onRemove: (index: number) => void;
-}
+const CmsHomeFeatureIcon = () => {
+  const { data: featureRes, isLoading: isFetching } = useGetHomepageSaveFeatureQuery();
+  const [createFeature, { isLoading: isCreating }] = useCreateHomepageSaveFeatureMutation();
+  const [updateFeature, { isLoading: isUpdating }] = useUpdateHomepageSaveFeatureMutation();
+  const [deleteFeature, { isLoading: isDeleting }] = useDeleteHomepageSaveFeatureMutation();
 
-const FeatureRow: React.FC<FeatureRowProps> = ({ feature, index, onUpdate, onRemove }) => {
-  // FIX: Replaced 'React.ComponentType<any>[]' with a type that explicitly defines the props 
-  // used by the icon components (className and style), resolving the final 'any' error (32:38).
-  const iconMap: React.ComponentType<{ className?: string, style?: React.CSSProperties }>[] = [Zap, Award, Shield, Clock];
-  
-  // Select an icon based on index or default to the first one
-  const IconComponent = iconMap[index % iconMap.length];
+  const featuresList = Array.isArray(featureRes?.data) ? featureRes.data : [];
 
-  const inputClass =
-    "w-full p-3 text-base text-gray-700 bg-[#f3f3f5] rounded-lg focus:outline-none border-none";
+  // Local State for "Add New Feature"
+  const [newTitle, setNewTitle] = useState("");
+  const [newSubtitle, setNewSubtitle] = useState("");
+  const [newIcon, setNewIcon] = useState<File | null>(null);
 
-  // Golden color for the icon border and text
-  const goldenColor = "#D4AF37"; // A representative gold/yellow
+  // Track editing state
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editSubtitle, setEditSubtitle] = useState("");
+  const [editIcon, setEditIcon] = useState<File | null>(null);
 
-  return (
-    <div className="flex items-center bg-white p-4 border border-[#e8e3dc] rounded-lg mb-4 transition-shadow hover:shadow-md">
-      {/* Icon Container (Golden Box) */}
-      <div
-        className="flex items-center justify-center w-14 h-14 rounded-lg border-2 mr-4 flex-shrink-0"
-        style={{ borderColor: goldenColor }}
-      >
-        <IconComponent className="w-7 h-7" style={{ color: goldenColor }} />
-      </div>
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-      {/* Title Input */}
-      <div className="flex-1 mr-4">
-        <input
-          type="text"
-          value={feature.title}
-          onChange={(e) => onUpdate(index, "title", e.target.value)}
-          className={inputClass}
-          placeholder="Feature Title (e.g., AI-POWERED DESIGN)"
-          style={{ backgroundColor: "#f3f3f5" }}
-        />
-      </div>
-
-      {/* Description Input */}
-      <div className="flex-1 mr-4">
-        <input
-          type="text"
-          value={feature.description}
-          onChange={(e) => onUpdate(index, "description", e.target.value)}
-          className={inputClass}
-          placeholder="Feature Description (e.g., Adobe Firefly Integration)"
-          style={{ backgroundColor: "#f3f3f5" }}
-        />
-      </div>
-
-      {/* Remove Button (Red trash icon) */}
-      <button
-        onClick={() => onRemove(index)}
-        className="p-2 text-gray-500 hover:text-red-600 transition flex-shrink-0"
-        title="Remove Feature"
-      >
-        <Trash2 className="w-5 h-5" />
-      </button>
-    </div>
-  );
-};
-
-// ---
-
-const App = () => {
-  // Initial state matching the features in the image
-  const [features, setFeatures] = useState([
-    {
-      id: 1,
-      title: "AI-POWERED DESIGN",
-      description: "Adobe Firefly Integration",
-    },
-    { id: 2, title: "300 DPI QUALITY", description: "Professional Printing" },
-    { id: 3, title: "GDPR COMPLIANT", description: "Privacy Protected" },
-    { id: 4, title: "24/7 SUPPORT", description: "Always Here to Help" },
-  ]);
-
-  // HANDLER for updating a specific statistic field
-  const handleUpdateFeature = (
-    index: number,
-    field: "title" | "description", // Resolved 'any' error
-    value: string // Resolved 'any' error
-  ) => {
-    setFeatures((prevFeatures) =>
-      prevFeatures.map((feat, i) =>
-        i === index ? { ...feat, [field]: value } : feat
-      )
-    );
-  };
-
-  // HANDLER for adding a new feature
-  const handleAddFeature = () => {
-    const newId = Math.max(...features.map((f) => f.id), 0) + 1;
-    setFeatures((prevFeatures) => [
-      ...prevFeatures,
-      {
-        id: newId,
-        title: "NEW FEATURE TITLE",
-        description: "New feature description",
-      },
-    ]);
-    toast.success("New feature added!", { position: "bottom-center" });
-  };
-
-  // HANDLER for removing a feature
-  const handleRemoveFeature = (indexToRemove: number) => {
-    setFeatures((prevFeatures) =>
-      prevFeatures.filter((_, i) => i !== indexToRemove)
-    );
-    toast("Feature removed.", { icon: "🗑️", position: "bottom-center" });
-  };
-
-  // HANDLER for saving settings
-  const handleSaveSettings = (e: { preventDefault: () => void; }) => {
+  const handleAddNew = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Saving Features Icons Section settings...", features);
-    // In a real application, you would send the data to an API here
-    toast.success("Features saved successfully!", {
-      position: "bottom-center",
-    });
+    if (!newTitle || !newSubtitle) return toast.error("Title and Subtitle are required");
+
+    const formData = new FormData();
+    formData.append("title", newTitle);
+    formData.append("subtitle", newSubtitle);
+    if (newIcon) formData.append("icon", newIcon);
+
+    try {
+      await createFeature(formData).unwrap();
+      toast.success("Feature Added Successfully!");
+      setNewTitle("");
+      setNewSubtitle("");
+      setNewIcon(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.data?.message || "Failed to add feature");
+    }
   };
 
-  // Adjusted CmsHomePageTitle to integrate Add Feature button logic
-  const CmsHomePageTitleWithButton = () => (
-    <header className="mb-6 flex justify-between items-start">
-      <div>
-        {/* Note: CmsHomePageTitle must be defined or imported correctly */}
-        <CmsHomePageTitle
-          title="Technology & Statistics Section"
-          text="Showcase your technology and key metrics"
-        />
-      </div>
+  const handleStartEdit = (item: any) => {
+    setEditingId(item.id);
+    setEditTitle(item.title || "");
+    setEditSubtitle(item.subtitle || "");
+    setEditIcon(null);
+  };
 
-      {/* The "Add Feature" button */}
-      <button
-        onClick={handleAddFeature}
-        className="flex items-center px-4 py-2 text-sm text-white font-medium rounded-lg transition duration-150 ease-in-out hover:brightness-110"
-        style={{ backgroundColor: "#8b6f47" }}
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Add Feature
-      </button>
-    </header>
-  );
+  const handleSaveEdit = async () => {
+    if (!editingId) return;
+    const formData = new FormData();
+    if (editTitle) formData.append("title", editTitle);
+    if (editSubtitle) formData.append("subtitle", editSubtitle);
+    if (editIcon) formData.append("icon", editIcon);
+
+    try {
+      await updateFeature({ id: editingId, data: formData }).unwrap();
+      toast.success("Feature Updated!");
+      setEditingId(null);
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.data?.message || "Failed to update feature");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to remove this feature?")) return;
+    try {
+      await deleteFeature(id).unwrap();
+      toast.success("Feature Removed!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err?.data?.message || "Failed to delete feature");
+    }
+  };
+
+  const goldenColor = "#D4AF37";
 
   return (
-    <div className=" bg-gray-50 mt-6">
-      <div>
-        {/* Main Form Container - Matching the image's overall look */}
-        <div className="p-6 bg-white rounded-xl border-2 border-[#e8e3dc]">
-          {/* Header Section: Features Icons Section (with Add Button) */}
-          <CmsHomePageTitleWithButton />
+    <div className="bg-gray-50 mt-6">
+      <div className="p-6 bg-white rounded-xl border-2 border-[#e8e3dc]">
 
-          {/* Dynamic Feature List */}
-          <div className="mb-8">
-            {features.map((feature, index) => (
-              <FeatureRow
-                key={feature.id}
-                feature={feature}
-                index={index}
-                onUpdate={handleUpdateFeature}
-                onRemove={handleRemoveFeature}
-              />
-            ))}
-          </div>
+        <header className="mb-6 flex justify-between items-start">
+          <CmsHomePageTitle
+            title="Save Features Section"
+            text="Highlight key features and benefits on your homepage"
+          />
+        </header>
 
-          {/* Save Button */}
-          <button
-            onClick={handleSaveSettings}
-            type="button"
-            className="w-full flex items-center justify-center py-3 px-4 
-                          bg-[linear-gradient(180deg,#8b6f47,#7a5f3a)] text-white font-semibold rounded-lg 
-                          hover:brightness-110 transition duration-150 ease-in-out 
-                          hover:shadow-lg focus:outline-none"
-          >
-            <FileText className="w-5 h-5 mr-3 " />
-            Save Features
-          </button>
+        {/* Existing Features List */}
+        <div className="mb-8">
+          <h3 className="text-base font-semibold text-gray-800 mb-4">Active Features</h3>
+
+          {isFetching ? (
+            <div className="flex justify-center py-6"><Loader2 className="w-6 h-6 animate-spin text-amber-800" /></div>
+          ) : featuresList.length === 0 ? (
+            <p className="text-gray-500 text-sm italic p-4 bg-gray-50 rounded-xl text-center border-2 border-dashed border-gray-200">No active features found.</p>
+          ) : (
+            <div className="space-y-4">
+              {featuresList.map((feature: any) => (
+                <div key={feature.id} className="flex flex-col sm:flex-row items-start sm:items-center bg-white p-4 border border-[#e8e3dc] rounded-lg transition-shadow hover:shadow-md gap-4">
+
+                  {editingId === feature.id ? (
+                    <div className="w-full flex flex-col gap-3">
+                      <input
+                        type="text"
+                        placeholder="Feature Title"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="p-3 bg-[#f3f3f5] border-none rounded-lg text-sm w-full focus:ring-2 focus:ring-amber-500"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Feature Subtitle"
+                        value={editSubtitle}
+                        onChange={(e) => setEditSubtitle(e.target.value)}
+                        className="p-3 bg-[#f3f3f5] border-none rounded-lg text-sm w-full focus:ring-2 focus:ring-amber-500"
+                      />
+                      <div className="flex items-center gap-2 mt-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) setEditIcon(e.target.files[0]);
+                          }}
+                          className="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"
+                        />
+                      </div>
+                      <div className="flex gap-2 justify-end mt-2">
+                        <button onClick={() => setEditingId(null)} className="px-3 py-2 text-sm bg-gray-200 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+                        <button onClick={handleSaveEdit} disabled={isUpdating} className="px-3 py-2 text-sm bg-amber-800 text-white rounded-lg hover:bg-amber-900 transition flex items-center">
+                          {isUpdating ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />} Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-4 w-full">
+                        <div className="flex items-center justify-center w-14 h-14 rounded-lg border-2 shrink-0 bg-gray-50" style={{ borderColor: goldenColor }}>
+                          {feature.icon ? (
+                            <img src={feature.icon} alt={feature.title} className="w-8 h-8 object-contain" />
+                          ) : (
+                            <ImageIcon className="w-7 h-7" style={{ color: goldenColor }} />
+                          )}
+                        </div>
+                        <div className="flex flex-col flex-1">
+                          <h4 className="font-semibold text-gray-800">{feature.title || "Untitled"}</h4>
+                          <p className="text-sm text-gray-500">{feature.subtitle || "No subtitle provided"}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                        <button
+                          onClick={() => handleStartEdit(feature)}
+                          className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition"
+                          title="Edit Feature"
+                        >
+                          <FileText className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(feature.id)}
+                          disabled={isDeleting}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                          title="Remove Feature"
+                        >
+                          {isDeleting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
+        {/* Add New Feature Form */}
+        <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
+          <h3 className="text-sm font-semibold text-gray-800 mb-4 flex items-center">
+            <Plus className="w-4 h-4 mr-1" /> Add New Feature
+          </h3>
+          <form onSubmit={handleAddNew} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Feature Title *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. AI-POWERED DESIGN"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  required
+                  className="w-full p-3 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Feature Subtitle *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Adobe Firefly Integration"
+                  value={newSubtitle}
+                  onChange={(e) => setNewSubtitle(e.target.value)}
+                  required
+                  className="w-full p-3 bg-white border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Upload Feature Icon (Optional)</label>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) setNewIcon(e.target.files[0]);
+                }}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300 cursor-pointer"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isCreating}
+              className="w-full mt-4 flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-lg text-white disabled:opacity-50"
+              style={{ background: "linear-gradient(180deg, #8b6f47, #7a5f3a)" }}
+            >
+              {isCreating ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Plus className="h-5 w-5 mr-2" />}
+              {isCreating ? "Adding..." : "Add Feature"}
+            </button>
+          </form>
+        </div>
+
       </div>
       <Toaster />
     </div>
   );
 };
 
-export default App;
+export default CmsHomeFeatureIcon;

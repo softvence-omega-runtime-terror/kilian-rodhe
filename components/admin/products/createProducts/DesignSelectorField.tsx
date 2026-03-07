@@ -45,7 +45,9 @@ const DesignSelectorField: React.FC<DesignSelectorFieldProps> = ({
       : [...selectedDesigns, key];
 
     setSelectedDesigns(newSelection);
-    onDesignChange?.(newSelection);
+    if (onDesignChange) {
+      onDesignChange(newSelection);
+    }
   };
 
   // --- Helper function to get card styles ---

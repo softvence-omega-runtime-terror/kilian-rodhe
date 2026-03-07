@@ -6,7 +6,7 @@ import { motion, Variant } from "framer-motion";
 
 // import specialColorIcon from "../public/image/livePreview/specialIconColor.svg";
 import whiteSpecialIcon from "../public/image/livePreview/whitSpecileIcon.svg";
-import blueSpecialIcom from "../public/image/livePreview/blueSpecialIcon.svg";
+// import blueSpecialIcom from "../public/image/livePreview/blueSpecialIcon.svg";
 
 import { Jost } from "next/font/google";
 
@@ -17,13 +17,13 @@ const jostFont = Jost({
 
 
 interface AiDesignGenerateProps {
-  onPreviewClick: () => void;
+  _onPreviewClick: () => void;
   onGenerate: (payload: any) => void;
   isGenerating?: boolean;
 }
 
 const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
-  onPreviewClick,
+  _onPreviewClick,
   onGenerate,
   isGenerating = false,
 }) => {

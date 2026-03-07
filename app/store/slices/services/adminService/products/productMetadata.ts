@@ -12,11 +12,7 @@ export interface AgeRange {
     end: number;
 }
 
-interface AgeRangeListResponse {
-    success: boolean;
-    message: string;
-    data: AgeRange[];
-}
+
 
 interface AgeRangeSingleResponse {
     success: boolean;
@@ -50,12 +46,7 @@ export interface CategoryPayload {
     banner?: File;
 }
 
-interface CategoryListResponse {
-    success: boolean;
-    message: string;
-    data: Category[];
-    errors?: unknown;
-}
+
 
 interface CategorySingleResponse {
     success: boolean;
@@ -94,11 +85,7 @@ export interface Classification {
     title: string;
 }
 
-interface ClassificationListResponse {
-    success: boolean;
-    message: string;
-    data: Classification[];
-}
+
 
 interface ClassificationSingleResponse {
     success: boolean;
@@ -115,11 +102,7 @@ export interface SubCategory {
     title: string;
 }
 
-interface SubCategoryListResponse {
-    success: boolean;
-    message: string;
-    data: SubCategory[];
-}
+
 
 interface SubCategorySingleResponse {
     success: boolean;

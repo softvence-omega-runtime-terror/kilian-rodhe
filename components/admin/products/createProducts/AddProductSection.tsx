@@ -107,26 +107,28 @@ const AddNewProductScreen = ({ onViewChange }: { onViewChange: ViewChangeHandler
 
   const [createProduct, { isLoading }] = useCreateProductMutation();
 
+  const getArrayData = (d: any) => Array.isArray(d?.data) ? d.data : (Array.isArray(d) ? d : d?.categories || d?.products || d?.results?.categories || d?.results?.products || d?.results || []);
+
   const categoryOptions =
-    categoriesData?.map((cat) => ({
+    getArrayData(categoriesData).map((cat: any) => ({
       value: String(cat.id),
       label: cat.title,
     })) || [];
 
   const subCategoryOptions =
-    subCategoriesData?.map((sub) => ({
+    getArrayData(subCategoriesData).map((sub: any) => ({
       value: String(sub.id),
       label: sub.title,
     })) || [];
 
   const classificationOptions =
-    classificationsData?.map((cls) => ({
+    getArrayData(classificationsData).map((cls: any) => ({
       value: String(cls.id),
       label: cls.title,
     })) || [];
 
   const ageGroupOptions =
-    ageRangesData?.map((age) => ({
+    getArrayData(ageRangesData).map((age: any) => ({
       value: String(age.id),
       label: `${age.start} - ${age.end}`,
     })) || [];

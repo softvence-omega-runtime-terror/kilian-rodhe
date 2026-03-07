@@ -30,18 +30,18 @@ const SendDiscountCodes = () => {
 
   // API Hooks
   // Using getAllDiscountCodes to get details (amount, prefix)
-  const { data: discountCodesData, isLoading: isLoadingCodes } = useGetAllDiscountCodesQuery();
+  const { isLoading: _isLoadingCodes } = useGetAllDiscountCodesQuery();
   // Using getAllDiscountSeries to get actual series (user clarified we should use series)
-  const { data: discountSeriesData, isLoading: isLoadingSeries } = useGetAllDiscountSeriesQuery();
+  const { data: discountSeriesData, isLoading: _isLoadingSeries } = useGetAllDiscountSeriesQuery();
   // Using getAdminDiscountUsageStats to get Series IDs and Names (for other stats if needed)
-  const { data: usageStats, isLoading: isLoadingUsage } = useGetAdminDiscountUsageStatsQuery();
+  const { data: _usageStats, isLoading: _isLoadingUsage } = useGetAdminDiscountUsageStatsQuery();
 
 
 
   const { data: templatesData, isLoading: isLoadingTemplates } = useGetAllTemplatesQuery();
   const [sendDiscountEmail, { isLoading: isSending }] = useSendDiscountEmailMutation();
 
-  const templates = templatesData?.data?.email_templates || [];
+  const templates = React.useMemo(() => templatesData?.data?.email_templates || [], [templatesData]);
 
   // Available Series are now directly from getAllDiscountSeries results
   const availableSeries = React.useMemo(() => {
@@ -65,12 +65,12 @@ const SendDiscountCodes = () => {
       setEmailBody(templates[0].body);
       setEmailSubject(templates[0].subject);
     }
-  }, [templates, selectedTemplateId]);
+  }, [templates, selectedTemplateId, emailBody, emailSubject]);
 
   const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const templateId = Number(e.target.value);
     setSelectedTemplateId(templateId);
-    const template = templates.find((t) => t.id === templateId);
+    const template = templates.find((t: any) => t.id === templateId);
     if (template) {
       setEmailBody(template.body);
       setEmailSubject(template.subject);
@@ -78,7 +78,7 @@ const SendDiscountCodes = () => {
   };
 
   // Find the selected template object
-  const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
+  const selectedTemplate = templates.find((t: any) => t.id === selectedTemplateId);
 
   // Handle Send
   const handleSend = async () => {
@@ -309,7 +309,7 @@ const SendDiscountCodes = () => {
             Discount Code Series
           </h3>
           <div className="relative">
-            {isLoadingUsage ? (
+            {_isLoadingUsage ? (
               <p className="text-sm text-gray-500">Loading series...</p>
             ) : (
               <select
@@ -357,7 +357,7 @@ const SendDiscountCodes = () => {
                 className="w-full p-3 border border-gray-300 rounded-lg appearance-none bg-white focus:ring-purple-500 focus:border-purple-500"
               >
                 <option value="" disabled>Select a template...</option>
-                {templates.map(t => (
+                {templates.map((t: any) => (
                   <option key={t.id} value={t.id}>{t.name} ({t.body_type})</option>
                 ))}
               </select>

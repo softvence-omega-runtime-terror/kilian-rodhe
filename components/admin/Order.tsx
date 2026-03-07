@@ -4,6 +4,7 @@ import { Search, Eye, ChevronUp, ChevronDown } from "lucide-react";
 // Assuming OrderView is a placeholder component for viewing order details
 import OrderView from "./OrderView";
 import Footer from "./FooterAdmin";
+import { useGetOrdersQuery, IOrderAdminItem } from "@/app/store/slices/services/adminService/orderAdminApi";
 
 // --- Custom Dropdown Component ---
 interface DropdownFilterProps {
@@ -68,11 +69,10 @@ const DropdownFilter: React.FC<DropdownFilterProps> = ({
             <div
               key={option}
               onClick={() => handleSelect(option)}
-              className={`px-4 py-3 text-sm cursor-pointer hover:bg-gray-100 transition duration-150 ${
-                selectedValue === option
-                  ? "font-semibold text-gray-900 bg-gray-50"
-                  : "text-gray-700"
-              }`}
+              className={`px-4 py-3 text-sm cursor-pointer hover:bg-gray-100 transition duration-150 ${selectedValue === option
+                ? "font-semibold text-gray-900 bg-gray-50"
+                : "text-gray-700"
+                }`}
             >
               {option}
             </div>
@@ -114,87 +114,20 @@ interface Order {
   status: OrderStatus; // Updated type
 }
 
-// --- NEW DATA BASED ON THE IMAGE ---
-const initialOrderData: Order[] = [
-  {
-    id: 1,
-    orderId: "#ORD-2847",
-    customerName: "Emma Schmidt",
-    customerEmail: "emma.s@email.com",
-    product: "Custom T-Shirt",
-    designType: "AI Generated",
-    amount: "€34.99",
-    date: "Oct 10, 2025",
-    status: "Processing",
-  },
-  {
-    id: 2, // Must be unique
-    orderId: "#ORD-2846",
-    customerName: "Lucas Müller",
-    customerEmail: "lucas.m@email.com",
-    product: "AI Design Mug",
-    designType: "AI Generated",
-    amount: "€19.99",
-    date: "Oct 10, 2025",
-    status: "Completed",
-  },
-  {
-    id: 3, // Must be unique
-    orderId: "#ORD-2845",
-    customerName: "Sophie Weber",
-    customerEmail: "sophie.w@email.com",
-    product: "Custom Cap",
-    designType: "Letter/Number",
-    amount: "€24.99",
-    date: "Oct 09, 2025",
-    status: "Shipped",
-  },
-  {
-    id: 4, // Must be unique
-    orderId: "#ORD-2844",
-    customerName: "Noah Fischer",
-    customerEmail: "noah.f@email.com",
-    product: "Letter Design T-Shirt",
-    designType: "Letter/Number",
-    amount: "€34.99",
-    date: "Oct 09, 2025",
-    status: "Processing",
-  },
-  {
-    id: 5, // Must be unique
-    orderId: "#ORD-2843",
-    customerName: "Mia Becker",
-    customerEmail: "mia.b@email.com",
-    product: "AI Art Hoodie",
-    designType: "AI Generated",
-    amount: "€54.99",
-    date: "Oct 08, 2025",
-    status: "Completed",
-  },
-  {
-    id: 6, // Must be unique
-    orderId: "#ORD-2842",
-    customerName: "Leon Wagner",
-    customerEmail: "leon.w@email.com",
-    product: "Custom T-Shirt",
-    designType: "User Upload",
-    amount: "€34.99",
-    date: "Oct 08, 2025",
-    status: "Quality Check",
-  },
-];
+
 
 // Helper component for the status badge (UPDATED COLORS)
-const StatusBadge = ({ status }: { status: OrderStatus }) => {
-  const getBadgeStyles = (status: OrderStatus) => {
-    switch (status) {
-      case "Processing":
+const StatusBadge = ({ status }: { status: string }) => {
+  const getBadgeStyles = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "processing":
         return "bg-yellow-100 text-yellow-800";
-      case "Completed":
+      case "completed":
+      case "paid":
         return "bg-green-100 text-green-800";
-      case "Shipped":
+      case "shipped":
         return "bg-blue-100 text-blue-800";
-      case "Quality Check":
+      case "quality check":
         return "bg-purple-100 text-purple-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -253,10 +186,8 @@ const OrderTable = ({
   onViewOrder,
   searchTerm,
 }: {
-  data: Order[];
+  data: IOrderAdminItem[];
   onViewOrder: (id: number) => void;
-  onEditOrder: (id: number) => void; // Kept for type compatibility
-  onDeleteOrder: (id: number) => void; // Kept for type compatibility
   searchTerm: string;
 }) => (
   <div className="bg-white rounded-xl border border-[#e8e3dc] overflow-x-auto ">
@@ -296,17 +227,17 @@ const OrderTable = ({
             className="hover:bg-gray-50 transition duration-150"
           >
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-              <HighlightText text={order.orderId} highlight={searchTerm} />
+              <HighlightText text={order.order_uid} highlight={searchTerm} />
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-[14px] font-medium text-[#1a1410]">
               <div className="flex flex-col">
                 <HighlightText
-                  text={order.customerName}
+                  text={order.customer_email.split('@')[0]}
                   highlight={searchTerm}
                 />
                 <span className="text-xs text-gray-400">
                   <HighlightText
-                    text={order.customerEmail}
+                    text={order.customer_email}
                     highlight={searchTerm}
                   />
                 </span>
@@ -316,13 +247,13 @@ const OrderTable = ({
               <HighlightText text={order.product} highlight={searchTerm} />
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <HighlightText text={order.designType} highlight={searchTerm} />
+              <HighlightText text={order.design_type} highlight={searchTerm} />
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">
-              <HighlightText text={order.amount} highlight={searchTerm} />
+              <HighlightText text={`€${order.amount}`} highlight={searchTerm} />
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              {order.date}
+              {new Date(order.date).toLocaleDateString()}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <StatusBadge status={order.status} />
@@ -354,72 +285,43 @@ const OrderTable = ({
 // --- Order List Screen (RENAMED) ---
 const OrderListScreen = ({
   onViewChange,
-  onDeleteOrder,
   orderData,
+  searchTerm,
+  setSearchTerm,
+  selectedStatus,
+  setSelectedStatus,
+  selectedDesignType,
+  setSelectedDesignType,
 }: {
   onViewChange: ViewChangeHandler;
-  onDeleteOrder: (id: number) => void;
-  orderData: Order[];
+  orderData: IOrderAdminItem[];
+  searchTerm: string;
+  setSearchTerm: (val: string) => void;
+  selectedStatus: string;
+  setSelectedStatus: (val: string) => void;
+  selectedDesignType: string;
+  setSelectedDesignType: (val: string) => void;
 }) => {
-  // --- State for Filtering ---
-  const [searchTerm, setSearchTerm] = useState("");
-  // Renamed from selectedProduct to selectedDesignType to match the image's "All Types"
-  const [selectedDesignType, setSelectedDesignType] = useState("All Types");
-  const [selectedStatus, setSelectedStatus] = useState("All Status"); // Updated default to match the dropdown title
-  // ---
-
   const handleViewOrder = (id: number) => {
     onViewChange("viewOrder", id);
   };
 
-  const handleEditOrder = (id: number) => {
-    onViewChange("editOrder", id);
-  };
-
-  // Custom unique options based on the image's requirements
   const uniqueStatuses = [
-    "All Status", // Matches dropdown title
+    "All Status",
     "Processing",
     "Quality Check",
     "Shipped",
     "Completed",
+    "Paid"
   ];
 
   const uniqueDesignTypes = [
-    "All Types", // Matches dropdown title
+    "All Types",
     "AI Generated",
     "User Upload",
-    // Keep 'Letter/Number' as it's present in the data, even if not in the minimal image
-    ...Array.from(new Set(initialOrderData.map((p) => p.designType))).filter(
-      (t) => !["AI Generated", "User Upload"].includes(t)
-    ),
+    "Letter/Number",
+    "Customize"
   ];
-
-  // Logic to filter the order data
-  const filteredOrders = orderData.filter((order) => {
-    const searchLower = searchTerm.toLowerCase().trim();
-
-    // 1. Search Term Filter
-    const matchesSearch =
-      order.orderId.toLowerCase().includes(searchLower) ||
-      order.customerName.toLowerCase().includes(searchLower) ||
-      order.customerEmail.toLowerCase().includes(searchLower) ||
-      order.product.toLowerCase().includes(searchLower) ||
-      order.designType.toLowerCase().includes(searchLower) ||
-      order.amount.toLowerCase().includes(searchLower);
-
-    // 2. Status Filter (Uses 'All Status' as the default/all value)
-    const matchesStatus =
-      selectedStatus === "All Status" || order.status === selectedStatus;
-
-    // 3. Design Type Filter (Uses 'All Types' as the default/all value)
-    const matchesDesignType =
-      selectedDesignType === "All Types" ||
-      order.designType === selectedDesignType;
-
-    return matchesSearch && matchesStatus && matchesDesignType;
-  });
-
   return (
     <div className="p-4 sm:p-8 w-full bg-gray-50">
       <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 mb-6">
@@ -433,7 +335,7 @@ const OrderListScreen = ({
       <div className="bg-white p-4 md:p-6 rounded-2xl border border-[#e8e3dc] mb-6">
         <div className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
           {/* Search Input */}
-          <div className="relative flex-grow w-full">
+          <div className="relative grow w-full">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
             <input
               type="text"
@@ -466,11 +368,10 @@ const OrderListScreen = ({
       {/* Order Table */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
         <div className="md:col-span-2">
+          {/* Filter locally as well for better UX or just rely on API? Initial plan says fetch from API. We already pass search/status to API in App. So we just show orderData. */}
           <OrderTable
-            data={filteredOrders}
+            data={orderData}
             onViewOrder={handleViewOrder}
-            onEditOrder={handleEditOrder}
-            onDeleteOrder={onDeleteOrder}
             searchTerm={searchTerm}
           />
         </div>
@@ -481,29 +382,23 @@ const OrderListScreen = ({
 
 // --- Main App Component ---
 const App = () => {
-  const [orderData, setOrderData] = useState<Order[]>(initialOrderData);
   const [view, setView] = useState<ViewType>("listOrder");
   const [currentOrderId, setCurrentOrderId] = useState<number>(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("All Status");
+  const [selectedDesignType, setSelectedDesignType] = useState("All Types");
+
+  const { data: ordersData } = useGetOrdersQuery({
+    search: searchTerm || undefined,
+    status: selectedStatus === "All Status" ? undefined : selectedStatus,
+    design_type: selectedDesignType === "All Types" ? undefined : selectedDesignType
+  });
+
+  const orders = ordersData?.results || [];
 
   const handleViewChange: ViewChangeHandler = (newView, id = 0) => {
     setCurrentOrderId(id);
     setView(newView);
-  };
-
-  const handleDeleteOrder = (id: number) => {
-    const orderToDelete = orderData.find((order) => order.id === id);
-    const orderIdText = orderToDelete ? orderToDelete.orderId : `ID: ${id}`;
-
-    const isConfirmed = window.confirm(
-      `Are you sure you want to delete order ${orderIdText}?`
-    );
-    if (isConfirmed) {
-      setOrderData((prevData) => prevData.filter((order) => order.id !== id));
-      alert(`Order ${orderIdText} deleted successfully.`);
-      if (view !== "listOrder" && currentOrderId === id) {
-        handleViewChange("listOrder");
-      }
-    }
   };
 
   return (
@@ -511,8 +406,13 @@ const App = () => {
       {view === "listOrder" && (
         <OrderListScreen
           onViewChange={handleViewChange}
-          onDeleteOrder={handleDeleteOrder}
-          orderData={orderData}
+          orderData={orders}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedStatus={selectedStatus}
+          setSelectedStatus={setSelectedStatus}
+          selectedDesignType={selectedDesignType}
+          setSelectedDesignType={setSelectedDesignType}
         />
       )}
 

@@ -9,10 +9,8 @@ import {
   useDeleteAgeRangeMutation,
   useGetAllSubCategoriesQuery,
   useCreateSubCategoryMutation,
-  useUpdateSubCategoryMutation,
   useDeleteSubCategoryMutation,
 } from "@/app/store/slices/services/adminService/products/productMetadata";
-import Image from "next/image";
 import { toast } from "sonner";
 import { X, Upload, Loader2, Trash2 } from "lucide-react";
 
@@ -100,7 +98,7 @@ const FilterItem: React.FC<FilterItemProps> = ({
       description={description || `Filter item for ${label}`}
       isChecked={isChecked}
       onDelete={onDelete}
-      onChange={(e) => {
+      onChange={(_e) => {
         if (onChange) onChange();
       }}
     />
@@ -421,7 +419,7 @@ const FilterPage: React.FC = () => {
         }
       }).unwrap();
       toast.success(`${cat.title} ${newActiveState ? "activated" : "deactivated"}`);
-    } catch (err) {
+    } catch (_err) {
       toast.error("Failed to update status");
     }
   };
