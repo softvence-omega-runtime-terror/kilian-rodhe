@@ -17,13 +17,13 @@ const jostFont = Jost({
 
 
 interface AiDesignGenerateProps {
-  _onPreviewClick: () => void;
+  onPreviewClick: () => void;
   onGenerate: (payload: any) => void;
   isGenerating?: boolean;
 }
 
 const AiDesignGenerate: React.FC<AiDesignGenerateProps> = ({
-  _onPreviewClick,
+  onPreviewClick: _onPreviewClick,
   onGenerate,
   isGenerating = false,
 }) => {
