@@ -67,7 +67,7 @@ const AddressBook: React.FC<AddressBookProps> = ({ onSelectAddress, selectedAddr
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {data.address.map((addr) => {
                     const isSelected = selectedAddressId === addr.id;
-                    const Icon = addr.address_name.toLowerCase().includes("home") ? Home : Briefcase;
+                    const Icon = addr.address_name?.toLowerCase().includes("home") ? Home : Briefcase;
                     const isThisDeleting = isDeletingId === addr.id;
 
                     return (

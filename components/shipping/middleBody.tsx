@@ -318,7 +318,7 @@ const ShippingPage: React.FC = () => {
 
   if (discountResults?.success && orderDetails?.items) {
     orderDetails.items.forEach(item => {
-      const res = discountResults.data.product[item.order_product_id.toString()];
+      const res = discountResults.data?.product?.[item.order_product_id.toString()];
       if (res?.is_valid) {
         let amount = 0;
         const itemPrice = parseFloat(item.order_product_price);
@@ -549,7 +549,7 @@ const ShippingPage: React.FC = () => {
 
         {/* Right: Order Summary (No changes) */}
         <div
-          className={`${jostFont.className} w-full lg:w-[350px] bg-[#ffffff] rounded-xl p-6 border-2 border-[#E8E3DC] self-start`}
+          className={`${jostFont.className} w-full lg:w-87.5 bg-[#ffffff] rounded-xl p-6 border-2 border-[#E8E3DC] self-start`}
         >
           <h3 className="font-semibold text-gray-800 mb-6 text-lg">
             Order Summary
@@ -560,7 +560,7 @@ const ShippingPage: React.FC = () => {
               orderDetails.items.map((item) => (
                 <div key={item.id} className="flex items-start space-x-4 mb-4">
                   {/* Note: IOrderItem might not have images in the type, but let's check if they are there or use a placeholder */}
-                  <div className="w-16 h-16 flex-shrink-0 relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
+                  <div className="w-16 h-16 shrink-0 relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
                     <ShoppingBag className="text-gray-300" size={24} />
                   </div>
 
@@ -600,7 +600,7 @@ const ShippingPage: React.FC = () => {
                         onChange={(e) => setProductCoupons(prev => ({ ...prev, [item.order_product_id]: e.target.value }))}
                         className="w-full px-2 py-1 text-[10px] border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-[#a07d48]"
                       />
-                      {discountResults?.data?.product[item.order_product_id.toString()] && (
+                      {discountResults?.data?.product?.[item.order_product_id.toString()] && (
                         <p className={`text-[10px] mt-1 ${discountResults.data.product[item.order_product_id.toString()].is_valid ? 'text-green-600' : 'text-red-500'}`}>
                           {discountResults.data.product[item.order_product_id.toString()].is_valid
                             ? "Applicable"
