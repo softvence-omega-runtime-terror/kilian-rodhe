@@ -424,14 +424,14 @@ const ItemImageSlider = ({ images }: { images: string[] }) => {
   const [currentIdx, setCurrentIdx] = useState(0);
 
   React.useEffect(() => {
-    if (images.length <= 1) return;
+    if (images?.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentIdx((prev) => (prev + 1) % images.length);
+      setCurrentIdx((prev) => (prev + 1) % images?.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [images?.length]);
 
-  if (!images || images.length === 0) {
+  if (!images || images?.length === 0) {
     return (
       <div className="w-16 h-20 bg-gray-100 rounded shrink-0 flex items-center justify-center text-[10px] text-gray-400">
         No Img
@@ -446,9 +446,9 @@ const ItemImageSlider = ({ images }: { images: string[] }) => {
         className="w-full h-full object-cover transition-opacity duration-500"
         alt="Product"
       />
-      {images.length > 1 && (
+      {images?.length > 1 && (
         <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-0.5">
-          {images.map((_, i) => (
+          {images?.map((_, i) => (
             <div
               key={i}
               className={`w-1 h-1 rounded-full ${i === currentIdx ? 'bg-white' : 'bg-white/40'}`}

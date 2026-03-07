@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
-import { XCircle, ArrowLeft, RotateCcw } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { XCircle, ArrowLeft, RotateCcw, LayoutDashboard } from "lucide-react";
 import { Jost, Cormorant_Garamond } from "next/font/google";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
@@ -12,6 +12,10 @@ const cormorantItalic = Cormorant_Garamond({ subsets: ["latin"], weight: ["400",
 
 const CancelPage = () => {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const type = searchParams.get("type");
+
+    const isTopUp = type === "topup";
 
     return (
         <>
@@ -23,29 +27,45 @@ const CancelPage = () => {
                     </div>
 
                     <h1 className={`${cormorantItalic.className} text-4xl font-bold text-[#1A1410] mb-4`}>
-                        Payment Cancelled
+                        {isTopUp ? "Top-up Cancelled" : "Payment Cancelled"}
                     </h1>
 
                     <p className="text-gray-600 mb-8">
-                        The payment process was cancelled or didn&apos;t go through. Don&apos;t worry, your items are still in your cart.
+                        {isTopUp
+                            ? "The top-up process was cancelled. Your wallet balance has not been changed."
+                            : "The payment process was cancelled or didn't go through. Don't worry, your items are still in your cart."}
                     </p>
 
                     <div className="space-y-4">
-                        <button
-                            onClick={() => router.push("/pages/payment")}
-                            className="w-full bg-[#1A1410] text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-black transition duration-300 shadow-lg flex items-center justify-center gap-2"
-                        >
-                            <RotateCcw size={18} />
-                            Try Again
-                        </button>
+                        {isTopUp ? (
+                            <>
+                                <button
+                                    onClick={() => router.push(`/pages/my-creation/create-your-design${searchParams.get("id") ? `?id=${searchParams.get("id")}` : ""}`)}
+                                    className="w-full bg-[#1A1410] text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-black transition duration-300 shadow-lg flex items-center justify-center gap-2"
+                                >
+                                    <LayoutDashboard size={18} />
+                                    Return to Studio
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => router.push("/pages/payment")}
+                                    className="w-full bg-[#1A1410] text-white py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-black transition duration-300 shadow-lg flex items-center justify-center gap-2"
+                                >
+                                    <RotateCcw size={18} />
+                                    Try Again
+                                </button>
 
-                        <button
-                            onClick={() => router.push("/pages/shipping")}
-                            className="w-full bg-white text-[#1A1410] border-2 border-[#E8E3DC] py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-gray-50 transition duration-300 flex items-center justify-center gap-2"
-                        >
-                            <ArrowLeft size={18} />
-                            Return to Shipping
-                        </button>
+                                <button
+                                    onClick={() => router.push("/pages/shipping")}
+                                    className="w-full bg-white text-[#1A1410] border-2 border-[#E8E3DC] py-4 rounded-xl font-bold text-sm tracking-widest uppercase hover:bg-gray-50 transition duration-300 flex items-center justify-center gap-2"
+                                >
+                                    <ArrowLeft size={18} />
+                                    Return to Shipping
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

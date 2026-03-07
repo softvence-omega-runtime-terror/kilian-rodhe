@@ -14,9 +14,13 @@ const jostFont = Jost({
     weight: ["400", "500", "600"],
 });
 
-const WalletManager = () => {
+interface WalletManagerProps {
+    productId?: string | null;
+    openTopUpModal: () => void;
+}
+
+const WalletManager: React.FC<WalletManagerProps> = ({ productId, openTopUpModal }) => {
     const { data: walletData, isLoading } = useGetWalletQuery();
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
     const wallet = walletData?.results?.[0];
@@ -57,7 +61,7 @@ const WalletManager = () => {
                         toast.error("Please login to top up your balance.");
                         return;
                     }
-                    setIsModalOpen(true);
+                    openTopUpModal();
                 }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
@@ -65,8 +69,6 @@ const WalletManager = () => {
             >
                 Top Up Balance
             </motion.button>
-
-            <TopUpModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
         </div>
     );
 };

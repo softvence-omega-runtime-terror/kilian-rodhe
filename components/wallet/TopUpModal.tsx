@@ -13,9 +13,10 @@ const jostFont = Jost({
 interface TopUpModalProps {
     isOpen: boolean;
     onClose: () => void;
+    productId?: string | null;
 }
 
-const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
+const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose, productId }) => {
     const [amount, setAmount] = useState<number>(10);
     const [currency, setCurrency] = useState<string>("eur");
     const [paymentMethod, setPaymentMethod] = useState<"stripe" | "paypal">("stripe");
@@ -29,8 +30,8 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
                 amount,
                 currency,
                 payment_method: paymentMethod,
-                success_url: `${window.location.origin}/pages/payment/success`,
-                cancel_url: `${window.location.origin}/pages/payment/cancel`,
+                success_url: `${window.location.origin}/pages/payment/success?type=topup${productId ? `&id=${productId}` : ""}`,
+                cancel_url: `${window.location.origin}/pages/payment/cancel?type=topup${productId ? `&id=${productId}` : ""}`,
             }).unwrap();
 
             if (res.success && res.data.session_url) {
@@ -84,8 +85,8 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
                                     key={curr}
                                     onClick={() => setCurrency(curr)}
                                     className={`py-2 border rounded-md transition-all uppercase ${currency === curr
-                                            ? 'bg-red-800 text-white border-red-800 shadow-md'
-                                            : 'border-gray-200 text-gray-600 hover:border-red-800'
+                                        ? 'bg-red-800 text-white border-red-800 shadow-md'
+                                        : 'border-gray-200 text-gray-600 hover:border-red-800'
                                         }`}
                                 >
                                     {curr}
@@ -107,10 +108,10 @@ const TopUpModal: React.FC<TopUpModalProps> = ({ isOpen, onClose }) => {
                                     disabled={method.id === "paypal"}
                                     onClick={() => setPaymentMethod(method.id as "stripe" | "paypal")}
                                     className={`py-2 border rounded-md transition-all ${paymentMethod === method.id
-                                            ? 'bg-red-800 text-white border-red-800 shadow-md'
-                                            : method.id === "paypal"
-                                                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
-                                                : 'border-gray-200 text-gray-600 hover:border-red-800'
+                                        ? 'bg-red-800 text-white border-red-800 shadow-md'
+                                        : method.id === "paypal"
+                                            ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                                            : 'border-gray-200 text-gray-600 hover:border-red-800'
                                         }`}
                                 >
                                     {method.label}
